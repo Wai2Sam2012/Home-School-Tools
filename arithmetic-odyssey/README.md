@@ -12,7 +12,7 @@ An offline math adventure game for the iPad, with two themes: **Dino Tour** and 
 | [themes/national-parks/](themes/national-parks/) | Truck Off-Road theme. All 63 US national parks, grouped by region, with location, size, 2025 visitors, key attractions and history. |
 | [tools/Get-DinoPictures.ps1](tools/Get-DinoPictures.ps1) | PowerShell script that downloads each dinosaur's pictures from dinosaurpictures.org. See below. |
 | [tools/Run-DinoPictures.cmd](tools/Run-DinoPictures.cmd) | Double-click launcher for the script. |
-| [js/](js/) | The game's code. `app.js` starts the game and switches screens; each screen is in `js/screens/`. `math.js` is the math engine: it makes problems for each operation and difficulty and checks answers. `keypad.js` is the on-screen keypad, `hold.js` the grown-up "hold for 3 seconds" button, `profiles.js` and `settings.js` the players and their settings, `storyline.js` loads a theme's story file, and `art.js` draws a picture for stickers that don't have one. `debug.js` is the debug panel; `version.js` holds the version number. |
+| [js/](js/) | The game's code. `app.js` starts the game and switches screens; each screen is in `js/screens/`. `adventure.js` has the adventure rules (steps, flags, detours, going back to a flag, unlocking stickers). `math.js` is the math engine: it makes problems for each operation and difficulty and checks answers. `keypad.js` is the on-screen keypad, `hold.js` the grown-up "hold for 3 seconds" button, `profiles.js` and `settings.js` the players and their settings, `storyline.js` loads a theme's story file, and `art.js` draws a picture for stickers that don't have one. `debug.js` is the debug panel; `version.js` holds the version number. |
 | [css/style.css](css/style.css) | The game's styles. |
 | [tools/Start-LocalServer.ps1](tools/Start-LocalServer.ps1) | Runs the game in a browser on your PC. See [Testing in a browser on your PC](#testing-in-a-browser-on-your-pc). |
 | [tools/set-version.mjs](tools/set-version.mjs) | Sets a new version number, and the matching `?v=` tag on every game file, so browsers never mix cached files from two versions. Run `node tools/set-version.mjs 1.2.3` for each release. |
@@ -29,8 +29,9 @@ Each theme keeps all of its resources (facts, story text, pictures, sounds and t
 | 0. Project setup and first publish | Done: placeholder page, local server, debug panel and publishing workflow. The iPad check (T0.4) runs after the first publish. |
 | 1. Math engine | Done: `js/math.js` |
 | 2. Theme content | Dino theme done: story file builder, kid-friendly facts, story text and picture checks. Triassic pictures are in; Jurassic and Cretaceous show a drawing until their pictures are added. The Parks theme comes later. |
-| 3. Screens and keypad | Done: Tap to Start, players, home, Setup, a practice run with the keypad, Sticker Album, Stats and grown-up Settings, in portrait and landscape. Players and stickers are not saved yet (Stage 6). |
-| 4–8 | Not started |
+| 3. Screens and keypad | Done: Tap to Start, players, home, Setup, Sticker Album, Stats and grown-up Settings, with the on-screen keypad, in portrait and landscape. |
+| 4. The adventure | Done: the trail map with a flag every 10 steps, detours after a wrong answer, going back to the last flag when a whole detour is missed, Resume Adventure, and Trail's End with the new sticker, a slideshow of its pictures and a trip summary. Players, stickers and trips are not saved yet (Stage 6). |
+| 5–8 | Not started |
 
 ## Running the tests
 
@@ -41,7 +42,7 @@ cd arithmetic-odyssey
 node --test
 ```
 
-You should see `# fail 0` (74 tests at the end of Stage 3). Each test name starts with its ID from the test plan in [GAME-PLAN.md](GAME-PLAN.md) where it has one, for example `T1.3`.
+You should see `# fail 0` (103 tests at the end of Stage 4). Each test name starts with its ID from the test plan in [GAME-PLAN.md](GAME-PLAN.md) where it has one, for example `T1.3`.
 
 ## Testing in a browser on your PC
 
@@ -57,7 +58,7 @@ It first rebuilds the story files if Node.js is installed (otherwise it warns an
 
 To see the game at iPad size, press **F12** in Chrome or Edge, then **Ctrl+Shift+M**, and choose an iPad from the device list.
 
-The debug panel sits in the top-right corner; **Hide** folds it away. Besides the device facts, it has buttons to **add a test player**, **collect the next 5 Dino stickers** (to try the Sticker Album) and **remove the player's stickers**. Players only last until the page reloads in this version.
+The debug panel sits in the top-right corner; **Hide** folds it away. Besides the device facts, it has buttons to **add a test player**, **collect the next 5 Dino stickers** (to try the Sticker Album) and **remove the player's stickers**. During an adventure, it can also **answer right** or **answer wrong** (to force a detour or a trip back to the flag) and **jump to just before the next flag** or **to the last step**. Players only last until the page reloads in this version.
 
 **Grown-up Settings** opens by holding the **Grown-ups** button on a player's home screen for 3 seconds. Deleting a player is there, so children can't do it by accident.
 

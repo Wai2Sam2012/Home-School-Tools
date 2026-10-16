@@ -114,7 +114,7 @@ test('T3.1 buttons are large: at least 60 px high', () => {
 test('T3.1 every screen in the app has its module', () => {
   const app = read('js/app.js');
   const screens = [...app.matchAll(/^ {2}(\w+): \{ build: (\w+)/gm)];
-  assert.deepEqual(screens.map((m) => m[1]), ['start', 'profiles', 'newPlayer', 'home', 'setup', 'practice', 'album', 'stats', 'settings']);
+  assert.deepEqual(screens.map((m) => m[1]), ['start', 'profiles', 'newPlayer', 'home', 'setup', 'adventure', 'trailEnd', 'album', 'stats', 'settings']);
   for (const [, , builder] of screens) assert.match(app, new RegExp(`import \\{[^}]*\\b${builder}\\b[^}]*\\} from './screens/`), builder);
 });
 

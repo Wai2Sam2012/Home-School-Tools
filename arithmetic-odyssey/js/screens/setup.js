@@ -1,11 +1,12 @@
 // 3. Setup: theme, operations and difficulty, with the next sticker on the
 // trip ("Next stop: Eoraptor!").
 
-import { stickerPicture } from '../art.js?v=0.3.1';
-import { OPERATIONS } from '../math.js?v=0.3.1';
-import { DIFFICULTY_LABELS, THEMES, toggleOperation } from '../settings.js?v=0.3.1';
-import { nextSticker } from '../storyline.js?v=0.3.1';
-import { choiceRow, flash, h, topBar } from '../ui.js?v=0.3.1';
+import { startAdventure, withNextProblem } from '../adventure.js?v=0.4.0';
+import { stickerPicture } from '../art.js?v=0.4.0';
+import { OPERATIONS } from '../math.js?v=0.4.0';
+import { DIFFICULTY_LABELS, THEMES, toggleOperation } from '../settings.js?v=0.4.0';
+import { nextSticker } from '../storyline.js?v=0.4.0';
+import { choiceRow, confirmDialog, flash, h, topBar } from '../ui.js?v=0.4.0';
 
 const OPERATION_NAMES = { '+': 'Add', '−': 'Subtract', '×': 'Multiply', '÷': 'Divide' };
 const DIFFICULTY_DETAILS = { beginner: 'Small numbers', intermediate: 'Bigger numbers', advanced: 'Big numbers' };
@@ -75,6 +76,24 @@ export function setupScreen(ctx) {
     onChange: (difficulty) => ctx.profiles.updateSetup(player.id, { difficulty }),
   });
 
+  async function go() {
+    const current = player.adventure;
+    if (current && current.mode !== 'done') {
+      const yes = await confirmDialog({
+        title: 'Start a new adventure?',
+        message: `You are on step ${current.step} of ${current.length} of your other trip. Starting a new one ends it.`,
+        yes: 'Start new',
+        no: 'Keep my trip',
+      });
+      if (!yes) return;
+    }
+    const { theme, operations, difficulty } = player.setup;
+    const { adventureLength, detourLength } = player.settings;
+    player.adventure = withNextProblem(startAdventure({ theme, length: adventureLength, detourLength, operations, difficulty }));
+    ctx.show('adventure');
+  }
+
+  const { adventureLength, detourLength } = player.settings;
   return h('main', { class: 'screen setup-screen' },
     topBar('Plan your trip', () => ctx.show('home')),
     h('div', { class: 'setup-layout' },
@@ -89,7 +108,8 @@ export function setupScreen(ctx) {
         h('h2', {}, 'How hard?'),
         difficultyRow,
         status,
-        h('button', { type: 'button', class: 'big-button primary go-button', onclick: () => ctx.show('practice') }, "Let's go!"),
+        h('p', { class: 'note trip-length' }, `${adventureLength} steps to the finish · detours of ${detourLength} questions`),
+        h('button', { type: 'button', class: 'big-button primary go-button', onclick: go }, "Let's go!"),
       ),
     ),
   );
