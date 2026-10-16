@@ -1,6 +1,6 @@
 # Arithmetic Odyssey
 
-An offline math adventure game for the iPad, with two themes: **Dino Tour** and **Truck Off-Road** (US national parks). The game is planned in [GAME-PLAN.md](GAME-PLAN.md) and will be built here in stages.
+An offline math adventure game for the iPad, with two themes: **Dino Tour** and **Off-Roading** (US national parks). The game is planned in [GAME-PLAN.md](GAME-PLAN.md) and will be built here in stages.
 
 ## Contents
 
@@ -9,7 +9,7 @@ An offline math adventure game for the iPad, with two themes: **Dino Tour** and 
 | [index.html](index.html) | The game's page. The screens are drawn by `js/app.js`. |
 | [GAME-PLAN.md](GAME-PLAN.md) | Plan and AI-agent brief for the game, with build stages, a test plan and decisions. |
 | [themes/dino/](themes/dino/) | Dino Tour theme. The top 20 dinosaurs from each period, with a quick list and a detailed summary of each one: [Triassic](themes/dino/triassic.md), [Jurassic](themes/dino/jurassic.md), [Cretaceous](themes/dino/cretaceous.md). [game-text.json](themes/dino/game-text.json) has the kid-friendly facts and story text; `pictures/` has the pictures (see [Adding pictures](#adding-pictures)). |
-| [themes/national-parks/](themes/national-parks/) | Truck Off-Road theme. All 63 US national parks, grouped by region, with location, size, 2025 visitors, key attractions and history. |
+| [themes/national-parks/](themes/national-parks/) | Off-Roading theme. All 63 US national parks, grouped by region, with location, size, 2025 visitors, key attractions and history. |
 | [tools/Get-DinoPictures.ps1](tools/Get-DinoPictures.ps1) | PowerShell script that downloads each dinosaur's pictures from dinosaurpictures.org. See below. |
 | [tools/Run-DinoPictures.cmd](tools/Run-DinoPictures.cmd) | Double-click launcher for the script. |
 | [js/](js/) | The game's code. `app.js` starts the game and switches screens; each screen is in `js/screens/`. `adventure.js` has the adventure rules (steps, flags, detours, going back to a flag, unlocking stickers). `math.js` is the math engine: it makes problems for each operation and difficulty and checks answers. `keypad.js` is the on-screen keypad, `hold.js` the grown-up "hold for 3 seconds" button, `profiles.js` and `settings.js` the players and their settings, `storyline.js` loads a theme's story file, and `art.js` draws a picture for stickers that don't have one. `debug.js` is the debug panel; `version.js` holds the version number. |

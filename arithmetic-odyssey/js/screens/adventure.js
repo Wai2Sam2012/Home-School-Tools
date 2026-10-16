@@ -2,12 +2,12 @@
 // and the story moments (milestones, detours, going back to a flag).
 // The rules are in js/adventure.js; this screen only shows them.
 
-import { answerProblem, jumpTo, milestoneSteps, storyText, unlockSticker, withNextProblem } from '../adventure.js?v=0.4.0';
-import { stickerPicture } from '../art.js?v=0.4.0';
-import { createKeypad } from '../keypad.js?v=0.4.0';
-import { THEMES } from '../settings.js?v=0.4.0';
-import { nextSticker } from '../storyline.js?v=0.4.0';
-import { h, topBar } from '../ui.js?v=0.4.0';
+import { answerProblem, jumpTo, milestoneSteps, storyText, unlockSticker, withNextProblem } from '../adventure.js?v=0.4.1';
+import { stickerPicture } from '../art.js?v=0.4.1';
+import { createKeypad } from '../keypad.js?v=0.4.1';
+import { THEMES } from '../settings.js?v=0.4.1';
+import { nextSticker } from '../storyline.js?v=0.4.1';
+import { h, topBar } from '../ui.js?v=0.4.1';
 
 const PRAISE = ['Correct!', 'Great job!', 'You got it!', 'Awesome!', 'Nice work!'];
 const NEXT_AFTER_RIGHT_MS = 1100;

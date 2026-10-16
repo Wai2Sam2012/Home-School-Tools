@@ -1,7 +1,7 @@
 // Players (profiles). Stage 3 keeps them in memory only, so they reset when
 // the page reloads; Stage 6 saves them with storage.js.
 
-import { DEFAULT_SETTINGS, DEFAULT_SETUP, THEMES, normalizeSettings, normalizeSetup } from './settings.js?v=0.4.0';
+import { DEFAULT_SETTINGS, DEFAULT_SETUP, THEMES, normalizeSettings, normalizeSetup } from './settings.js?v=0.4.1';
 
 export const AVATARS = Object.freeze(['🦖', '🦕', '🐢', '🦊', '🐼', '🐯', '🦁', '🐸', '🐙', '🦄', '🐧', '🚀']);
 export const MAX_PROFILES = 8;

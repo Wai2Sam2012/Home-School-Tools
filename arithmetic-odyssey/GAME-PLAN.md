@@ -79,7 +79,7 @@ Home-School-Tools/                public repository
     │   │   ├── sounds/           optional theme sounds
     │   │   ├── CREDITS.md        where each picture came from
     │   │   └── downloaded-pictures/   raw downloads (excluded from git)
-    │   └── national-parks/       "Truck Off-Road" theme, same layout;
+    │   └── national-parks/       "Off-Roading" theme, same layout;
     │                             facts in README.md and the 7 region files
     ├── tests/                    automated tests (not published)
     ├── tools/                    PowerShell helpers, including the picture
@@ -97,7 +97,7 @@ Each theme's Markdown files in its `themes/` folder, plus the kid-friendly facts
 | Theme | Journey | Fact source | Stickers, in this order |
 |---|---|---|---|
 | **Dino Tour** | Travel through the Triassic, Jurassic and Cretaceous | `themes/dino/triassic.md`, `jurassic.md`, `cretaceous.md` | 60 dinosaurs: Triassic #1–20, then Jurassic #1–20, then Cretaceous #1–20 |
-| **Truck Off-Road** | Drive a truck to national parks across the US | `themes/national-parks/README.md` and the region files | 63 parks: region by region in the order of the README's region table, alphabetically within each region |
+| **Off-Roading** | Drive a truck to national parks across the US | `themes/national-parks/README.md` and the region files | 63 parks: region by region in the order of the README's region table, alphabetically within each region |
 
 **Facts**
 
@@ -126,7 +126,7 @@ Keep each theme's pictures under about 50 MB (the Dino theme with 3–5 pictures
 1. **Tap to Start**: shown on every launch. It unlocks sound and speech (see 1.9) and then shows the profile screen.
 2. **Profiles**: create, choose or delete a profile. Each profile has its own Sticker Album, stats, high scores and saved adventure. If a saved adventure exists, offer **Resume Adventure**.
 3. **Setup**:
-   - Theme: Dino Tour or Truck Off-Road. The screen shows where the trip is going, for example *"Next stop: Eoraptor!"*
+   - Theme: Dino Tour or Off-Roading. The screen shows where the trip is going, for example *"Next stop: Eoraptor!"*
    - Operations: checkboxes for +, −, × and ÷. At least one must be selected.
    - Difficulty: Beginner, Intermediate or Advanced (see 1.7).
 4. **Adventure**: the question, the progress map with milestones, the on-screen keypad, and detours.

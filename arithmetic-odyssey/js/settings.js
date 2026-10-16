@@ -2,7 +2,7 @@
 // (chosen by the player on the Setup screen), with their allowed values.
 // normalize...() turns anything, including damaged saved data, into valid values.
 
-import { DIFFICULTIES, OPERATIONS } from './math.js?v=0.4.0';
+import { DIFFICULTIES, OPERATIONS } from './math.js?v=0.4.1';
 
 export const ADVENTURE_LENGTHS = Object.freeze([20, 40, 60, 80, 100]);
 export const DETOUR_MIN = 3;
@@ -11,7 +11,7 @@ export const DETOUR_MAX = 10;
 /** Themes in album order. Only themes marked ready can be played. */
 export const THEMES = Object.freeze({
   dino: Object.freeze({ id: 'dino', title: 'Dino Tour', icon: '🦕', folder: 'themes/dino/', ready: true }),
-  parks: Object.freeze({ id: 'parks', title: 'Truck Off-Road', icon: '🛻', folder: 'themes/national-parks/', ready: false }),
+  parks: Object.freeze({ id: 'parks', title: 'Off-Roading', icon: '🛻', folder: 'themes/national-parks/', ready: false }),
 });
 
 export const DIFFICULTY_LABELS = Object.freeze({
