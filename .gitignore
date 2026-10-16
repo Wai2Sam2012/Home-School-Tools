@@ -8,3 +8,6 @@ downloaded-pictures/
 # OS files
 .DS_Store
 Thumbs.db
+
+# Local preview of the published site (node .github/scripts/assemble-site.mjs)
+_site/

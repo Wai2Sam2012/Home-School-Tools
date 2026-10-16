@@ -6,12 +6,15 @@ An offline math adventure game for the iPad, with two themes: **Dino Tour** and 
 
 | Path | Description |
 | --- | --- |
+| [index.html](index.html) | The game's page. For now a placeholder that shows the version and checks the math engine loads. |
 | [GAME-PLAN.md](GAME-PLAN.md) | Plan and AI-agent brief for the game, with build stages, a test plan and decisions. |
 | [themes/dino/](themes/dino/) | Dino Tour theme. The top 20 dinosaurs from each period, with a quick list and a detailed summary of each one: [Triassic](themes/dino/triassic.md), [Jurassic](themes/dino/jurassic.md), [Cretaceous](themes/dino/cretaceous.md). |
 | [themes/national-parks/](themes/national-parks/) | Truck Off-Road theme. All 63 US national parks, grouped by region, with location, size, 2025 visitors, key attractions and history. |
 | [tools/Get-DinoPictures.ps1](tools/Get-DinoPictures.ps1) | PowerShell script that downloads each dinosaur's pictures from dinosaurpictures.org. See below. |
 | [tools/Run-DinoPictures.cmd](tools/Run-DinoPictures.cmd) | Double-click launcher for the script. |
-| [js/math.js](js/math.js) | The game's math engine: makes problems for each operation and difficulty, and checks answers (Stage 1). |
+| [js/](js/) | The game's code. `math.js` is the math engine (Stage 1): it makes problems for each operation and difficulty and checks answers. `debug.js` is the debug panel; `version.js` holds the version number. |
+| [css/style.css](css/style.css) | The game's styles. |
+| [tools/Start-LocalServer.ps1](tools/Start-LocalServer.ps1) | Runs the game in a browser on your PC. See [Testing in a browser on your PC](#testing-in-a-browser-on-your-pc). |
 | [tests/](tests/) | Automated tests. See [Running the tests](#running-the-tests). |
 | [package.json](package.json) | Only tells Node.js that the game's `.js` files are modules, so the tests can load them. No packages are installed. |
 
@@ -21,8 +24,8 @@ Each theme keeps all of its resources (facts, pictures, sounds and, later, the g
 
 | Stage | Status |
 | --- | --- |
-| 0. Project setup and first publish | Not started (the test runner part works) |
-| 1. Math engine | Done: `js/math.js`, 17 tests passing |
+| 0. Project setup and first publish | Done: placeholder page, local server, debug panel and publishing workflow. The iPad check (T0.4) runs after the first publish. |
+| 1. Math engine | Done: `js/math.js` |
 | 2–8 | Not started |
 
 ## Running the tests
@@ -34,7 +37,32 @@ cd arithmetic-odyssey
 node --test
 ```
 
-You should see `# pass 17` and `# fail 0`. Each test name starts with its ID from the test plan in [GAME-PLAN.md](GAME-PLAN.md), for example `T1.3`.
+You should see `# fail 0` (32 tests at the end of Stage 1). Each test name starts with its ID from the test plan in [GAME-PLAN.md](GAME-PLAN.md) where it has one, for example `T1.3`.
+
+## Testing in a browser on your PC
+
+The game has to run from a web server, not by double-clicking `index.html`: browsers only allow the game's modules and offline mode from `http://localhost` or HTTPS. A small server is included:
+
+```powershell
+cd arithmetic-odyssey\tools
+Unblock-File .\Start-LocalServer.ps1    # only needed once, for files downloaded from GitHub
+pwsh -ExecutionPolicy Bypass -File .\Start-LocalServer.ps1
+```
+
+It serves the whole repository and opens the game at `http://localhost:8080/arithmetic-odyssey/`, the same folder layout as the published site. Add `?debug=1` to the address to show the debug panel. Press **Ctrl+C** in the PowerShell window to stop the server. If port 8080 is busy, add `-Port 8081`.
+
+To see the game at iPad size, press **F12** in Chrome or Edge, then **Ctrl+Shift+M**, and choose an iPad from the device list.
+
+## Publishing and testing on the iPad
+
+Every push to the repository's `main` branch runs `.github/workflows/deploy.yml`, which runs the tests and, if they pass, publishes the site to GitHub Pages:
+
+- Start page: `https://wai2sam2012.github.io/Home-School-Tools/`
+- Game: `https://wai2sam2012.github.io/Home-School-Tools/arithmetic-odyssey/`
+
+**One-time setup:** in the repository on GitHub, open **Settings → Pages** and set **Build and deployment → Source** to **GitHub Actions**. Without this, the deploy step fails.
+
+The **Actions** tab shows each run; a green tick means it published. Tests, tools and `downloaded-pictures` are never published. To preview exactly what will be published, run `node .github/scripts/assemble-site.mjs` from the repository folder; it copies the site into `_site`.
 
 ## Downloading the dinosaur pictures
 
