@@ -1,19 +1,20 @@
 // Starts the game: keeps the players and story files, and switches between
 // screens. Each screen is a function in js/screens/ that builds its page.
 
-import { APP_VERSION } from './version.js?v=0.3.1';
-import { addDebugAction, addDebugInfo, isDebugOn, showDebugPanel } from './debug.js?v=0.3.1';
-import { AVATARS, createProfileStore } from './profiles.js?v=0.3.1';
-import { collectNext, loadStoryline } from './storyline.js?v=0.3.1';
-import { h } from './ui.js?v=0.3.1';
-import { startScreen } from './screens/start.js?v=0.3.1';
-import { newPlayerScreen, profilesScreen } from './screens/profiles.js?v=0.3.1';
-import { homeScreen } from './screens/home.js?v=0.3.1';
-import { setupScreen } from './screens/setup.js?v=0.3.1';
-import { practiceScreen } from './screens/practice.js?v=0.3.1';
-import { albumScreen } from './screens/album.js?v=0.3.1';
-import { statsScreen } from './screens/stats.js?v=0.3.1';
-import { settingsScreen } from './screens/settings.js?v=0.3.1';
+import { APP_VERSION } from './version.js?v=0.4.0';
+import { addDebugAction, addDebugInfo, isDebugOn, showDebugPanel } from './debug.js?v=0.4.0';
+import { AVATARS, createProfileStore } from './profiles.js?v=0.4.0';
+import { collectNext, loadStoryline } from './storyline.js?v=0.4.0';
+import { h } from './ui.js?v=0.4.0';
+import { startScreen } from './screens/start.js?v=0.4.0';
+import { newPlayerScreen, profilesScreen } from './screens/profiles.js?v=0.4.0';
+import { homeScreen } from './screens/home.js?v=0.4.0';
+import { setupScreen } from './screens/setup.js?v=0.4.0';
+import { adventureScreen } from './screens/adventure.js?v=0.4.0';
+import { trailEndScreen } from './screens/trail-end.js?v=0.4.0';
+import { albumScreen } from './screens/album.js?v=0.4.0';
+import { statsScreen } from './screens/stats.js?v=0.4.0';
+import { settingsScreen } from './screens/settings.js?v=0.4.0';
 
 const SCREENS = {
   start: { build: startScreen },
@@ -21,7 +22,8 @@ const SCREENS = {
   newPlayer: { build: newPlayerScreen },
   home: { build: homeScreen, needsPlayer: true },
   setup: { build: setupScreen, needsPlayer: true },
-  practice: { build: practiceScreen, needsPlayer: true },
+  adventure: { build: adventureScreen, needsPlayer: true },
+  trailEnd: { build: trailEndScreen, needsPlayer: true },
   album: { build: albumScreen, needsPlayer: true },
   stats: { build: statsScreen, needsPlayer: true },
   settings: { build: settingsScreen, needsPlayer: true },
@@ -37,6 +39,7 @@ let current = { name: null, params: {}, leave: [] };
 const ctx = {
   version: APP_VERSION,
   audio: null,
+  debugAdventure: null, // set by the adventure screen while it is shown
   profiles: createProfileStore(),
 
   /** The theme's story file, loaded once. A failed load is tried again next time. */
@@ -121,6 +124,11 @@ function addDebugTools() {
     ctx.refresh();
     return `${player.name} has ${player.collected.dino.length} Dino stickers.`;
   });
+  const onAdventure = (run) => () => (ctx.debugAdventure ? run(ctx.debugAdventure) : 'Start or resume an adventure first.');
+  addDebugAction('Adventure: answer right', onAdventure((a) => a.answer(true)));
+  addDebugAction('Adventure: answer wrong', onAdventure((a) => a.answer(false)));
+  addDebugAction('Adventure: jump to just before the next flag', onAdventure((a) => a.jump('flag')));
+  addDebugAction('Adventure: jump to the last step', onAdventure((a) => a.jump('end')));
   addDebugAction("Remove the player's stickers", () => {
     const player = ctx.profiles.active();
     if (!player) return 'Choose a player first.';

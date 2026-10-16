@@ -103,6 +103,7 @@ h1:focus {
 
 .back-button {
   justify-self: start;
+  white-space: nowrap;
   min-height: 60px;
   min-width: 120px;
   padding: 8px 20px;
@@ -539,13 +540,7 @@ h1:focus {
   font-size: 32px;
 }
 
-/* ------------------------------------------------------------ practice and keypad */
-
-.practice-layout {
-  display: grid;
-  gap: 16px;
-  align-items: start;
-}
+/* ------------------------------------------------------------ question and keypad */
 
 .question-area {
   text-align: center;
@@ -645,6 +640,228 @@ h1:focus {
   background: var(--accent);
   box-shadow: 0 4px 0 #134a3d;
   color: #fff;
+}
+
+/* ------------------------------------------------------------ adventure */
+
+.home-grid.has-trip {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+.home-grid.has-trip .home-adventure {
+  grid-column: 1 / -1;
+}
+
+.button-detail {
+  display: block;
+  font-size: 18px;
+  font-weight: 500;
+  opacity: 0.9;
+}
+
+.trip-length {
+  margin-top: 12px;
+  text-align: center;
+}
+
+.trail-area {
+  padding: 12px 20px 4px;
+  border-radius: var(--radius);
+  background: var(--dino);
+}
+
+.trail-map {
+  display: flex;
+  align-items: center;
+  gap: 18px;
+}
+
+.trail-track {
+  position: relative;
+  flex: 1;
+  height: 18px;
+  margin: 34px 22px 18px;
+  border-radius: 999px;
+  background: repeating-linear-gradient(90deg, #cdbf9f 0 14px, #e3d8bf 14px 24px);
+}
+
+.trail-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 0;
+  border-radius: 999px;
+  background: var(--dino-edge);
+  transition: width 0.6s ease;
+}
+
+.trail-flag {
+  position: absolute;
+  bottom: 12px;
+  font-size: 28px;
+  line-height: 1;
+  transform: translateX(-4px);
+  filter: grayscale(1);
+  opacity: 0.45;
+}
+
+.trail-flag.reached {
+  filter: none;
+  opacity: 1;
+}
+
+.trail-traveler {
+  position: absolute;
+  top: 50%;
+  left: 0;
+  z-index: 1;
+  font-size: 44px;
+  line-height: 1;
+  transform: translate(-50%, -62%);
+  transition: left 0.6s ease;
+}
+
+.trail-traveler.on-detour {
+  transform: translate(-50%, -18%) rotate(-12deg);
+}
+
+.trail-goal {
+  flex: 0 0 auto;
+  width: 84px;
+  height: 64px;
+  font-size: 44px;
+  line-height: 64px;
+  text-align: center;
+}
+
+.goal-picture {
+  width: 100%;
+  height: 100%;
+  border: 3px solid var(--dino-edge);
+}
+
+.goal-picture img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.trail-count {
+  margin: 0;
+  color: var(--muted);
+  font-weight: 600;
+  text-align: center;
+}
+
+.adventure-layout {
+  display: grid;
+  gap: 16px;
+  align-items: start;
+}
+
+.story {
+  margin: 0 0 8px;
+  padding: 10px 16px;
+  border-radius: 14px;
+  background: var(--surface);
+  font-size: 22px;
+  font-weight: 600;
+}
+
+.story.milestone {
+  background: #fff1c2;
+  animation: pop 0.4s ease;
+}
+
+.story.detour {
+  background: var(--truck);
+  border: 3px dashed var(--truck-edge);
+}
+
+.story.cleared {
+  background: var(--accent-soft);
+}
+
+.story.setback {
+  background: #fde2dc;
+}
+
+@keyframes pop {
+  50% { transform: scale(1.04); }
+}
+
+.detour-count {
+  margin: 0;
+  color: #9a5a1c;
+  font-weight: 700;
+}
+
+/* The adventure screen also holds the trail map and story, so its question
+   and keys are a little smaller than the practice-sized defaults. */
+.adventure-screen .question {
+  font-size: clamp(44px, 7vw, 80px);
+}
+
+.adventure-screen .key {
+  height: clamp(60px, 8vh, 88px);
+}
+
+/* ------------------------------------------------------------ trail's end */
+
+.trail-end-screen h1 {
+  font-size: clamp(40px, 6vw, 60px);
+}
+
+.trail-end-layout {
+  display: grid;
+  gap: 16px;
+}
+
+.slideshow {
+  height: min(42vh, 420px);
+}
+
+.slide {
+  width: 100%;
+  height: 100%;
+  animation: fade-in 0.8s ease;
+}
+
+.slide img {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+}
+
+.trail-end-sticker h2 {
+  margin-top: 12px;
+}
+
+.summary {
+  margin: 0 0 16px;
+}
+
+.summary-row {
+  display: flex;
+  justify-content: space-between;
+  padding: 10px 0;
+  border-bottom: 2px solid var(--line);
+  font-size: 24px;
+}
+
+.summary-row dd {
+  margin: 0;
+  font-weight: 800;
+}
+
+.trail-end-buttons {
+  display: grid;
+  gap: 12px;
 }
 
 /* ------------------------------------------------------------ sticker album */
@@ -851,10 +1068,22 @@ h1:focus {
     align-items: start;
   }
 
-  .practice-layout {
-    grid-template-columns: 1fr minmax(360px, 440px);
+  .adventure-layout {
+    grid-template-columns: 1fr minmax(340px, 420px);
     align-items: center;
-    flex: 1;
+  }
+
+  .trail-end-layout {
+    grid-template-columns: 1.3fr 1fr;
+    align-items: start;
+  }
+
+  .home-grid.has-trip {
+    grid-template-columns: 1.4fr 1fr 1fr 1fr;
+  }
+
+  .home-grid.has-trip .home-adventure {
+    grid-column: auto;
   }
 
   .home-grid {
@@ -884,8 +1113,38 @@ h1:focus {
     font-size: 22px;
   }
 
-  .home-grid {
+  .home-grid,
+  .home-grid.has-trip {
     grid-template-columns: 1fr;
+  }
+
+  .trail-track {
+    margin: 30px 12px 14px;
+  }
+
+  .adventure-screen .key {
+    height: 60px;
+  }
+
+  .adventure-screen .question {
+    font-size: 40px;
+  }
+
+  .answer-display {
+    min-height: 64px;
+    font-size: 40px;
+    line-height: 44px;
+  }
+
+  .story {
+    font-size: 17px;
+  }
+
+  .trail-goal {
+    width: 56px;
+    height: 44px;
+    font-size: 32px;
+    line-height: 44px;
   }
 
   .player-grid {

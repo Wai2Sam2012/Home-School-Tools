@@ -419,6 +419,14 @@ Every stage ends with its tests passing, the site republished, and a short repor
 | T4.7 | Finishing unlocks the next sticker in order for that theme and profile; when all are collected, it shows "Collection complete!" | Automated |
 | T4.8 | A full 20-question adventure plays through in each theme, including a detour and a milestone setback (forced with `?debug=1`) | PC |
 
+**Notes from building Stage 4:**
+
+- The rules are in `js/adventure.js`, separate from the screen, and the adventure is plain data so Stage 6 can save it as `ao.v1.active.<id>`.
+- Leaving an adventure keeps it, and the home screen offers **Resume Adventure**. Until Stage 6 it is kept only until the page reloads.
+- Wrong answers in a detour also count for Need More Practice, since they are problems the player missed.
+- Trail's End shows the new sticker's pictures as a slideshow; after "Collection complete!" it shows one picture of every sticker. Total thinking time is added to the summary in Stage 5.
+- The T4.8 check ran in each layout for the Dino theme; the Parks theme follows with its content.
+
 ### Stage 5: Sound, voice and timer
 
 **Build:** `audio.js` (Web Audio sound effects, voice with the reliable finished-speaking detection in 1.9) and the thinking timer.

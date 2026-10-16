@@ -1,7 +1,7 @@
 // Players (profiles). Stage 3 keeps them in memory only, so they reset when
 // the page reloads; Stage 6 saves them with storage.js.
 
-import { DEFAULT_SETTINGS, DEFAULT_SETUP, THEMES, normalizeSettings, normalizeSetup } from './settings.js?v=0.3.1';
+import { DEFAULT_SETTINGS, DEFAULT_SETUP, THEMES, normalizeSettings, normalizeSetup } from './settings.js?v=0.4.0';
 
 export const AVATARS = Object.freeze(['🦖', '🦕', '🐢', '🦊', '🐼', '🐯', '🦁', '🐸', '🐙', '🦄', '🐧', '🚀']);
 export const MAX_PROFILES = 8;
@@ -54,6 +54,8 @@ export function createProfileStore({ makeId = () => `p${Date.now().toString(36)}
         settings: { ...DEFAULT_SETTINGS },
         setup: normalizeSetup(DEFAULT_SETUP),
         collected: emptyCollection(),
+        adventure: null, // the adventure in progress (js/adventure.js)
+        lastResult: null, // the last finished adventure, for Trail's End
       };
       profiles.push(profile);
       return profile;
