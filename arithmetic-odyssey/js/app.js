@@ -1,22 +1,23 @@
 // Starts the game: keeps the players and story files, and switches between
 // screens. Each screen is a function in js/screens/ that builds its page.
 
-import { APP_VERSION } from './version.js?v=0.5.0';
-import { addDebugAction, addDebugInfo, isDebugOn, showDebugPanel } from './debug.js?v=0.5.0';
-import { audioSuspended, playSound, unlockAudio } from './audio.js?v=0.5.0';
-import { AVATARS, createProfileStore } from './profiles.js?v=0.5.0';
-import { chooseVoice, createSpeaker, loadVoices } from './speech.js?v=0.5.0';
-import { collectNext, loadStoryline } from './storyline.js?v=0.5.0';
-import { h } from './ui.js?v=0.5.0';
-import { startScreen } from './screens/start.js?v=0.5.0';
-import { newPlayerScreen, profilesScreen } from './screens/profiles.js?v=0.5.0';
-import { homeScreen } from './screens/home.js?v=0.5.0';
-import { setupScreen } from './screens/setup.js?v=0.5.0';
-import { adventureScreen } from './screens/adventure.js?v=0.5.0';
-import { trailEndScreen } from './screens/trail-end.js?v=0.5.0';
-import { albumScreen } from './screens/album.js?v=0.5.0';
-import { statsScreen } from './screens/stats.js?v=0.5.0';
-import { settingsScreen } from './screens/settings.js?v=0.5.0';
+import { APP_VERSION } from './version.js?v=0.5.1';
+import { addDebugAction, addDebugInfo, isDebugOn, showDebugPanel } from './debug.js?v=0.5.1';
+import { audioSuspended, playSound, unlockAudio } from './audio.js?v=0.5.1';
+import { AVATARS, createProfileStore } from './profiles.js?v=0.5.1';
+import { SPEECH_RATES, chooseVoice, createSpeaker, loadVoices } from './speech.js?v=0.5.1';
+import { collectNext, loadStoryline } from './storyline.js?v=0.5.1';
+import { h } from './ui.js?v=0.5.1';
+import { startScreen } from './screens/start.js?v=0.5.1';
+import { newPlayerScreen, profilesScreen } from './screens/profiles.js?v=0.5.1';
+import { homeScreen } from './screens/home.js?v=0.5.1';
+import { setupScreen } from './screens/setup.js?v=0.5.1';
+import { adventureScreen } from './screens/adventure.js?v=0.5.1';
+import { trailEndScreen } from './screens/trail-end.js?v=0.5.1';
+import { albumScreen } from './screens/album.js?v=0.5.1';
+import { statsScreen } from './screens/stats.js?v=0.5.1';
+import { settingsScreen } from './screens/settings.js?v=0.5.1';
+import { voiceLabScreen } from './screens/voice-lab.js?v=0.5.1';
 
 const SCREENS = {
   start: { build: startScreen },
@@ -29,6 +30,7 @@ const SCREENS = {
   album: { build: albumScreen, needsPlayer: true },
   stats: { build: statsScreen, needsPlayer: true },
   settings: { build: settingsScreen, needsPlayer: true },
+  voiceLab: { build: voiceLabScreen },
 };
 
 // If the browser showed an older cached copy of index.html, there is no #app
@@ -46,6 +48,8 @@ const ctx = {
   speaker: createSpeaker(),
   /** 'locked' until Tap to Start, then 'loading', 'ready' (a voice was found) or 'none'. */
   voiceState: 'locked',
+  /** The device's voices, once loaded (for the voice list in Settings). */
+  voices: [],
 
   /** Tap to Start: unlocks sound and speech and finds a voice (GAME-PLAN.md 1.9). */
   unlock() {
@@ -54,14 +58,21 @@ const ctx = {
     ctx.speaker.unlock();
     ctx.voiceState = 'loading';
     loadVoices(globalThis.speechSynthesis).then((voices) => {
+      ctx.voices = voices;
       ctx.speaker.setVoice(chooseVoice(voices));
       ctx.voiceState = ctx.speaker.available && ctx.speaker.voice ? 'ready' : 'none';
     });
   },
 
-  /** True when questions should be read aloud for this player: Voice is on and a voice was found. */
+  /**
+   * True when questions should be read aloud for this player: Voice is on and
+   * a voice was found. Also sets the player's chosen voice and speed.
+   */
   voiceOn(player) {
-    return Boolean(player?.settings.voice) && ctx.voiceState === 'ready';
+    if (!player?.settings.voice || ctx.voiceState !== 'ready') return false;
+    ctx.speaker.setVoice(chooseVoice(ctx.voices, { chosenId: player.settings.voiceId }));
+    ctx.speaker.rate = SPEECH_RATES[player.settings.speed] ?? SPEECH_RATES.normal;
+    return true;
   },
 
   /** Plays a sound effect if the active player has sound turned on. */
@@ -137,6 +148,11 @@ function addDebugTools() {
   addDebugInfo('Sound and speech unlocked', () => (ctx.audio ? `sound ${ctx.audio.sound ? 'yes' : 'no'}, speech ${ctx.audio.speech ? 'yes' : 'no'}` : 'not yet (tap Start)'));
   addDebugInfo('Voice', () => (ctx.speaker.voice ? `${ctx.speaker.voice.name} (${ctx.speaker.voice.lang}, ${ctx.speaker.voice.localService ? 'offline' : 'needs internet'})` : ctx.voiceState));
   addDebugInfo('Last speech finished by', () => ctx.speaker.lastEnd || 'nothing spoken yet');
+  addDebugAction('Open the voice tester', () => {
+    ctx.unlock(); // the tap on this button also unlocks speech
+    ctx.show('voiceLab');
+    return 'Voice tester opened. Hide this panel to see it all.';
+  });
   addDebugAction('Speech: pretend the end event never comes', () => {
     ctx.speaker.simulateStuck = !ctx.speaker.simulateStuck;
     return ctx.speaker.simulateStuck

@@ -7,7 +7,8 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
 import {
-  MAX_WAIT_MS, MIN_WAIT_MS, POLL_MS, START_GRACE_MS, chooseVoice, createSpeaker, estimateSpeechMs, loadVoices,
+  MAX_WAIT_MS, MIN_WAIT_MS, POLL_MS, START_GRACE_MS, chooseVoice, createSpeaker, estimateSpeechMs, isFunVoice, loadVoices,
+  rankVoices, voiceId, voiceQuality,
 } from '../js/speech.js';
 import { createThinkingTimer, formatDuration } from '../js/timer.js';
 import { SOUNDS, playSound } from '../js/audio.js';
@@ -222,6 +223,77 @@ test('an English voice that works offline is preferred, US English first', () =>
   assert.equal(chooseVoice([]), null);
   assert.equal(chooseVoice(undefined), null);
   assert.equal(chooseVoice([{ name: 'Karen', lang: 'en_AU', localService: true }]).name, 'Karen', 'Android-style en_AU counts');
+});
+
+// Like the list an iPad gives: fun voices first, a compact and an enhanced
+// Samantha with the same name, an eloquence voice and a Premium voice.
+const IPAD_VOICES = [
+  { name: 'Albert', lang: 'en-US', localService: true, default: true, voiceURI: 'com.apple.speech.synthesis.voice.Albert' },
+  { name: 'Bad News', lang: 'en-US', localService: true, voiceURI: 'com.apple.speech.synthesis.voice.BadNews' },
+  { name: 'Eddy (English (US))', lang: 'en-US', localService: true, voiceURI: 'com.apple.eloquence.en-US.Eddy' },
+  { name: 'Zarvox', lang: 'en-US', localService: true, voiceURI: 'com.apple.speech.synthesis.voice.Zarvox' },
+  { name: 'Samantha', lang: 'en-US', localService: true, voiceURI: 'com.apple.voice.compact.en-US.Samantha' },
+  { name: 'Samantha', lang: 'en-US', localService: true, voiceURI: 'com.apple.voice.enhanced.en-US.Samantha' },
+  { name: 'Daniel', lang: 'en-GB', localService: true, voiceURI: 'com.apple.voice.compact.en-GB.Daniel' },
+  { name: 'Ava (Premium)', lang: 'en-US', localService: true, voiceURI: 'com.apple.voice.premium.en-US.Ava' },
+  { name: 'Amélie', lang: 'fr-CA', localService: true, voiceURI: 'com.apple.voice.compact.fr-CA.Amelie' },
+];
+
+test('the automatic voice is the most natural one, never a fun or robotic voice', () => {
+  assert.equal(voiceId(chooseVoice(IPAD_VOICES)), 'com.apple.voice.premium.en-US.Ava');
+  const noPremium = IPAD_VOICES.filter((v) => !v.name.startsWith('Ava'));
+  assert.equal(voiceId(chooseVoice(noPremium)), 'com.apple.voice.enhanced.en-US.Samantha', 'Enhanced before compact');
+  const compactOnly = noPremium.filter((v) => !v.voiceURI.includes('enhanced'));
+  assert.equal(chooseVoice(compactOnly).name, 'Samantha', 'a natural name before the device default Albert');
+  const funOnly = IPAD_VOICES.filter((v) => isFunVoice(v));
+  assert.ok(isFunVoice(chooseVoice(funOnly)), 'with nothing else, a fun voice is better than silence');
+});
+
+test('fun and robotic voices are recognised by name or by an eloquence voice id', () => {
+  for (const name of ['Albert', 'Bad News', 'Eddy (English (US))', 'Zarvox']) {
+    assert.ok(isFunVoice(IPAD_VOICES.find((v) => v.name === name)), name);
+  }
+  assert.ok(isFunVoice({ name: 'Somebody', voiceURI: 'com.apple.eloquence.en-GB.Somebody' }));
+  assert.ok(!isFunVoice(IPAD_VOICES.find((v) => v.name === 'Daniel')));
+});
+
+test('voice quality: Premium, then Enhanced, then natural names, then the rest', () => {
+  const q = (uri) => voiceQuality(IPAD_VOICES.find((v) => v.voiceURI === uri));
+  assert.equal(q('com.apple.voice.premium.en-US.Ava'), 0);
+  assert.equal(q('com.apple.voice.enhanced.en-US.Samantha'), 1);
+  assert.equal(q('com.apple.voice.compact.en-US.Samantha'), 1.5);
+  assert.equal(voiceQuality({ name: 'Unknown Voice', lang: 'en-US' }), 2);
+  assert.equal(voiceQuality({ name: 'Microsoft Aria Online (Natural) - English (United States)', lang: 'en-US' }), 1);
+  assert.equal(q('com.apple.speech.synthesis.voice.Zarvox'), 3);
+});
+
+test('a grown-up\'s chosen voice is used while the device has it, by its id', () => {
+  const zarvox = 'com.apple.speech.synthesis.voice.Zarvox';
+  assert.equal(chooseVoice(IPAD_VOICES, { chosenId: zarvox }).name, 'Zarvox', 'a fun voice can be chosen on purpose');
+  assert.equal(voiceId(chooseVoice(IPAD_VOICES, { chosenId: 'com.apple.voice.compact.en-US.Samantha' })), 'com.apple.voice.compact.en-US.Samantha', 'two voices called Samantha are told apart');
+  assert.equal(voiceId(chooseVoice(IPAD_VOICES, { chosenId: 'gone' })), 'com.apple.voice.premium.en-US.Ava', 'a voice that was removed falls back to automatic');
+  assert.equal(chooseVoice(IPAD_VOICES, { chosenId: 'com.apple.voice.compact.fr-CA.Amelie' }).name, 'Ava (Premium)', 'only English voices can be chosen');
+});
+
+test('the Settings voice list has every English voice, natural ones first', () => {
+  const ranked = rankVoices(IPAD_VOICES);
+  assert.equal(ranked.length, 8, 'the French voice is left out');
+  assert.equal(ranked[0].name, 'Ava (Premium)');
+  const firstFun = ranked.findIndex((v) => isFunVoice(v));
+  assert.ok(ranked.slice(firstFun).every((v) => isFunVoice(v)), 'fun voices come last');
+});
+
+test('the voice tester can use a different voice and pitch just once', async () => {
+  const { synth, speaker } = setup();
+  const ava = IPAD_VOICES[7];
+  speaker.setVoice(IPAD_VOICES[4]);
+  speaker.speak(QUESTION, { voice: ava, pitch: 1.2, rate: 1 });
+  assert.equal(synth.current.voice, ava);
+  assert.equal(synth.current.pitch, 1.2);
+  assert.equal(synth.current.rate, 1);
+  speaker.speak(QUESTION);
+  assert.equal(synth.current.voice, IPAD_VOICES[4], 'the next question uses the normal voice again');
+  assert.equal(synth.current.pitch, 1);
 });
 
 test('the voice list is waited for when it arrives late, but not forever', async () => {

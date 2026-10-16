@@ -823,6 +823,65 @@ h1:focus {
   flex: 0 0 auto;
 }
 
+.voice-panel h3 {
+  margin: 12px 0 4px;
+  font-size: 20px;
+}
+
+.voice-list {
+  display: grid;
+  gap: 8px;
+  max-height: 420px;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 4px;
+}
+
+.voice-list .voice-choice {
+  align-items: flex-start;
+  min-height: 60px;
+  text-align: left;
+}
+
+.voice-group {
+  margin: 8px 0 0;
+  font-weight: 700;
+  color: var(--muted);
+}
+
+.voice-lab-row {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 8px 0;
+  border-bottom: 2px solid var(--line);
+}
+
+.voice-lab-row.playing {
+  background: var(--accent-soft);
+}
+
+.voice-lab-name {
+  display: flex;
+  flex: 1;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.voice-lab-id {
+  font-size: 13px;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+.use-voice {
+  min-height: 56px;
+  padding: 8px 14px;
+  font-size: 18px;
+}
+
 .voice-note .big-button {
   min-height: 56px;
   margin-top: 8px;

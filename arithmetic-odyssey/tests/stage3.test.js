@@ -114,7 +114,7 @@ test('T3.1 buttons are large: at least 60 px high', () => {
 test('T3.1 every screen in the app has its module', () => {
   const app = read('js/app.js');
   const screens = [...app.matchAll(/^ {2}(\w+): \{ build: (\w+)/gm)];
-  assert.deepEqual(screens.map((m) => m[1]), ['start', 'profiles', 'newPlayer', 'home', 'setup', 'adventure', 'trailEnd', 'album', 'stats', 'settings']);
+  assert.deepEqual(screens.map((m) => m[1]), ['start', 'profiles', 'newPlayer', 'home', 'setup', 'adventure', 'trailEnd', 'album', 'stats', 'settings', 'voiceLab']);
   for (const [, , builder] of screens) assert.match(app, new RegExp(`import \\{[^}]*\\b${builder}\\b[^}]*\\} from './screens/`), builder);
 });
 
@@ -174,7 +174,7 @@ test(`there can be up to ${MAX_PROFILES} players`, () => {
 test('changing settings and setup keeps them valid', () => {
   const store = createProfileStore();
   const p = store.add('Cy', AVATARS[0]);
-  assert.deepEqual(store.updateSettings(p.id, { adventureLength: 60, voice: false }), { voice: false, sound: true, adventureLength: 60, detourLength: 3 });
+  assert.deepEqual(store.updateSettings(p.id, { adventureLength: 60, voice: false }), { voice: false, sound: true, voiceId: '', speed: 'normal', adventureLength: 60, detourLength: 3 });
   assert.equal(store.updateSettings(p.id, { adventureLength: 55 }).adventureLength, 20, 'an invalid length goes back to the default');
   assert.deepEqual(store.updateSetup(p.id, { operations: ['×', '+'], difficulty: 'advanced' }).operations, ['+', '×'], 'kept in + − × ÷ order');
 });
@@ -183,7 +183,12 @@ test('changing settings and setup keeps them valid', () => {
 test('settings are fixed up if they are missing or damaged', () => {
   assert.deepEqual(normalizeSettings(undefined), DEFAULT_SETTINGS);
   assert.deepEqual(normalizeSettings({ voice: 'yes', adventureLength: '40', detourLength: 11 }), DEFAULT_SETTINGS);
-  assert.deepEqual(normalizeSettings({ voice: false, sound: false, adventureLength: 100, detourLength: 10 }), { voice: false, sound: false, adventureLength: 100, detourLength: 10 });
+  assert.deepEqual(
+    normalizeSettings({ voice: false, sound: false, voiceId: 'com.apple.voice.enhanced.en-US.Ava', speed: 'slower', adventureLength: 100, detourLength: 10 }),
+    { voice: false, sound: false, voiceId: 'com.apple.voice.enhanced.en-US.Ava', speed: 'slower', adventureLength: 100, detourLength: 10 },
+  );
+  assert.equal(normalizeSettings({ speed: 'fast' }).speed, 'normal');
+  assert.equal(normalizeSettings({ voiceId: 42 }).voiceId, '', 'a damaged voice choice goes back to automatic');
   assert.equal(normalizeSettings({ sound: 'off' }).sound, true, 'sound is on unless it is turned off');
   assert.deepEqual(ADVENTURE_LENGTHS, [20, 40, 60, 80, 100]);
   assert.equal(normalizeSettings({ detourLength: 2.5 }).detourLength, 3);
