@@ -393,6 +393,8 @@ Every stage ends with its tests passing, the site republished, and a short repor
 - Tap to Start, Profiles, Setup (with "Next stop"), Sticker Album, Stats and Settings screens with the grown-up check, using placeholder data where later stages fill in.
 - The on-screen keypad.
 - Layout for portrait and landscape.
+- Until Stage 4, **Start Adventure** opens a practice run with the player's setup, so the keypad can be tried. Players live in memory only until Stage 6, and the screens say so.
+- The only text box is the player's name on the New player screen, usually typed by a grown-up.
 
 | ID | Test | Kind |
 |---|---|---|
