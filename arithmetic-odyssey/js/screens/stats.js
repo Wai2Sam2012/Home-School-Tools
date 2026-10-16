@@ -1,8 +1,8 @@
 // 7. Stats: Need More Practice and High Scores. Stage 3 shows the layout;
 // the adventure (Stage 4) and saving (Stage 6) fill it in.
 
-import { ADVENTURE_LENGTHS } from '../settings.js?v=0.4.1';
-import { choiceRow, h, topBar } from '../ui.js?v=0.4.1';
+import { ADVENTURE_LENGTHS } from '../settings.js?v=0.5.0';
+import { choiceRow, h, topBar } from '../ui.js?v=0.5.0';
 
 export function statsScreen(ctx) {
   const player = ctx.profiles.active();

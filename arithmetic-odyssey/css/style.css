@@ -812,6 +812,23 @@ h1:focus {
   50% { transform: scale(1.04); }
 }
 
+.question-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.repeat-button {
+  flex: 0 0 auto;
+}
+
+.voice-note .big-button {
+  min-height: 56px;
+  margin-top: 8px;
+  font-size: 20px;
+}
+
 .detour-count {
   margin: 0;
   color: #9a5a1c;

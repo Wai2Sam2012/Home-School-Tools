@@ -441,6 +441,14 @@ Every stage ends with its tests passing, the site republished, and a short repor
 | T5.5 | With no offline voice available, the game switches to text-only mode and says so in Settings | PC |
 | T5.6 | Voice works with Wi-Fi turned off | iPad |
 
+**Notes from building Stage 5:**
+
+- The thinking timer starts when the question has been read aloud, **or at the first key press** if that comes sooner, so a player who answers while it is still being read never gets a time of zero.
+- Besides the question, the voice reads the story moments (flags, detours, going back to a flag), "Not quite. 7 times 8 is 56." after a wrong answer, and the new sticker on Trail's End.
+- Settings has **Sound effects: On/Off** as the mute control, and says which voice is used, or that none was found and the game is text only.
+- An English voice that works offline is preferred. If the device only has voices that need the internet, one of those is used and Settings says so.
+- `?debug=1` can make speech "never finish", to check the safety timeout (T5.3). Automated browser checks use a fake speech engine; the real voices are checked on the iPad (T5.2, T5.6).
+
 ### Stage 6: Saving, stats, high scores and backup
 
 **Build:** `storage.js` as designed in 1.10, Resume Adventure, Need More Practice, high-score boards, and backup and restore.

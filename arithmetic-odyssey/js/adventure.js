@@ -7,8 +7,8 @@
 //     clears it (back to the same step); all wrong goes back to the checkpoint.
 //   The trail ends at step `length`, and the next sticker is unlocked.
 
-import { checkAnswer, createProblemGenerator } from './math.js?v=0.4.1';
-import { collectNext, nextSticker } from './storyline.js?v=0.4.1';
+import { checkAnswer, createProblemGenerator } from './math.js?v=0.5.0';
+import { collectNext, nextSticker } from './storyline.js?v=0.5.0';
 
 export const ADVENTURE_SCHEMA = 1;
 export const MILESTONE_EVERY = 10;
@@ -44,7 +44,7 @@ export function startAdventure({ theme, length, detourLength, operations, diffic
     detour: null, // { number, asked, correct } while in a detour
     problem: null,
     lastKey: null,
-    stats: { answered: 0, correct: 0, detours: 0, setbacks: 0, missed: {} },
+    stats: { answered: 0, correct: 0, detours: 0, setbacks: 0, thinkingMs: 0, missed: {} },
   };
 }
 
@@ -61,7 +61,9 @@ export function withNextProblem(state, random = Math.random) {
 }
 
 /**
- * Answers the current problem. Returns { state, check, events }:
+ * Answers the current problem. thinkingMs is the thinking time for this
+ * question (from js/timer.js); it is added to the trip's total, which is the
+ * high-score time. Returns { state, check, events }:
  *   check   the result of checkAnswer(); if check.ok is false (empty or
  *           invalid input) nothing else changes and the player tries again.
  *   events  what happened, in order, for the screen to show:
@@ -74,13 +76,18 @@ export function withNextProblem(state, random = Math.random) {
  *     { type: 'setback', from, to }             all detour answers wrong
  *     { type: 'finished' }                      reached the end of the trail
  */
-export function answerProblem(state, input) {
+export function answerProblem(state, input, { thinkingMs = 0 } = {}) {
   if (state.mode === 'done' || !state.problem) throw new Error('There is no question to answer.');
   const check = checkAnswer(state.problem, input);
   if (!check.ok) return { state, check, events: [] };
 
   const problem = state.problem;
-  const stats = { ...state.stats, answered: state.stats.answered + 1, missed: { ...state.stats.missed } };
+  const stats = {
+    ...state.stats,
+    answered: state.stats.answered + 1,
+    thinkingMs: (state.stats.thinkingMs ?? 0) + Math.max(0, Math.round(Number(thinkingMs) || 0)),
+    missed: { ...state.stats.missed },
+  };
   const events = [];
   let next = { ...state, problem: null, stats };
 

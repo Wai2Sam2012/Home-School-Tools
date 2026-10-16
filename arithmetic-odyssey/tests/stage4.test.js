@@ -48,7 +48,7 @@ test('a new adventure starts at step 0 on the trail, with the setup and settings
   assert.equal(s.step, 0);
   assert.equal(s.checkpoint, 0);
   assert.equal(s.detour, null);
-  assert.deepEqual(s.stats, { answered: 0, correct: 0, detours: 0, setbacks: 0, missed: {} });
+  assert.deepEqual(s.stats, { answered: 0, correct: 0, detours: 0, setbacks: 0, thinkingMs: 0, missed: {} });
   assert.ok(s.problem && s.problem.op === '+');
   assert.deepEqual(JSON.parse(JSON.stringify(s)), s, 'the state is plain data, so Stage 6 can save it');
 });
