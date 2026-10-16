@@ -11,8 +11,30 @@ An offline math adventure game for the iPad, with two themes: **Dino Tour** and 
 | [themes/national-parks/](themes/national-parks/) | Truck Off-Road theme. All 63 US national parks, grouped by region, with location, size, 2025 visitors, key attractions and history. |
 | [tools/Get-DinoPictures.ps1](tools/Get-DinoPictures.ps1) | PowerShell script that downloads each dinosaur's pictures from dinosaurpictures.org. See below. |
 | [tools/Run-DinoPictures.cmd](tools/Run-DinoPictures.cmd) | Double-click launcher for the script. |
+| [js/math.js](js/math.js) | The game's math engine: makes problems for each operation and difficulty, and checks answers (Stage 1). |
+| [tests/](tests/) | Automated tests. See [Running the tests](#running-the-tests). |
+| [package.json](package.json) | Only tells Node.js that the game's `.js` files are modules, so the tests can load them. No packages are installed. |
 
 Each theme keeps all of its resources (facts, pictures, sounds and, later, the game's story file) in its own folder under `themes/`.
+
+## Build progress
+
+| Stage | Status |
+| --- | --- |
+| 0. Project setup and first publish | Not started (the test runner part works) |
+| 1. Math engine | Done: `js/math.js`, 17 tests passing |
+| 2–8 | Not started |
+
+## Running the tests
+
+The tests need [Node.js](https://nodejs.org/) (the LTS version) installed on your PC. It is only used for testing, not to play the game. In PowerShell:
+
+```powershell
+cd arithmetic-odyssey
+node --test
+```
+
+You should see `# pass 17` and `# fail 0`. Each test name starts with its ID from the test plan in [GAME-PLAN.md](GAME-PLAN.md), for example `T1.3`.
 
 ## Downloading the dinosaur pictures
 

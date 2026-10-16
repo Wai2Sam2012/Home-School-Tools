@@ -1,0 +1,9 @@
+{
+  "name": "arithmetic-odyssey",
+  "private": true,
+  "description": "Marks the game's .js files as ES modules for the Node.js tests. No npm packages are used.",
+  "type": "module",
+  "scripts": {
+    "test": "node --test"
+  }
+}
