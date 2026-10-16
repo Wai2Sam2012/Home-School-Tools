@@ -1,8 +1,8 @@
 // The on-screen number keypad. Answers are only ever typed here (or on a PC
 // keyboard), never in a text box, so the iPad's keyboard never opens.
 
-import { MAX_ANSWER_DIGITS } from './math.js?v=0.4.0';
-import { h } from './ui.js?v=0.4.0';
+import { MAX_ANSWER_DIGITS } from './math.js?v=0.5.0';
+import { h } from './ui.js?v=0.5.0';
 
 export const BACK = 'back';
 export const SUBMIT = 'submit';
@@ -88,6 +88,9 @@ export function createKeypad({ maxDigits = MAX_ANSWER_DIGITS, onSubmit = () => {
   const pad = h('div', { class: 'keypad', role: 'group', 'aria-label': 'Number keypad' }, buttons);
 
   function onKeyDown(event) {
+    // While the keypad is locked, keys are left alone, so Enter or Space can
+    // press another button (such as "Got it").
+    if (!enabled) return;
     if (event.ctrlKey || event.metaKey || event.altKey) return;
     if (event.target instanceof HTMLElement && event.target.closest('input, textarea, [contenteditable]')) return;
     if (document.querySelector('.overlay')) return;

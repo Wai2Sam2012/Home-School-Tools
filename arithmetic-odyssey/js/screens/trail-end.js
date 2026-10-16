@@ -2,15 +2,21 @@
 // facts, and a summary of the trip. When every sticker is collected, a
 // "Collection complete!" celebration with all the theme's pictures.
 
-import { stickerPicture } from '../art.js?v=0.4.0';
-import { THEMES } from '../settings.js?v=0.4.0';
-import { h } from '../ui.js?v=0.4.0';
+import { stickerPicture } from '../art.js?v=0.5.0';
+import { THEMES } from '../settings.js?v=0.5.0';
+import { formatDuration } from '../timer.js?v=0.5.0';
+import { h } from '../ui.js?v=0.5.0';
 
 const SLIDE_MS = 3500;
 
 export function trailEndScreen(ctx, result = {}) {
   const theme = THEMES[result.theme] ?? THEMES.dino;
-  const stats = result.stats ?? { answered: 0, correct: 0, detours: 0, setbacks: 0 };
+  const stats = result.stats ?? { answered: 0, correct: 0, detours: 0, setbacks: 0, thinkingMs: 0 };
+  const player = ctx.profiles.active();
+  const say = (text) => {
+    if (ctx.voiceOn(player)) ctx.speaker.speak(text);
+  };
+  ctx.onLeave(() => ctx.speaker.cancel());
   const stage = h('div', { class: 'slideshow' }, h('p', {}, 'Loading your sticker…'));
   const about = h('div', { class: 'trail-end-sticker' });
   let slideTimer = 0;
@@ -34,6 +40,7 @@ export function trailEndScreen(ctx, result = {}) {
     if (sticker) {
       const count = Math.max(1, sticker.pictures.length);
       runSlideshow(Array.from({ length: count }, (_, picture) => ({ sticker, picture })));
+      say(`You made it! Your new sticker is ${sticker.name}.`);
       about.replaceChildren(
         h('h2', {}, `New sticker: ${sticker.number}. ${sticker.name}`),
         h('ul', { class: 'fact-list' }, sticker.facts.map((f) => h('li', {}, f))),
@@ -41,6 +48,7 @@ export function trailEndScreen(ctx, result = {}) {
     } else {
       const withPictures = storyline.stickers.filter((s) => s.pictures.length > 0);
       runSlideshow((withPictures.length ? withPictures : storyline.stickers).map((s) => ({ sticker: s, picture: 0 })));
+      say(`You made it! You collected every ${theme.title} sticker!`);
       about.replaceChildren(
         h('h2', {}, 'Collection complete! 🎉'),
         h('p', { class: 'lead' }, `You have all ${storyline.stickers.length} ${theme.title} stickers!`),
@@ -63,6 +71,7 @@ export function trailEndScreen(ctx, result = {}) {
           row('Right answers', stats.correct),
           row('Detours', stats.detours),
           row('Sent back to a flag', stats.setbacks),
+          row('Thinking time', formatDuration(stats.thinkingMs ?? 0)),
         ),
         h('div', { class: 'trail-end-buttons' },
           h('button', { type: 'button', class: 'big-button primary', onclick: () => ctx.show('setup') }, 'New adventure'),

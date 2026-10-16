@@ -615,7 +615,29 @@ h1:focus {
   75% { transform: translateX(8px); }
 }
 
+.got-it-cover {
+  position: absolute;
+  inset: 0;
+  z-index: 2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 16px;
+  background: rgba(253, 248, 239, 0.85);
+}
+
+.got-it-cover[hidden] {
+  display: none;
+}
+
+.got-it {
+  min-width: 70%;
+  min-height: 110px;
+  font-size: 36px;
+}
+
 .keypad {
+  position: relative;
   display: grid;
   grid-template-columns: repeat(3, 1fr);
   gap: 12px;
@@ -788,6 +810,23 @@ h1:focus {
 
 @keyframes pop {
   50% { transform: scale(1.04); }
+}
+
+.question-row {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+}
+
+.repeat-button {
+  flex: 0 0 auto;
+}
+
+.voice-note .big-button {
+  min-height: 56px;
+  margin-top: 8px;
+  font-size: 20px;
 }
 
 .detour-count {

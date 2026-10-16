@@ -79,7 +79,7 @@ Home-School-Tools/                public repository
     │   │   ├── sounds/           optional theme sounds
     │   │   ├── CREDITS.md        where each picture came from
     │   │   └── downloaded-pictures/   raw downloads (excluded from git)
-    │   └── national-parks/       "Truck Off-Road" theme, same layout;
+    │   └── national-parks/       "Off-Roading" theme, same layout;
     │                             facts in README.md and the 7 region files
     ├── tests/                    automated tests (not published)
     ├── tools/                    PowerShell helpers, including the picture
@@ -97,7 +97,7 @@ Each theme's Markdown files in its `themes/` folder, plus the kid-friendly facts
 | Theme | Journey | Fact source | Stickers, in this order |
 |---|---|---|---|
 | **Dino Tour** | Travel through the Triassic, Jurassic and Cretaceous | `themes/dino/triassic.md`, `jurassic.md`, `cretaceous.md` | 60 dinosaurs: Triassic #1–20, then Jurassic #1–20, then Cretaceous #1–20 |
-| **Truck Off-Road** | Drive a truck to national parks across the US | `themes/national-parks/README.md` and the region files | 63 parks: region by region in the order of the README's region table, alphabetically within each region |
+| **Off-Roading** | Drive a truck to national parks across the US | `themes/national-parks/README.md` and the region files | 63 parks: region by region in the order of the README's region table, alphabetically within each region |
 
 **Facts**
 
@@ -126,7 +126,7 @@ Keep each theme's pictures under about 50 MB (the Dino theme with 3–5 pictures
 1. **Tap to Start**: shown on every launch. It unlocks sound and speech (see 1.9) and then shows the profile screen.
 2. **Profiles**: create, choose or delete a profile. Each profile has its own Sticker Album, stats, high scores and saved adventure. If a saved adventure exists, offer **Resume Adventure**.
 3. **Setup**:
-   - Theme: Dino Tour or Truck Off-Road. The screen shows where the trip is going, for example *"Next stop: Eoraptor!"*
+   - Theme: Dino Tour or Off-Roading. The screen shows where the trip is going, for example *"Next stop: Eoraptor!"*
    - Operations: checkboxes for +, −, × and ÷. At least one must be selected.
    - Difficulty: Beginner, Intermediate or Advanced (see 1.7).
 4. **Adventure**: the question, the progress map with milestones, the on-screen keypad, and detours.
@@ -157,6 +157,7 @@ Keep each theme's pictures under about 50 MB (the Dino theme with 3–5 pictures
 - **Adventure length** (Settings: 20, 40, 60, 80 or 100) is the number of trail steps to the destination.
 - Each correct answer on the main trail moves the truck or dinosaur one step along the progress map.
 - A wrong answer on the main trail does not move forward. It starts a **detour**. The missed question is not asked again in that adventure, but it is counted in Need More Practice.
+- After any wrong answer (on the trail or in a detour), the game shows the right answer and waits for the player to press **Got it** before going on. After a right answer it goes on by itself after about a second.
 
 **Milestones**
 
@@ -439,6 +440,14 @@ Every stage ends with its tests passing, the site republished, and a short repor
 | T5.4 | The timer counts only from end of speech (or question shown) to Submit, and pauses while in the background and during Repeat | Automated |
 | T5.5 | With no offline voice available, the game switches to text-only mode and says so in Settings | PC |
 | T5.6 | Voice works with Wi-Fi turned off | iPad |
+
+**Notes from building Stage 5:**
+
+- The thinking timer starts when the question has been read aloud, **or at the first key press** if that comes sooner, so a player who answers while it is still being read never gets a time of zero.
+- Besides the question, the voice reads the story moments (flags, detours, going back to a flag), "Not quite. 7 times 8 is 56." after a wrong answer, and the new sticker on Trail's End.
+- Settings has **Sound effects: On/Off** as the mute control, and says which voice is used, or that none was found and the game is text only.
+- An English voice that works offline is preferred. If the device only has voices that need the internet, one of those is used and Settings says so.
+- `?debug=1` can make speech "never finish", to check the safety timeout (T5.3). Automated browser checks use a fake speech engine; the real voices are checked on the iPad (T5.2, T5.6).
 
 ### Stage 6: Saving, stats, high scores and backup
 
