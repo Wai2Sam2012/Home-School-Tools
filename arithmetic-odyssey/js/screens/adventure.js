@@ -10,8 +10,9 @@ import { nextSticker } from '../storyline.js?v=0.4.1';
 import { h, topBar } from '../ui.js?v=0.4.1';
 
 const PRAISE = ['Correct!', 'Great job!', 'You got it!', 'Awesome!', 'Nice work!'];
+// A right answer moves on by itself; after a wrong one the game waits for
+// "Got it" so the player has time to read the right answer.
 const NEXT_AFTER_RIGHT_MS = 1100;
-const NEXT_AFTER_WRONG_MS = 2400;
 
 export function adventureScreen(ctx) {
   const player = ctx.profiles.active();
@@ -26,6 +27,7 @@ export function adventureScreen(ctx) {
   let storyline = null;
   let timer = 0;
   let busy = false;
+  let waitingFor = null; // the events of a wrong answer, until "Got it" is pressed
 
   // ---- trail map
   const fill = h('div', { class: 'trail-fill' });
@@ -55,8 +57,7 @@ export function adventureScreen(ctx) {
     traveler.style.left = `${at}%`;
     traveler.classList.toggle('on-detour', state.mode === 'detour');
     for (const flag of flags) flag.classList.toggle('reached', Number(flag.dataset.step) <= state.checkpoint);
-    detourCount.hidden = state.mode !== 'detour';
-    if (state.detour) detourCount.textContent = `Detour question ${Math.min(state.detour.asked + 1, state.detourLength)} of ${state.detourLength}`;
+
     count.textContent = `Step ${state.step} of ${state.length}`;
     map.setAttribute('aria-label', `Trail map: step ${state.step} of ${state.length}`);
   }
@@ -68,6 +69,9 @@ export function adventureScreen(ctx) {
   }
 
   function showQuestion() {
+    // The detour counter changes with the question, not while the last answer is still shown.
+    detourCount.hidden = state.mode !== 'detour';
+    if (state.detour) detourCount.textContent = `Detour question ${state.detour.asked + 1} of ${state.detourLength}`;
     question.textContent = `${state.problem.text} = ?`;
     feedback.textContent = '';
     feedback.className = 'feedback';
@@ -134,14 +138,33 @@ export function adventureScreen(ctx) {
       feedback.className = 'feedback wrong';
     }
     showMap();
-    timer = setTimeout(() => afterAnswer(events), check.correct ? NEXT_AFTER_RIGHT_MS : NEXT_AFTER_WRONG_MS);
+    if (check.correct) {
+      timer = setTimeout(() => afterAnswer(events), NEXT_AFTER_RIGHT_MS);
+    } else {
+      waitingFor = events;
+      gotItCover.hidden = false;
+      gotIt.focus({ preventScroll: true });
+    }
+  }
+
+  function acknowledge() {
+    if (!waitingFor) return;
+    const events = waitingFor;
+    waitingFor = null;
+    gotItCover.hidden = true;
+    afterAnswer(events);
   }
 
   const keypad = createKeypad({ onSubmit: submit });
+  // Covers the keys (not the answer box) after a wrong answer, so the screen doesn't change size.
+  const gotIt = h('button', { type: 'button', class: 'big-button primary got-it', onclick: acknowledge }, 'Got it ›');
+  const gotItCover = h('div', { class: 'got-it-cover', hidden: true }, gotIt);
+  keypad.el.querySelector('.keypad').append(gotItCover);
 
   // Debug helpers (?debug=1) to force detours, setbacks and the ending (T4.8).
   ctx.debugAdventure = {
     answer(right) {
+      if (waitingFor) return 'Press "Got it" first.';
       if (busy) return 'Wait for the next question.';
       const answer = right ? state.problem.answer : state.problem.answer + 1;
       submit(String(answer));

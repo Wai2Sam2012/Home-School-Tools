@@ -157,6 +157,7 @@ Keep each theme's pictures under about 50 MB (the Dino theme with 3–5 pictures
 - **Adventure length** (Settings: 20, 40, 60, 80 or 100) is the number of trail steps to the destination.
 - Each correct answer on the main trail moves the truck or dinosaur one step along the progress map.
 - A wrong answer on the main trail does not move forward. It starts a **detour**. The missed question is not asked again in that adventure, but it is counted in Need More Practice.
+- After any wrong answer (on the trail or in a detour), the game shows the right answer and waits for the player to press **Got it** before going on. After a right answer it goes on by itself after about a second.
 
 **Milestones**
 
