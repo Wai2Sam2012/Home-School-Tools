@@ -31,10 +31,13 @@ test('the folder structure from the Game Plan (1.4) is in place', () => {
     'js/debug.js',
     'js/math.js',
     'js/version.js',
+    'js/screens/start.js',
     'GAME-PLAN.md',
     'README.md',
     'tools/Start-LocalServer.ps1',
     'tools/Get-DinoPictures.ps1',
+    'tools/build-storyline.mjs',
+    'themes/dino/game-text.json',
     'themes/dino/triassic.md',
     'themes/dino/jurassic.md',
     'themes/dino/cretaceous.md',
@@ -88,10 +91,12 @@ test('the game page sets up the iPad viewport and loads the scripts as a module'
 });
 
 test('every JavaScript import points at a real file', () => {
-  for (const file of readdirSync(join(GAME, 'js'))) {
+  const files = readdirSync(join(GAME, 'js'), { recursive: true }).filter((f) => f.endsWith('.js'));
+  assert.ok(files.length > 5);
+  for (const file of files) {
     const source = read(join(GAME, 'js', file));
     for (const [, path] of source.matchAll(/from\s+'(\.[^']+)'/g)) {
-      assert.ok(existsSync(join(GAME, 'js', path)), `js/${file} imports missing ${path}`);
+      assert.ok(existsSync(join(GAME, 'js', dirname(file), path)), `js/${file} imports missing ${path}`);
     }
   }
 });
@@ -191,6 +196,8 @@ test('T0.3 the deploy workflow runs on main, runs the tests, builds the site and
   assert.match(workflow, /pages: write/);
   assert.match(workflow, /id-token: write/);
   assert.match(workflow, /node --test/);
+  // The story files are built before the tests and before the site is copied.
+  assert.match(workflow, /node arithmetic-odyssey\/tools\/build-storyline\.mjs[\s\S]*node --test[\s\S]*assemble-site\.mjs/);
   assert.match(workflow, /node \.github\/scripts\/assemble-site\.mjs _site/);
   assert.match(workflow, /actions\/upload-pages-artifact@v\d+[\s\S]*path: _site/);
   assert.match(workflow, /actions\/deploy-pages@v\d+/);

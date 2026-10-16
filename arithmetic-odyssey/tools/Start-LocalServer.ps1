@@ -16,6 +16,11 @@
     network cannot reach it. Files are sent with "no-cache" so changes show up
     on the next reload. Press Ctrl+C to stop it.
 
+    Before starting, it rebuilds the game's story files
+    (themes\<theme>\storyline.json) so newly added pictures show up. This
+    needs Node.js; without it the server still runs, using the story files
+    from the last build.
+
     Works in Windows PowerShell 5.1 and PowerShell 7.
 
 .PARAMETER Port
@@ -158,6 +163,26 @@ function Invoke-Request {
     }
 }
 
+function Invoke-StorylineBuild {
+    # Rebuilds themes\<theme>\storyline.json with Node.js, if it is installed.
+    # Problems are reported but don't stop the server.
+    param([string]$RootPath)
+    $buildScript = [System.IO.Path]::Combine($RootPath, 'arithmetic-odyssey', 'tools', 'build-storyline.mjs')
+    if (-not [System.IO.File]::Exists($buildScript)) { return }
+    $node = Get-Command node -CommandType Application -ErrorAction SilentlyContinue | Select-Object -First 1
+    if ($null -eq $node) {
+        Write-Warning ('Node.js was not found, so the story files were not rebuilt and new pictures may not show. ' +
+            'Install the LTS version from https://nodejs.org/ and start the server again.')
+        return
+    }
+    Write-Host 'Building the story files...'
+    & $node.Path $buildScript | Out-Host
+    if ($LASTEXITCODE -ne 0) {
+        Write-Warning 'The story files have problems (listed above). Fix them, then start the server again.'
+    }
+    Write-Host ''
+}
+
 # ---------------------------------------------------------------------------
 
 $scriptFolder = $PSScriptRoot
@@ -171,6 +196,7 @@ if (-not [System.IO.Directory]::Exists($Root)) {
     exit 2
 }
 $Root = [System.IO.Path]::GetFullPath($Root)
+Invoke-StorylineBuild $Root
 
 $prefix = "http://localhost:$Port/"
 $gameUrl = "${prefix}arithmetic-odyssey/"

@@ -14,6 +14,7 @@ export const STORAGE_PREFIX = 'ao.';
 const infoRows = [];
 const actions = [];
 let panel = null;
+let collapsed = false;
 
 /** True when the page address contains debug=1. */
 export function isDebugOn(search = globalThis.location?.search ?? '') {
@@ -139,8 +140,24 @@ function render(message = '') {
       },
     }),
   );
+  // The panel can be folded away so it doesn't cover the game's buttons.
+  const toggle = element('button', {
+    type: 'button',
+    className: 'debug-toggle',
+    textContent: collapsed ? 'Show' : 'Hide',
+    onclick: () => {
+      collapsed = !collapsed;
+      render();
+    },
+  });
+  const heading = element('h2', { textContent: 'Debug panel ' }, [toggle]);
+  panel.classList.toggle('collapsed', collapsed);
+  if (collapsed) {
+    panel.replaceChildren(heading);
+    return;
+  }
   panel.replaceChildren(
-    element('h2', { textContent: 'Debug panel' }),
+    heading,
     element('dl', {}, rows),
     element('div', { className: 'debug-actions' }, buttons),
     element('p', { className: 'debug-message', textContent: message, role: 'status' }),
