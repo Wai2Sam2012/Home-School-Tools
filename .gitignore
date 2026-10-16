@@ -11,3 +11,7 @@ Thumbs.db
 
 # Local preview of the published site (node .github/scripts/assemble-site.mjs)
 _site/
+
+# Built from each theme's files by arithmetic-odyssey/tools/build-storyline.mjs
+# (the deploy workflow and the local server build it)
+arithmetic-odyssey/themes/*/storyline.json

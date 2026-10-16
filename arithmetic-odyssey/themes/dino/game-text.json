@@ -1,0 +1,337 @@
+{
+  "title": "Dino Tour",
+  "intro": "Travel back in time through the Triassic, Jurassic and Cretaceous to meet the dinosaurs!",
+  "traveler": "🦕",
+  "milestones": [
+    "You crossed the steaming swamp!",
+    "You reached the giant fern forest!",
+    "You found a field of fossil footprints!",
+    "You made it past the bubbling volcano!",
+    "You reached the big blue lake!",
+    "You climbed over the rocky ridge!",
+    "You found a hidden dinosaur nest!",
+    "You crossed the wide river delta!",
+    "You reached the tall conifer woods!",
+    "You can see your destination ahead!"
+  ],
+  "detours": [
+    "Oh no, a volcano is rumbling! Solve {count} problems to find a safe path around it.",
+    "A herd of long-necked dinosaurs is crossing the trail. Solve {count} problems while you wait for them to pass!",
+    "Your time machine needs a quick repair. Solve {count} problems to fix it!",
+    "A river flooded the path! Solve {count} problems to build a log bridge.",
+    "Thick fog rolled in. Solve {count} problems to find the trail again!",
+    "Sticky mud is everywhere! Solve {count} problems to pull your boots free.",
+    "A big rock slid onto the path. Solve {count} problems to roll it away!",
+    "A curious little dinosaur took your map! Solve {count} problems to get it back."
+  ],
+  "detourCleared": [
+    "You did it! Back on the trail.",
+    "Great work! The path is clear again.",
+    "Detour done! Let's keep exploring."
+  ],
+  "setback": [
+    "Uh-oh, that detour was tricky! Let's go back to the last flag and try again. You can do it!",
+    "No problem! Explorers sometimes take the long way. Back to the last flag we go!"
+  ],
+  "kidFacts": {
+    "eoraptor": [
+      "Eoraptor is one of the earliest dinosaurs ever found.",
+      "It lived about 231 million years ago in what is now Argentina.",
+      "It probably ate both plants and animals."
+    ],
+    "herrerasaurus": [
+      "Herrerasaurus was one of the first big meat-eating dinosaurs.",
+      "It lived about 231 million years ago in Argentina.",
+      "Scientists have found 11 Herrerasaurus skeletons."
+    ],
+    "coelophysis": [
+      "Coelophysis was about 9 feet long but weighed only about 30 pounds.",
+      "Hundreds of them were found together at Ghost Ranch in New Mexico.",
+      "It had the first wishbone ever found in a dinosaur fossil."
+    ],
+    "plateosaurus": [
+      "Plateosaurus was a plant-eater that lived in Europe.",
+      "Scientists have found 33 Plateosaurus skeletons, more than almost any other Triassic dinosaur."
+    ],
+    "staurikosaurus": [
+      "Staurikosaurus is one of the oldest dinosaurs ever found, about 233 million years old.",
+      "It was a meat-eater from Brazil.",
+      "Only 2 Staurikosaurus skeletons have been found."
+    ],
+    "nyasasaurus": [
+      "Nyasasaurus lived more than 240 million years ago in Tanzania, in Africa.",
+      "It might be the oldest dinosaur of all!",
+      "Scientists are still deciding whether it is a true dinosaur or a very close cousin."
+    ],
+    "eodromaeus": [
+      "Eodromaeus was a small meat-eater from Argentina.",
+      "It lived at the same time and in the same place as Eoraptor.",
+      "Scientists call it a dinosaur from the dawn of the dinosaur age."
+    ],
+    "saturnalia": [
+      "Saturnalia was an early cousin of the giant long-necked dinosaurs.",
+      "It ate plants and lived in Brazil.",
+      "Only 3 Saturnalia skeletons have been found."
+    ],
+    "buriolestes": [
+      "Buriolestes was an early cousin of the giant long-necked plant-eaters.",
+      "Surprise: Buriolestes ate meat!",
+      "It shows that the long-necked dinosaur family started out as hunters."
+    ],
+    "panphagia": [
+      "Panphagia's name means \"eats everything.\"",
+      "It ate both plants and animals.",
+      "Only one Panphagia skeleton has ever been found, in Argentina."
+    ],
+    "pisanosaurus": [
+      "Pisanosaurus was a small plant-eater from Argentina.",
+      "Only one Pisanosaurus skeleton has ever been found.",
+      "Scientists still argue about which dinosaur family it belongs to."
+    ],
+    "liliensternus": [
+      "Liliensternus was one of the biggest meat-eaters of the Triassic.",
+      "Its fossils were found in Germany and Switzerland.",
+      "It laid eggs, and 5 Liliensternus skeletons are known."
+    ],
+    "tawa": [
+      "Tawa was a meat-eater that lived in New Mexico.",
+      "Scientists found a complete Tawa skeleton.",
+      "It helps scientists understand how the early meat-eating dinosaurs developed."
+    ],
+    "chindesaurus": [
+      "Chindesaurus was a meat-eater that lived more than 200 million years ago.",
+      "The first Chindesaurus fossil was found in Petrified Forest National Park in Arizona.",
+      "Scientists have found 7 Chindesaurus skeletons."
+    ],
+    "daemonosaurus": [
+      "Daemonosaurus had a short snout and big buck teeth!",
+      "It was a meat-eater from Ghost Ranch in New Mexico.",
+      "Scientists have found only its skull."
+    ],
+    "riojasaurus": [
+      "Riojasaurus was a large, heavy plant-eater.",
+      "It lived in Argentina.",
+      "Only 2 Riojasaurus skeletons have been found."
+    ],
+    "melanorosaurus": [
+      "Melanorosaurus was a heavy plant-eater that walked on four legs.",
+      "It lived in South Africa.",
+      "About 10 Melanorosaurus skeletons have been found."
+    ],
+    "thecodontosaurus": [
+      "Thecodontosaurus was found in England in 1834.",
+      "That was 8 years before the word \"dinosaur\" was even invented!",
+      "It was only the fourth dinosaur ever given a name."
+    ],
+    "efraasia": [
+      "Efraasia was a plant-eater from Germany.",
+      "It was an early relative of Plateosaurus.",
+      "Scientists have found 5 Efraasia skeletons."
+    ],
+    "ingentia": [
+      "Ingentia was a giant, about 26 to 33 feet long!",
+      "It lived in Argentina, long before the biggest long-necked dinosaurs.",
+      "It shows that dinosaurs grew huge earlier than scientists once thought."
+    ],
+    "stegosaurus": [
+      "Stegosaurus had big plates on its back and spikes on its tail.",
+      "It lived in the western United States and in Portugal.",
+      "Scientists have found 75 Stegosaurus skeletons."
+    ],
+    "brachiosaurus": [
+      "Brachiosaurus was a giant long-necked dinosaur shaped a bit like a giraffe.",
+      "It weighed about 29,000 kilograms. That's around 64,000 pounds!",
+      "Being so huge helped keep it safe from predators."
+    ],
+    "allosaurus": [
+      "Allosaurus was the top predator of the Late Jurassic.",
+      "The biggest Allosaurus found was about 32 feet long.",
+      "Scientists have found 117 Allosaurus skeletons."
+    ],
+    "diplodocus": [
+      "Diplodocus had a very long, whip-like tail.",
+      "Its name means \"double beam,\" after the bones under its tail.",
+      "Tracks and skeletons show it stood up tall, not sprawled on its belly."
+    ],
+    "apatosaurus-brontosaurus": [
+      "For many years, people used the name Brontosaurus for Apatosaurus.",
+      "In 2015, scientists decided Brontosaurus is its own kind of dinosaur after all!",
+      "Apatosaurus weighed about 19,500 kilograms. That's around 43,000 pounds!"
+    ],
+    "archaeopteryx": [
+      "Archaeopteryx was a feathered dinosaur that could fly.",
+      "It weighed only about half a pound.",
+      "It is one of the most famous links between dinosaurs and birds."
+    ],
+    "dilophosaurus": [
+      "Dilophosaurus had two flat crests on its head.",
+      "The crests were probably for showing off, not for fighting.",
+      "It was about 6 meters long. That's nearly 20 feet!"
+    ],
+    "ceratosaurus": [
+      "Ceratosaurus had a horn on its nose.",
+      "It was a meat-eater that lived in Utah, Colorado and Tanzania.",
+      "It weighed about 670 kilograms, around 1,500 pounds."
+    ],
+    "camarasaurus": [
+      "Camarasaurus is the most common long-necked dinosaur found in North America.",
+      "Its name means \"chambered lizard,\" after the hollow spaces in its backbone.",
+      "Each of its feet had a hooked claw on the inside toe."
+    ],
+    "megalosaurus": [
+      "Megalosaurus was the first dinosaur ever given a name, in 1824.",
+      "It was found in England.",
+      "People were digging up its bones long before anyone knew what a dinosaur was."
+    ],
+    "giraffatitan": [
+      "Giraffatitan was a giant long-necked plant-eater from Tanzania, in Africa.",
+      "It looks a lot like its American cousin, Brachiosaurus.",
+      "It was dug up at a famous fossil site called Tendaguru."
+    ],
+    "compsognathus": [
+      "Compsognathus was about the size of a chicken.",
+      "It weighed only about 2.5 kilograms, around 5½ pounds.",
+      "It was a meat-eater from Germany and France."
+    ],
+    "kentrosaurus": [
+      "Kentrosaurus was a spiky stegosaur from Tanzania, in Africa.",
+      "It weighed about 321 kilograms, around 700 pounds.",
+      "Scientists have found 27 Kentrosaurus skeletons."
+    ],
+    "torvosaurus": [
+      "Torvosaurus was one of the biggest meat-eaters of the Jurassic.",
+      "Its fossils have been found in Colorado and in Portugal.",
+      "About 18 Torvosaurus skeletons are known."
+    ],
+    "mamenchisaurus": [
+      "Mamenchisaurus had an extremely long neck, up to about half the length of its body!",
+      "It lived in China.",
+      "It was a plant-eater, and 24 Mamenchisaurus skeletons are known."
+    ],
+    "guanlong": [
+      "Guanlong was an early relative of Tyrannosaurus rex.",
+      "It had a crest on its head.",
+      "It lived in China."
+    ],
+    "cryolophosaurus": [
+      "Cryolophosaurus was found in Antarctica!",
+      "It had an unusual crest that ran sideways across its head.",
+      "Only one Cryolophosaurus skeleton has ever been found."
+    ],
+    "scelidosaurus": [
+      "Scelidosaurus was one of the earliest armored dinosaurs.",
+      "It was found in Dorset, England.",
+      "It was a plant-eater."
+    ],
+    "massospondylus": [
+      "Scientists have found Massospondylus eggs with babies still inside!",
+      "It was a plant-eater from southern Africa.",
+      "Scientists have found 42 Massospondylus skeletons."
+    ],
+    "heterodontosaurus": [
+      "Heterodontosaurus had three different kinds of teeth, including tusks!",
+      "It was tiny, weighing only about 1.8 kilograms, around 4 pounds.",
+      "It lived in South Africa."
+    ],
+    "tyrannosaurus-rex": [
+      "Tyrannosaurus rex is the most famous meat-eating dinosaur.",
+      "The biggest complete T. rex skeleton is 40 feet long.",
+      "Skin fossils show that grown-up T. rex were mostly covered in scales."
+    ],
+    "triceratops": [
+      "Triceratops had three horns and a big frill on its head.",
+      "It lived at the very end of the age of dinosaurs.",
+      "Scientists have found 139 Triceratops skeletons."
+    ],
+    "velociraptor": [
+      "Velociraptor had feathers and was about the size of a turkey.",
+      "It had a curved, sickle-shaped claw on each foot.",
+      "Real Velociraptors were much smaller than the ones in movies."
+    ],
+    "spinosaurus": [
+      "Spinosaurus had a tall sail on its back.",
+      "It ate mostly fish.",
+      "Scientists still debate how much time it spent in the water."
+    ],
+    "ankylosaurus": [
+      "Ankylosaurus was covered in armor.",
+      "It had a heavy club at the end of its tail.",
+      "It was a plant-eater that lived in North America."
+    ],
+    "iguanodon": [
+      "Iguanodon had a sharp spike on each thumb.",
+      "It was the second dinosaur ever named, in 1825.",
+      "Dozens of Iguanodon skeletons were found together in a coal mine in Belgium."
+    ],
+    "parasaurolophus": [
+      "Parasaurolophus had a long, tube-shaped crest on its head.",
+      "It probably used its crest to make sounds.",
+      "This duck-billed dinosaur weighed about 2,500 kilograms."
+    ],
+    "pachycephalosaurus": [
+      "Pachycephalosaurus had a thick, dome-shaped head.",
+      "Some scientists think Dracorex and Stygimoloch were really young Pachycephalosaurus.",
+      "It was a plant-eater from the western United States."
+    ],
+    "giganotosaurus": [
+      "Giganotosaurus was about 40 feet long, roughly as big as T. rex!",
+      "It lived in Argentina.",
+      "Only 3 Giganotosaurus skeletons have been found."
+    ],
+    "argentinosaurus": [
+      "Argentinosaurus was one of the biggest land animals ever.",
+      "It may have been about 100 feet long!",
+      "Only one skeleton has been found, discovered in 1987."
+    ],
+    "carnotaurus": [
+      "Carnotaurus means \"flesh-eating bull.\"",
+      "It had two thick horns above its eyes and tiny arms.",
+      "It was about 25 feet long and lived in Argentina."
+    ],
+    "deinonychus": [
+      "Deinonychus was a raptor that weighed about 75 kilograms, around 165 pounds.",
+      "Its discovery changed the way scientists think about dinosaurs.",
+      "Scientists have found 41 Deinonychus skeletons."
+    ],
+    "utahraptor": [
+      "Utahraptor is the biggest raptor ever found, about 20 feet long.",
+      "It lived in Utah.",
+      "It was the top predator where it lived."
+    ],
+    "therizinosaurus": [
+      "Therizinosaurus had giant claws, up to about 3 feet long!",
+      "It ate plants, even though its relatives ate meat.",
+      "It lived in Mongolia."
+    ],
+    "edmontosaurus": [
+      "Edmontosaurus was a duck-billed dinosaur with a face like a shovel.",
+      "Some Edmontosaurus fossils are \"mummies\" that still show the shape of its skin.",
+      "Scientists have found 71 Edmontosaurus skeletons."
+    ],
+    "protoceratops": [
+      "Protoceratops was about the size of a sheep.",
+      "One famous fossil shows a Protoceratops fighting a Velociraptor!",
+      "It lived in the Gobi Desert."
+    ],
+    "oviraptor": [
+      "Oviraptor's name means \"egg thief.\"",
+      "But it was really guarding its own nest!",
+      "It lived in Mongolia."
+    ],
+    "microraptor": [
+      "Microraptor had feathered wings on both its arms and its legs.",
+      "It could glide through the air.",
+      "It lived in China."
+    ],
+    "carcharodontosaurus": [
+      "Carcharodontosaurus means \"shark-toothed lizard.\"",
+      "Its teeth looked like the teeth of a great white shark.",
+      "The first fossils ever found were destroyed during World War II."
+    ],
+    "baryonyx": [
+      "Baryonyx means \"heavy claw.\"",
+      "It had a head like a crocodile's and caught fish.",
+      "It was found in England."
+    ]
+  }
+}

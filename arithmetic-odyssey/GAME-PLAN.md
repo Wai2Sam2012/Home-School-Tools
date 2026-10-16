@@ -73,8 +73,9 @@ Home-School-Tools/                public repository
     ├── themes/
     │   ├── dino/                 "Dino Tour" theme
     │   │   ├── triassic.md, jurassic.md, cretaceous.md   facts for 60 dinosaurs
-    │   │   ├── storyline.json    trail, milestones, detours, stickers in order, facts
-    │   │   ├── pictures/         pictures chosen by you, resized to JPEG
+    │   │   ├── game-text.json    kid-friendly facts and story text (milestones, detours)
+    │   │   ├── storyline.json    built, not stored in git: stickers in order, facts, pictures
+    │   │   ├── pictures/         pictures chosen by you: pictures/<Period>/<Dinosaur>/*.jpg
     │   │   ├── sounds/           optional theme sounds
     │   │   ├── CREDITS.md        where each picture came from
     │   │   └── downloaded-pictures/   raw downloads (excluded from git)
@@ -89,7 +90,7 @@ Home-School-Tools/                public repository
 
 **Where the facts come from**
 
-Each theme's Markdown files in its `themes/` folder. They are read when building that theme's `storyline.json`.
+Each theme's Markdown files in its `themes/` folder, plus the kid-friendly facts and story text in its `game-text.json`. `tools/build-storyline.mjs` reads them, finds the pictures, and writes the theme's `storyline.json`, which the game loads. The deploy workflow and `tools/Start-LocalServer.ps1` run the build, so `storyline.json` is not stored in git and pictures uploaded on GitHub show up on the next publish.
 
 ### 1.5 Themes and content
 
@@ -100,15 +101,15 @@ Each theme's Markdown files in its `themes/` folder. They are read when building
 
 **Facts**
 
-- Build each theme's `storyline.json` from the Markdown files.
+- Build each theme's `storyline.json` from the Markdown files and `game-text.json`.
 - Each sticker needs a name, its place in the order, a picture, and two or three short, kid-friendly facts taken from those files. Do not invent facts.
 - Keep the order in `storyline.json`, so it can be changed later without changing code.
 
 **Pictures**
 
-- You choose the pictures (for dinosaurs, usually from `themes/dino/downloaded-pictures/`) and put them in the theme's `pictures/` folder, one to three per dinosaur or park.
-- A helper script, `tools/Resize-Pictures.ps1`, turns them into JPEGs about 1200 px wide and about 200 KB each.
-- Every picture has a line in the theme's `CREDITS.md` saying where it came from.
+- You choose the pictures (for dinosaurs, usually from `themes/dino/downloaded-pictures/`) and put them in the theme's `pictures/` folder, in the same layout the downloader uses: `pictures/<Period>/<Dinosaur>/<any name>.jpg`. Any number per dinosaur; the file names don't matter. A folder name that doesn't match a dinosaur fails the build, so typos are caught.
+- Each picture must be at most 400 KB and 1600 px on its longest side (JPEG, PNG or WebP). The dinosaurpictures.org downloads already fit, so the resize script, `tools/Resize-Pictures.ps1`, is postponed to the Parks theme, whose photos will be larger.
+- Every picture has a line in the theme's `CREDITS.md` saying where it came from. A line can cover one picture or a whole folder (`pictures/**`).
 - If a picture is missing, the game shows a simple drawn placeholder made with SVG instead of a broken image.
 
 **Sounds**
@@ -118,7 +119,7 @@ Each theme's Markdown files in its `themes/` folder. They are read when building
 
 **Size budget**
 
-Keep everything the game saves for offline use under about 50 MB in total.
+Keep each theme's pictures under about 50 MB (the Dino theme with 3–5 pictures per dinosaur is about 33 MB). Stage 7 decides how much to save for offline use; if both themes together are too big, it saves only the pictures of the theme being played.
 
 ### 1.6 Screens
 
@@ -371,17 +372,17 @@ Every stage ends with its tests passing, the site republished, and a short repor
 
 **Build:**
 
-- `storyline.json` for both themes, built from the Markdown files, with stickers in the order from 1.5.
-- Milestone and detour story text.
-- `tools/Resize-Pictures.ps1`.
-- The pictures you chose, resized, with `CREDITS.md`.
+- `tools/build-storyline.mjs`, which builds `storyline.json` for each theme from the Markdown files and `game-text.json`, with stickers in the order from 1.5.
+- Milestone and detour story text, and kid-friendly facts, in `game-text.json`.
+- The pictures you chose, with `CREDITS.md`.
+- Dino theme first; the Parks theme and `tools/Resize-Pictures.ps1` follow.
 
 | ID | Test | Kind |
 |---|---|---|
 | T2.1 | Dino theme has 60 stickers in order (Triassic #1–20, Jurassic #1–20, Cretaceous #1–20); Parks theme has 63 stickers in region order | Automated |
 | T2.2 | Every sticker has a name, at least 2 facts, and pictures that exist on disk | Automated |
 | T2.3 | Facts match the Markdown source (spot-check 10 per theme) | PC |
-| T2.4 | Each theme is under its size budget; no single picture is over 400 KB | Automated |
+| T2.4 | Each theme is under its size budget; no single picture is over 400 KB or 1600 px | Automated |
 | T2.5 | Every picture has a line in `CREDITS.md` | Automated |
 | T2.6 | A missing picture shows the drawn placeholder, not a broken image | PC |
 
@@ -522,7 +523,7 @@ A good routine is to build and test each stage on the PC, push it, and then run 
 | Milestones | Every 10 steps; a detour with every answer wrong goes back to the last milestone, not the very start |
 | Detours | A wrong answer inside a detour never starts another detour; at least one correct answer clears it |
 | High scores | Separate boards by adventure length, then by difficulty |
-| Pictures | You choose them; they are resized to JPEG and credited in `CREDITS.md` |
+| Pictures | You choose them and put them in `pictures/<Period>/<Dinosaur>/`; each is credited in `CREDITS.md` |
 
 ### Still open (the agent uses the default)
 

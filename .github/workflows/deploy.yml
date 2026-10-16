@@ -32,6 +32,12 @@ jobs:
         with:
           node-version: lts/*
 
+      # storyline.json is not stored in git; it is built here from each
+      # theme's fact files and pictures, so uploaded pictures show up.
+      # Fails if a picture folder or file is misnamed.
+      - name: Build the game's story files
+        run: node arithmetic-odyssey/tools/build-storyline.mjs
+
       - name: Run each tool's tests
         run: |
           found=0
