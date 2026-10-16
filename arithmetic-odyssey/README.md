@@ -31,7 +31,7 @@ Each theme keeps all of its resources (facts, story text, pictures, sounds and t
 | 2. Theme content | Dino theme done: story file builder, kid-friendly facts, story text and picture checks. Triassic pictures are in; Jurassic and Cretaceous show a drawing until their pictures are added. The Parks theme comes later. |
 | 3. Screens and keypad | Done: Tap to Start, players, home, Setup, Sticker Album, Stats and grown-up Settings, with the on-screen keypad, in portrait and landscape. |
 | 4. The adventure | Done: the trail map with a flag every 10 steps, detours after a wrong answer, going back to the last flag when a whole detour is missed, Resume Adventure, and Trail's End with the new sticker, a slideshow of its pictures and a trip summary. Players, stickers and trips are not saved yet (Stage 6). |
-| 5. Sound, voice and timer | Done: sound effects, questions and story moments read aloud with a Repeat button, the thinking timer (shown on Trail's End), and a "Tap to continue" screen when the iPad pauses sound. Grown-ups can turn the voice and the sound effects on or off in Settings, which also says which voice is used. |
+| 5. Sound, voice and timer | Done: sound effects, questions and story moments read aloud with a Repeat button, the thinking timer (shown on Trail's End), and a "Tap to continue" screen when the iPad pauses sound. Grown-ups can turn the voice and the sound effects on or off in Settings, choose the voice and its speed (tap a voice to hear it), and see which voice is used. |
 | 6–8 | Not started |
 
 ## Running the tests
@@ -43,7 +43,7 @@ cd arithmetic-odyssey
 node --test
 ```
 
-You should see `# fail 0` (123 tests at the end of Stage 5). Each test name starts with its ID from the test plan in [GAME-PLAN.md](GAME-PLAN.md) where it has one, for example `T1.3`.
+You should see `# fail 0` (129 tests at the end of Stage 5). Each test name starts with its ID from the test plan in [GAME-PLAN.md](GAME-PLAN.md) where it has one, for example `T1.3`.
 
 ## Testing in a browser on your PC
 
@@ -59,7 +59,7 @@ It first rebuilds the story files if Node.js is installed (otherwise it warns an
 
 To see the game at iPad size, press **F12** in Chrome or Edge, then **Ctrl+Shift+M**, and choose an iPad from the device list.
 
-The debug panel sits in the top-right corner; **Hide** folds it away. Besides the device facts, it has buttons to **add a test player**, **collect the next 5 Dino stickers** (to try the Sticker Album) and **remove the player's stickers**. It can also make speech **pretend the end event never comes**, to check the game never waits on speech. During an adventure, it can also **answer right** or **answer wrong** (to force a detour or a trip back to the flag) and **jump to just before the next flag** or **to the last step**. Players only last until the page reloads in this version.
+The debug panel sits in the top-right corner; **Hide** folds it away. Besides the device facts, it has buttons to **add a test player**, **collect the next 5 Dino stickers** (to try the Sticker Album) and **remove the player's stickers**. It can also open the **voice tester**, which plays every English voice on the device with a choice of sample line, speed and pitch (or all of them in turn, saying each name), and make speech **pretend the end event never comes**, to check the game never waits on speech. During an adventure, it can also **answer right** or **answer wrong** (to force a detour or a trip back to the flag) and **jump to just before the next flag** or **to the last step**. Players only last until the page reloads in this version.
 
 **Grown-up Settings** opens by holding the **Grown-ups** button on a player's home screen for 3 seconds. Deleting a player is there, so children can't do it by accident.
 

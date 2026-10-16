@@ -1,8 +1,22 @@
 // 8. Settings (grown-ups, behind the 3-second hold): voice, adventure and
 // detour length, backup and restore (Stage 6), and deleting the player.
 
-import { ADVENTURE_LENGTHS, DETOUR_MAX, DETOUR_MIN, stepDetourLength } from '../settings.js?v=0.5.0';
-import { choiceRow, confirmDialog, h, topBar } from '../ui.js?v=0.5.0';
+import { ADVENTURE_LENGTHS, DETOUR_MAX, DETOUR_MIN, stepDetourLength } from '../settings.js?v=0.5.1';
+import { chooseVoice, isFunVoice, rankVoices, voiceId, voiceQuality } from '../speech.js?v=0.5.1';
+import { choiceRow, confirmDialog, h, topBar } from '../ui.js?v=0.5.1';
+
+const REGIONS = { US: 'US', GB: 'UK', AU: 'Australia', IE: 'Ireland', IN: 'India', ZA: 'South Africa', NZ: 'New Zealand', CA: 'Canada', SG: 'Singapore' };
+const SAMPLE = 'Hi! What is 7 times 8?';
+
+/** "Enhanced · UK · works offline" */
+export function describeVoice(v) {
+  const region = String(v.lang).split(/[-_]/)[1]?.toUpperCase();
+  return [
+    { 0: 'Premium', 1: 'Enhanced', 1.5: 'Standard', 2: 'Standard' }[voiceQuality(v)] ?? '',
+    REGIONS[region] ?? v.lang,
+    v.localService ? 'works offline' : 'needs the internet',
+  ].filter(Boolean).join(' · ');
+}
 
 export function settingsScreen(ctx) {
   const player = ctx.profiles.active();
@@ -22,20 +36,79 @@ export function settingsScreen(ctx) {
   }
   showDetour();
 
-  // Which voice reads the questions, or why there is none (T5.5).
+  // Which voice reads the questions (or why there is none, T5.5), its speed,
+  // and the list of the device's English voices to choose from.
   const voiceNote = h('p', { class: 'note voice-note' });
-  const hear = h('button', { type: 'button', class: 'big-button', onclick: () => ctx.speaker.speak('What is 7 times 8?') }, '🔊 Hear the voice');
+  const voiceList = h('div', { class: 'voice-list', role: 'group', 'aria-label': 'Voices' });
+  const voicePanel = h('div', { class: 'voice-panel' },
+    h('h3', {}, 'Speed'),
+    choiceRow({
+      label: 'Speed',
+      value: player.settings.speed,
+      options: [{ value: 'slower', label: 'Slower' }, { value: 'normal', label: 'Normal' }],
+      onChange: (speed) => {
+        update({ speed });
+        sample();
+      },
+    }),
+    h('h3', {}, 'Voice'),
+    h('p', { class: 'note' }, 'Tap a voice to hear it.'),
+    voiceList,
+    h('p', { class: 'note' },
+      'For a more natural voice on iPad: open the Settings app › Accessibility › Spoken Content › Voices › English, ',
+      'download a voice marked Enhanced or Premium (for example Ava or Samantha), then close the game and open it again. ',
+      'Some downloaded voices are not offered to web pages, so not every one appears here.'),
+  );
+
+  function sample() {
+    if (ctx.voiceOn(player)) ctx.speaker.speak(SAMPLE);
+  }
+
+  function voiceButton(id, label, detail) {
+    return h('button', {
+      type: 'button',
+      class: 'choice voice-choice',
+      'aria-pressed': String(player.settings.voiceId === id),
+      dataset: { voice: id },
+      onclick: () => {
+        update({ voiceId: id });
+        showVoice();
+        sample();
+      },
+    }, h('span', { class: 'choice-label' }, label), h('span', { class: 'choice-detail' }, detail));
+  }
+
   function showVoice() {
-    const v = ctx.speaker.voice;
-    hear.hidden = !ctx.voiceOn(player);
+    const ready = ctx.voiceState === 'ready';
+    voicePanel.hidden = !player.settings.voice || !ready;
     if (!player.settings.voice) voiceNote.textContent = 'Questions are shown as text only.';
-    else if (ctx.voiceState === 'ready') voiceNote.textContent = `Voice: ${v.name}${v.localService ? ' (works offline)' : ' (needs the internet)'}.`;
-    else if (ctx.voiceState === 'loading') voiceNote.textContent = 'Looking for a voice…';
+    else if (ready) {
+      const v = chooseVoice(ctx.voices, { chosenId: player.settings.voiceId });
+      voiceNote.textContent = `Voice: ${v.name} (${describeVoice(v)}).`;
+    } else if (ctx.voiceState === 'loading') voiceNote.textContent = 'Looking for a voice…';
     else voiceNote.textContent = 'No voice was found on this device, so questions are shown as text only.';
     voiceNote.classList.toggle('notice', player.settings.voice && ctx.voiceState === 'none');
-    voiceNote.append(' ', hear);
+    if (!ready) return;
+
+    const ranked = rankVoices(ctx.voices);
+    const best = chooseVoice(ctx.voices);
+    const natural = ranked.filter((v) => !isFunVoice(v));
+    const fun = ranked.filter((v) => isFunVoice(v));
+    // replaceChildren() doesn't flatten lists or skip nulls the way h() does.
+    voiceList.replaceChildren(...[
+      voiceButton('', 'Automatic', `The best voice here: ${best.name}`),
+      natural.length ? h('p', { class: 'voice-group' }, 'Natural voices') : null,
+      natural.map((v) => voiceButton(voiceId(v), v.name, describeVoice(v))),
+      fun.length ? h('p', { class: 'voice-group' }, 'Robot and fun voices') : null,
+      fun.map((v) => voiceButton(voiceId(v), v.name, describeVoice(v))),
+    ].flat().filter(Boolean));
   }
   showVoice();
+  // The voice list can still be loading just after Tap to Start.
+  if (ctx.voiceState === 'loading') {
+    const later = setTimeout(showVoice, 2200);
+    ctx.onLeave(() => clearTimeout(later));
+  }
 
   async function deletePlayer() {
     const yes = await confirmDialog({
@@ -68,6 +141,7 @@ export function settingsScreen(ctx) {
           },
         }),
         voiceNote,
+        voicePanel,
         h('h2', {}, 'Sound effects'),
         choiceRow({
           label: 'Sound effects',

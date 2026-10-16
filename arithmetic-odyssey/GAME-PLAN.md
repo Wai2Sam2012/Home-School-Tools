@@ -447,6 +447,8 @@ Every stage ends with its tests passing, the site republished, and a short repor
 - Besides the question, the voice reads the story moments (flags, detours, going back to a flag), "Not quite. 7 times 8 is 56." after a wrong answer, and the new sticker on Trail's End.
 - Settings has **Sound effects: On/Off** as the mute control, and says which voice is used, or that none was found and the game is text only.
 - An English voice that works offline is preferred. If the device only has voices that need the internet, one of those is used and Settings says so.
+- The automatic voice is the most natural one: Premium, then Enhanced, then known natural voices (Ava, Samantha, Daniel …). The novelty and older robotic voices Apple lists among the English voices (Albert, Bad News, Zarvox, Eddy, Flo …) are never picked automatically, but a grown-up can choose any voice in Settings, where tapping a voice plays a sample, and set the speed to Slower or Normal.
+- To get a more natural voice on iPad: Settings app › Accessibility › Spoken Content › Voices › English, download an Enhanced or Premium voice, then restart the game. Not every downloaded voice is offered to web pages.
 - `?debug=1` can make speech "never finish", to check the safety timeout (T5.3). Automated browser checks use a fake speech engine; the real voices are checked on the iPad (T5.2, T5.6).
 
 ### Stage 6: Saving, stats, high scores and backup
