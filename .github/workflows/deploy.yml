@@ -1,0 +1,68 @@
+# Publishes the repository to GitHub Pages on every push to main.
+#
+# One-time setup: in the repository's Settings > Pages, set
+# "Build and deployment > Source" to "GitHub Actions".
+
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: # also allows running it by hand from the Actions tab
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# Only one deployment at a time; a newer push waits for the current one.
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@v4
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+
+      - name: Run each tool's tests
+        run: |
+          found=0
+          for tool in */; do
+            if [ -d "${tool}tests" ]; then
+              found=1
+              echo "::group::Tests for ${tool%/}"
+              (cd "$tool" && node --test) || exit 1
+              echo "::endgroup::"
+            fi
+          done
+          [ "$found" = 1 ] || { echo "No tests found"; exit 1; }
+
+      - name: Build the site folder (copy only, no compiling)
+        run: node .github/scripts/assemble-site.mjs _site
+
+      - name: Configure GitHub Pages
+        uses: actions/configure-pages@v5
+
+      - name: Upload the site
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: _site
+
+  deploy:
+    needs: build
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

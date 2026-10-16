@@ -1,0 +1,204 @@
+/* Arithmetic Odyssey styles. Stage 0: base layout, placeholder page and debug panel. */
+
+:root {
+  --bg: #fdf8ef;
+  --surface: #ffffff;
+  --text: #2b2b2b;
+  --muted: #6b6457;
+  --accent: #1f6f5c;
+  --dino: #e8f5e1;
+  --dino-edge: #7fb069;
+  --truck: #fdebd3;
+  --truck-edge: #e08e45;
+  --ok: #1f7a3a;
+  --error: #b3261e;
+  --radius: 20px;
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background: var(--bg);
+  color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  font-size: 20px;
+  line-height: 1.4;
+  /* iPad: no double-tap zoom, no text selection or callouts while playing, no page bounce. */
+  touch-action: manipulation;
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+  overscroll-behavior: none;
+  /* Keep content clear of the iPad's rounded corners and Home indicator. */
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+/* ------------------------------------------------------------ placeholder */
+
+.placeholder {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 48px 24px;
+  text-align: center;
+}
+
+.placeholder h1 {
+  margin: 0;
+  font-size: clamp(36px, 7vw, 64px);
+  color: var(--accent);
+}
+
+.tagline {
+  margin: 8px 0 32px;
+  font-size: 24px;
+  color: var(--muted);
+}
+
+.themes {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 24px;
+}
+
+.theme-card {
+  padding: 28px 20px;
+  border-radius: var(--radius);
+  border: 4px solid;
+}
+
+.theme-card.dino {
+  background: var(--dino);
+  border-color: var(--dino-edge);
+}
+
+.theme-card.truck {
+  background: var(--truck);
+  border-color: var(--truck-edge);
+}
+
+.theme-icon {
+  font-size: 64px;
+  line-height: 1;
+}
+
+.theme-card h2 {
+  margin: 12px 0 8px;
+  font-size: 30px;
+}
+
+.theme-card p {
+  margin: 0;
+}
+
+.engine-check {
+  margin: 32px 0 8px;
+  font-weight: 600;
+}
+
+.engine-check.ok {
+  color: var(--ok);
+}
+
+.engine-check.ok::before {
+  content: "✔ ";
+}
+
+.engine-check.error,
+.load-error {
+  color: var(--error);
+}
+
+.engine-check.error::before {
+  content: "⚠ ";
+}
+
+.version {
+  margin: 0;
+  font-size: 16px;
+  color: var(--muted);
+}
+
+/* ------------------------------------------------------------ debug panel */
+
+.debug-panel {
+  position: fixed;
+  right: calc(12px + env(safe-area-inset-right));
+  bottom: calc(12px + env(safe-area-inset-bottom));
+  z-index: 1000;
+  width: min(440px, calc(100vw - 24px));
+  max-height: 70vh;
+  overflow: auto;
+  padding: 16px;
+  border-radius: 12px;
+  background: rgba(20, 24, 28, 0.94);
+  color: #f2f2f2;
+  font: 14px/1.4 ui-monospace, Menlo, Consolas, monospace;
+  text-align: left;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+.debug-panel h2 {
+  margin: 0 0 8px;
+  font-size: 16px;
+}
+
+.debug-panel dl {
+  margin: 0;
+}
+
+.debug-row {
+  display: grid;
+  grid-template-columns: 45% 55%;
+  gap: 8px;
+  padding: 3px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.debug-row dt {
+  color: #9fd3c7;
+}
+
+.debug-row dd {
+  margin: 0;
+  overflow-wrap: anywhere;
+}
+
+.debug-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.debug-actions button {
+  min-height: 44px;
+  padding: 8px 12px;
+  border: 0;
+  border-radius: 8px;
+  background: #3a6ea5;
+  color: #fff;
+  font: inherit;
+}
+
+.debug-message {
+  min-height: 1.4em;
+  margin: 10px 0 0;
+  color: #ffd479;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
