@@ -1,19 +1,19 @@
 // Starts the game: keeps the players and story files, and switches between
 // screens. Each screen is a function in js/screens/ that builds its page.
 
-import { APP_VERSION } from './version.js';
-import { addDebugAction, addDebugInfo, isDebugOn, showDebugPanel } from './debug.js';
-import { AVATARS, createProfileStore } from './profiles.js';
-import { collectNext, loadStoryline } from './storyline.js';
-import { h } from './ui.js';
-import { startScreen } from './screens/start.js';
-import { newPlayerScreen, profilesScreen } from './screens/profiles.js';
-import { homeScreen } from './screens/home.js';
-import { setupScreen } from './screens/setup.js';
-import { practiceScreen } from './screens/practice.js';
-import { albumScreen } from './screens/album.js';
-import { statsScreen } from './screens/stats.js';
-import { settingsScreen } from './screens/settings.js';
+import { APP_VERSION } from './version.js?v=0.3.1';
+import { addDebugAction, addDebugInfo, isDebugOn, showDebugPanel } from './debug.js?v=0.3.1';
+import { AVATARS, createProfileStore } from './profiles.js?v=0.3.1';
+import { collectNext, loadStoryline } from './storyline.js?v=0.3.1';
+import { h } from './ui.js?v=0.3.1';
+import { startScreen } from './screens/start.js?v=0.3.1';
+import { newPlayerScreen, profilesScreen } from './screens/profiles.js?v=0.3.1';
+import { homeScreen } from './screens/home.js?v=0.3.1';
+import { setupScreen } from './screens/setup.js?v=0.3.1';
+import { practiceScreen } from './screens/practice.js?v=0.3.1';
+import { albumScreen } from './screens/album.js?v=0.3.1';
+import { statsScreen } from './screens/stats.js?v=0.3.1';
+import { settingsScreen } from './screens/settings.js?v=0.3.1';
 
 const SCREENS = {
   start: { build: startScreen },
@@ -27,7 +27,10 @@ const SCREENS = {
   settings: { build: settingsScreen, needsPlayer: true },
 };
 
-const root = document.getElementById('app');
+// If the browser showed an older cached copy of index.html, there is no #app
+// yet; make one instead of failing to start.
+const root = document.getElementById('app') ?? document.body.appendChild(Object.assign(document.createElement('div'), { id: 'app' }));
+for (const leftover of document.body.querySelectorAll(':scope > main')) leftover.remove();
 const storylines = new Map();
 let current = { name: null, params: {}, leave: [] };
 

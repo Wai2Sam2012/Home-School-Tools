@@ -339,6 +339,15 @@ h1:focus {
   color: var(--error);
 }
 
+.load-details {
+  max-width: 640px;
+  font-size: 15px;
+  color: var(--muted);
+  overflow-wrap: anywhere;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
 .start-art {
   font-size: clamp(72px, 14vw, 140px);
   line-height: 1.1;

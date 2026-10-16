@@ -12,6 +12,7 @@ import { fileURLToPath } from 'node:url';
 import { APP_VERSION, BUILD_STAGE } from '../js/version.js';
 import { STORAGE_PREFIX, isDebugOn, listGameKeys, clearGameKeys } from '../js/debug.js';
 import { assembleSite, checkSite } from '../../.github/scripts/assemble-site.mjs';
+import { tagImports, tagPage } from '../tools/set-version.mjs';
 
 const GAME = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const REPO = resolve(GAME, '..');
@@ -37,6 +38,7 @@ test('the folder structure from the Game Plan (1.4) is in place', () => {
     'tools/Start-LocalServer.ps1',
     'tools/Get-DinoPictures.ps1',
     'tools/build-storyline.mjs',
+    'tools/set-version.mjs',
     'themes/dino/game-text.json',
     'themes/dino/triassic.md',
     'themes/dino/jurassic.md',
@@ -73,7 +75,8 @@ test('both pages only use relative links that point at real files', () => {
     for (const link of links) {
       assert.ok(!link.startsWith('/'), `${link} in ${page} must be relative, not start with /`);
       assert.ok(!/^[a-z]+:/i.test(link), `${link} in ${page} must not load anything from the internet`);
-      const target = resolve(dirname(page), link.endsWith('/') ? `${link}index.html` : link);
+      const path = link.split('?')[0];
+      const target = resolve(dirname(page), path.endsWith('/') ? `${path}index.html` : path);
       assert.ok(existsSync(target), `${link} in ${page} points at a missing file`);
     }
   }
@@ -86,7 +89,7 @@ test('the start page links to the game', () => {
 test('the game page sets up the iPad viewport and loads the scripts as a module', () => {
   const html = read(join(GAME, 'index.html'));
   assert.match(html, /<meta name="viewport" content="[^"]*viewport-fit=cover/);
-  assert.match(html, /<script type="module" src="js\/app.js">/);
+  assert.match(html, /<script type="module" src="js\/app.js\?v=[^"]+"/);
   assert.match(html, /<html lang="en">/);
 });
 
@@ -95,10 +98,32 @@ test('every JavaScript import points at a real file', () => {
   assert.ok(files.length > 5);
   for (const file of files) {
     const source = read(join(GAME, 'js', file));
-    for (const [, path] of source.matchAll(/from\s+'(\.[^']+)'/g)) {
+    for (const [, path] of source.matchAll(/from\s+'(\.[^'?]+)/g)) {
       assert.ok(existsSync(join(GAME, 'js', dirname(file), path)), `js/${file} imports missing ${path}`);
     }
   }
+});
+
+// ---------------------------------------------------------------- version tags
+test('every game file address carries this version (?v=), so cached files from two versions never mix', () => {
+  const expected = `?v=${APP_VERSION}`;
+  const html = read(join(GAME, 'index.html'));
+  const pageLinks = [...html.matchAll(/(?:src|href)="((?:css|js)\/[^"]+)"/g)].map((m) => m[1]);
+  assert.deepEqual(pageLinks, [`css/style.css${expected}`, `js/app.js${expected}`]);
+  const files = readdirSync(join(GAME, 'js'), { recursive: true }).filter((f) => f.endsWith('.js'));
+  for (const file of files) {
+    for (const [, specifier] of read(join(GAME, 'js', file)).matchAll(/\b(?:from|import)\s+'(\.[^']+)'/g)) {
+      assert.ok(specifier.endsWith(expected), `js/${file} imports ${specifier} without ${expected}; run: node tools/set-version.mjs ${APP_VERSION}`);
+    }
+  }
+});
+
+test('set-version adds or replaces the ?v= tags and leaves other text alone', () => {
+  assert.equal(tagImports("import { a } from './a.js';\nimport { b } from '../b.js?v=0.1.0';", '0.2.0'),
+    "import { a } from './a.js?v=0.2.0';\nimport { b } from '../b.js?v=0.2.0';");
+  assert.equal(tagImports("import x from 'node:fs'; const s = 'from ./a.js';", '1.0.0'), "import x from 'node:fs'; const s = 'from ./a.js';");
+  assert.equal(tagPage('<link href="css/style.css"><script src="js/app.js?v=0.1.0"></script><a href="themes/x.css">', '0.2.0'),
+    '<link href="css/style.css?v=0.2.0"><script src="js/app.js?v=0.2.0"></script><a href="themes/x.css">');
 });
 
 // ---------------------------------------------------------------- debug panel
