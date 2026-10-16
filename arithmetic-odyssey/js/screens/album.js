@@ -1,10 +1,10 @@
 // 6. Sticker Album: every sticker in order, with locked ones greyed out.
 // Tapping a collected sticker shows its pictures and facts.
 
-import { placeholderArt, stickerPicture } from '../art.js';
-import { THEMES } from '../settings.js';
-import { nextSticker } from '../storyline.js';
-import { choiceRow, flash, h, topBar } from '../ui.js';
+import { placeholderArt, stickerPicture } from '../art.js?v=0.3.1';
+import { THEMES } from '../settings.js?v=0.3.1';
+import { nextSticker } from '../storyline.js?v=0.3.1';
+import { choiceRow, flash, h, topBar } from '../ui.js?v=0.3.1';
 
 export function albumScreen(ctx, { theme = 'dino' } = {}) {
   const player = ctx.profiles.active();

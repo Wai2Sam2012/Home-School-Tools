@@ -1,8 +1,8 @@
 // 8. Settings (grown-ups, behind the 3-second hold): voice, adventure and
 // detour length, backup and restore (Stage 6), and deleting the player.
 
-import { ADVENTURE_LENGTHS, DETOUR_MAX, DETOUR_MIN, stepDetourLength } from '../settings.js';
-import { choiceRow, confirmDialog, h, topBar } from '../ui.js';
+import { ADVENTURE_LENGTHS, DETOUR_MAX, DETOUR_MIN, stepDetourLength } from '../settings.js?v=0.3.1';
+import { choiceRow, confirmDialog, h, topBar } from '../ui.js?v=0.3.1';
 
 export function settingsScreen(ctx) {
   const player = ctx.profiles.active();

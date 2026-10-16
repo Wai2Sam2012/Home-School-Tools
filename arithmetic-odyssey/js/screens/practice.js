@@ -2,10 +2,10 @@
 // the on-screen keypad. Stage 4 replaces it with the full trail, milestones
 // and detours.
 
-import { createKeypad } from '../keypad.js';
-import { checkAnswer, createProblemGenerator } from '../math.js';
-import { THEMES } from '../settings.js';
-import { h, topBar } from '../ui.js';
+import { createKeypad } from '../keypad.js?v=0.3.1';
+import { checkAnswer, createProblemGenerator } from '../math.js?v=0.3.1';
+import { THEMES } from '../settings.js?v=0.3.1';
+import { h, topBar } from '../ui.js?v=0.3.1';
 
 const PRAISE = ['Correct!', 'Great job!', 'You got it!', 'Awesome!'];
 const NEXT_AFTER_RIGHT_MS = 1200;

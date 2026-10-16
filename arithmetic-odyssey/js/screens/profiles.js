@@ -1,8 +1,8 @@
 // 2. Profiles: choose a player or make a new one. Deleting a player is in
 // the grown-up Settings, so it can't happen by accident.
 
-import { AVATARS, MAX_PROFILES, NAME_MAX_LENGTH, checkProfileName } from '../profiles.js';
-import { h, topBar } from '../ui.js';
+import { AVATARS, MAX_PROFILES, NAME_MAX_LENGTH, checkProfileName } from '../profiles.js?v=0.3.1';
+import { h, topBar } from '../ui.js?v=0.3.1';
 
 const NOT_SAVED_NOTE = 'Test version: players and stickers are not saved yet, so they reset when the page reloads.';
 
