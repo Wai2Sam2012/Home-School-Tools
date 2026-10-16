@@ -19,21 +19,6 @@ export function settingsScreen(ctx) {
   function changeDetour(change) {
     update({ detourLength: stepDetourLength(player.settings.detourLength, change) });
     showDetour();
-
-  // Which voice reads the questions, or why there is none (T5.5).
-  const voiceNote = h('p', { class: 'note voice-note' });
-  const hear = h('button', { type: 'button', class: 'big-button', onclick: () => ctx.speaker.speak('What is 7 times 8?') }, '🔊 Hear the voice');
-  function showVoice() {
-    const v = ctx.speaker.voice;
-    hear.hidden = !ctx.voiceOn(player);
-    if (!player.settings.voice) voiceNote.textContent = 'Questions are shown as text only.';
-    else if (ctx.voiceState === 'ready') voiceNote.textContent = `Voice: ${v.name}${v.localService ? ' (works offline)' : ' (needs the internet)'}.`;
-    else if (ctx.voiceState === 'loading') voiceNote.textContent = 'Looking for a voice…';
-    else voiceNote.textContent = 'No voice was found on this device, so questions are shown as text only.';
-    voiceNote.classList.toggle('notice', player.settings.voice && ctx.voiceState === 'none');
-    voiceNote.append(' ', hear);
-  }
-  showVoice();
   }
   showDetour();
 
