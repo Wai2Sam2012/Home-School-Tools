@@ -1,0 +1,10 @@
+# Raw pictures downloaded by arithmetic-odyssey/tools/Get-DinoPictures.ps1.
+# Third-party art with unclear licenses; this repository is public.
+downloaded-pictures/
+
+# Player saves and backups exported from the game
+*-backup-*.json
+
+# OS files
+.DS_Store
+Thumbs.db

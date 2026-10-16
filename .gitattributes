@@ -1,0 +1,3 @@
+# Batch files must keep Windows (CRLF) line endings, even in raw downloads.
+*.cmd -text
+*.bat -text
