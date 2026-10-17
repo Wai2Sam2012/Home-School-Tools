@@ -195,6 +195,38 @@ function addDebugTools() {
   showDebugPanel(APP_VERSION);
 }
 
+// No pinch zoom while playing. Safari ignores user-scalable=no and doesn't
+// fully honour touch-action, so stop its pinch gesture directly.
+for (const type of ['gesturestart', 'gesturechange']) {
+  document.addEventListener(type, (event) => event.preventDefault(), { passive: false });
+}
+document.addEventListener('touchmove', (event) => {
+  if (event.touches.length > 1) event.preventDefault();
+}, { passive: false });
+
+// No double-tap zoom either: Safari can still zoom on two quick taps (for
+// example on Submit). Cancelling the second tap stops the zoom but also its
+// click, so press the button here instead; fast typing ("11") still works.
+// A swipe (to scroll the album) never presses anything.
+let tapStart = null;
+let lastTapAt = 0;
+document.addEventListener('touchstart', (event) => {
+  const touch = event.touches[0];
+  tapStart = event.touches.length === 1 && touch ? { x: touch.clientX, y: touch.clientY } : null;
+}, { passive: true });
+document.addEventListener('touchend', (event) => {
+  const touch = event.changedTouches[0];
+  if (!touch || event.touches.length) return;
+  const moved = !tapStart || Math.hypot(touch.clientX - tapStart.x, touch.clientY - tapStart.y) > 10;
+  const now = Date.now();
+  if (!moved && now - lastTapAt < 350) {
+    event.preventDefault();
+    const button = event.target.closest?.('button');
+    if (button && !button.disabled) button.click();
+  }
+  lastTapAt = moved ? 0 : now;
+}, { passive: false });
+
 // "Tap to continue": back from the background, the iPad may have suspended
 // sound. A tap is needed to start it again.
 document.addEventListener('visibilitychange', () => {

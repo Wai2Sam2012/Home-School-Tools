@@ -24,6 +24,8 @@ const PRAISE = ['Correct!', 'Great job!', 'You got it!', 'Awesome!', 'Nice work!
 const NEXT_AFTER_RIGHT_MS = 1100;
 // A short pause between a sound effect ending and the voice starting.
 const SOUND_GAP_MS = 150;
+// How long the keys ignore taps after "Got it" (a double tap must not type a digit).
+const GOT_IT_SETTLE_MS = 350;
 
 export function adventureScreen(ctx) {
   const player = ctx.profiles.active();
@@ -274,6 +276,8 @@ export function adventureScreen(ctx) {
     const events = waitingFor;
     waitingFor = null;
     gotItCover.hidden = true;
+    // A double tap on "Got it" must not type a digit with its second tap.
+    keypad.ignoreTaps(GOT_IT_SETTLE_MS);
     afterAnswer(events);
   }
 
@@ -305,12 +309,37 @@ export function adventureScreen(ctx) {
       return `Jumped to step ${state.step}.`;
     },
   };
+  // ---- fit: the screen never scrolls. Each time its size or the window
+  // changes, start from full size and step down to more compact sizes until
+  // it fits; if even the smallest doesn't fit, let it scroll (see style.css).
+  let page = null;
+  let fitFrame = 0;
+  function fit() {
+    cancelAnimationFrame(fitFrame);
+    fitFrame = requestAnimationFrame(() => {
+      const app = page?.parentElement;
+      if (!app) return;
+      const tooTall = () => app.scrollHeight > app.clientHeight + 1;
+      app.classList.remove('fit-scroll');
+      let level = 0;
+      page.dataset.fit = '0';
+      while (tooTall() && level < 3) page.dataset.fit = String(++level);
+      app.classList.toggle('fit-scroll', tooTall());
+    });
+  }
+  const resizes = new ResizeObserver(fit);
+  window.addEventListener('resize', fit);
+
   ctx.onLeave(() => {
     clearTimeout(timer);
     silence();
     document.removeEventListener('visibilitychange', onVisibility);
     keypad.destroy();
     ctx.debugAdventure = null;
+    cancelAnimationFrame(fitFrame);
+    resizes.disconnect();
+    window.removeEventListener('resize', fit);
+    page?.parentElement?.classList.remove('fit-scroll');
   });
 
   // The destination: the sticker this trail unlocks.
@@ -333,12 +362,17 @@ export function adventureScreen(ctx) {
   showMap();
   showQuestion(opening);
 
-  return h('main', { class: 'screen adventure-screen' },
+  const layout = h('div', { class: 'adventure-layout' },
+    h('section', { class: 'question-area' }, story, detourCount, h('div', { class: 'question-row' }, question, repeat), feedback),
+    keypad.el,
+  );
+  page = h('main', { class: 'screen adventure-screen', dataset: { fit: '0' } },
     topBar(`${theme.icon} ${theme.title}`, () => ctx.show('home')),
     h('section', { class: 'trail-area' }, map),
-    h('div', { class: 'adventure-layout' },
-      h('section', { class: 'question-area' }, story, detourCount, h('div', { class: 'question-row' }, question, repeat), feedback),
-      keypad.el,
-    ),
+    layout,
   );
+  // The screen is at least as tall as the window, so watch what is inside it.
+  resizes.observe(layout);
+  resizes.observe(page);
+  return page;
 }

@@ -466,6 +466,10 @@ Every stage ends with its tests passing, the site republished, and a short repor
 - Album tiles and the finish picture show the whole picture (many dinosaur pictures are about twice as wide as the tile), and long names such as Thecodontosaurus get a smaller size so they stay on one line.
 - After a wrong answer the screen shows the player's answer in red and crossed out, "✗ Incorrect ✗", and the question with the right answer in green in the answer box (0.5.5)
 - The voice now says "Incorrect. 7 times 8 is 56." after a wrong answer, matching the screen. (0.5.6)
+- No zooming or scrolling while playing (T3.5 on the iPad, 0.5.6):
+  - pinch zoom is blocked everywhere, and double-tap zoom on quick taps is blocked without losing fast typing;
+  - the adventure screen never scrolls: on a short window it steps down to more compact sizes, and only if even those don't fit does it scroll, so the keypad can always be reached;
+  - a double tap on "Got it" no longer types a digit with its second tap.
 - `tools/Get-ParkPictures.ps1` downloads about 5 Wikimedia Commons photos of each park attraction, with their credits, for the Off-Roading theme.
 - Voice lists show each voice once, in its best version; the iPad can list a name two or three times, including Apple's lowest-quality "super-compact" copies, which are labelled Basic. The tester can still show every copy.
 - `?debug=1` can make speech "never finish", to check the safety timeout (T5.3). Automated browser checks use a fake speech engine; the real voices are checked on the iPad (T5.2, T5.6).

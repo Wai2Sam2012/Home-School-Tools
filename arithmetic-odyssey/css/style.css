@@ -22,8 +22,9 @@
 
 * {
   box-sizing: border-box;
-  /* No double-tap zoom anywhere (pinch zoom still works). */
-  touch-action: manipulation;
+  /* No double-tap or pinch zoom anywhere; scrolling still works where a
+     screen scrolls. app.js also stops Safari's pinch gesture. */
+  touch-action: pan-x pan-y;
 }
 
 html {
@@ -61,6 +62,18 @@ body {
   overflow-y: auto;
   overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
+}
+
+/* The game screen never scrolls. When the window is short it steps down to
+   the compact sizes below (data-fit, set in screens/adventure.js); only if
+   even the smallest sizes don't fit does it scroll, so the keypad can
+   always be reached. */
+#app[data-screen="adventure"] {
+  overflow-y: hidden;
+}
+
+#app[data-screen="adventure"].fit-scroll {
+  overflow-y: auto;
 }
 
 button {
@@ -1048,6 +1061,59 @@ h1:focus {
 
 .adventure-screen .key {
   height: clamp(60px, 8vh, 88px);
+}
+
+/* Compact sizes for short windows, smallest last. */
+.adventure-screen:is([data-fit="1"], [data-fit="2"], [data-fit="3"]) {
+  gap: 10px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+}
+
+.adventure-screen:is([data-fit="1"], [data-fit="2"], [data-fit="3"]) .story {
+  margin-bottom: 4px;
+  padding: 6px 12px;
+  font-size: 19px;
+}
+
+.adventure-screen:is([data-fit="1"], [data-fit="2"], [data-fit="3"]) .key {
+  height: clamp(54px, 7vh, 80px);
+}
+
+.adventure-screen:is([data-fit="2"], [data-fit="3"]) .trail-area {
+  padding: 6px 16px 0;
+}
+
+.adventure-screen:is([data-fit="2"], [data-fit="3"]) .trail-lane {
+  height: 104px;
+}
+
+.adventure-screen:is([data-fit="2"], [data-fit="3"]) .question {
+  margin: 4px 0;
+  font-size: clamp(36px, 6vw, 64px);
+}
+
+.adventure-screen:is([data-fit="2"], [data-fit="3"]) .keypad,
+.adventure-screen:is([data-fit="2"], [data-fit="3"]) .keypad-area {
+  gap: 8px;
+}
+
+.adventure-screen:is([data-fit="2"], [data-fit="3"]) .answer-display {
+  min-height: 70px;
+  font-size: 44px;
+  line-height: 50px;
+}
+
+.adventure-screen[data-fit="3"] .key {
+  height: 50px;
+}
+
+.adventure-screen[data-fit="3"] .question {
+  font-size: 34px;
+}
+
+.adventure-screen[data-fit="3"] .feedback {
+  font-size: 22px;
 }
 
 /* ------------------------------------------------------------ trail's end */
