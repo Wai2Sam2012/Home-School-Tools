@@ -4,13 +4,13 @@
 // thinking timer starts when reading ends (or at the first key press), and a
 // wrong answer shows the right one and waits for "Got it".
 
-import { LEARN_NEEDS, answerLearning, currentProblem, startLearning } from '../learn.js?v=0.6.3';
-import { hasTip } from '../blocks.js?v=0.6.3';
-import { createKeypad } from '../keypad.js?v=0.6.3';
-import { createTipButton, createTipCard, showTipButtons } from '../tip-card.js?v=0.6.3';
-import { PRACTICE_SIZE, needMorePractice } from '../scores.js?v=0.6.3';
-import { createThinkingTimer } from '../timer.js?v=0.6.3';
-import { h, topBar } from '../ui.js?v=0.6.3';
+import { LEARN_NEEDS, answerLearning, currentProblem, startLearning } from '../learn.js?v=0.6.4';
+import { hasTip } from '../blocks.js?v=0.6.4';
+import { createKeypad } from '../keypad.js?v=0.6.4';
+import { createTipButton, createTipCard, showTipButtons } from '../tip-card.js?v=0.6.4';
+import { PRACTICE_SIZE, needMorePractice } from '../scores.js?v=0.6.4';
+import { createThinkingTimer } from '../timer.js?v=0.6.4';
+import { h, topBar } from '../ui.js?v=0.6.4';
 
 const PRAISE = ['Correct!', 'Great job!', 'You got it!', 'Nice work!'];
 const NEXT_AFTER_RIGHT_MS = 1100;

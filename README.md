@@ -4,7 +4,7 @@ Learning tools and games for home school. Each tool lives in its own folder.
 
 | Tool | Description |
 | --- | --- |
-| [Arithmetic Odyssey](arithmetic-odyssey/) | An offline math adventure game for the iPad, with Dino Tour and Off-Roading (US national parks) themes. Includes the dinosaur and national park fact files. Planned in [GAME-PLAN.md](arithmetic-odyssey/GAME-PLAN.md). |
+| [Arithmetic Odyssey](arithmetic-odyssey/) | An offline math adventure game for the iPad, with Dinosaur Adventure and Off-Roading (US national parks) themes. Includes the dinosaur and national park fact files. Planned in [GAME-PLAN.md](arithmetic-odyssey/GAME-PLAN.md). |
 
 ## Website
 

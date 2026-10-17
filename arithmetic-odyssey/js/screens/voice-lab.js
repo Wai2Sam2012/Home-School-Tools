@@ -2,11 +2,11 @@
 // voice on this device with a choice of sample line, speed and pitch, and
 // every sound effect, so a grown-up can compare them and pick the best.
 
-import { describeVoice } from './settings.js?v=0.6.3';
-import { bestVersions, chooseVoice, isFunVoice, loadVoices, rankVoices, voiceId } from '../speech.js?v=0.6.3';
-import { SOUNDS, SYNTHS, playRecording, playSound } from '../audio.js?v=0.6.3';
-import { THEMES } from '../settings.js?v=0.6.3';
-import { choiceRow, h, topBar } from '../ui.js?v=0.6.3';
+import { describeVoice } from './settings.js?v=0.6.4';
+import { bestVersions, chooseVoice, isFunVoice, loadVoices, rankVoices, voiceId } from '../speech.js?v=0.6.4';
+import { SOUNDS, SYNTHS, playRecording, playSound } from '../audio.js?v=0.6.4';
+import { THEMES } from '../settings.js?v=0.6.4';
+import { choiceRow, h, topBar } from '../ui.js?v=0.6.4';
 
 const SOUND_NAMES = {
   right: 'Right answer (ding)',
@@ -16,7 +16,7 @@ const SOUND_NAMES = {
   setback: 'Back to a flag',
   milestone: 'Flag (no theme sound)',
   finish: "Trail's End",
-  roar: 'Flag in Dino Tour (roar)',
+  roar: 'Flag in Dinosaur Adventure (roar)',
   engine: 'Flag in Off-Roading (engine)',
 };
 
