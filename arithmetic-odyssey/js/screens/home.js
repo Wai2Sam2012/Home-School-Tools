@@ -1,9 +1,9 @@
 // The player's home: start an adventure, see stickers and stats, switch
 // player, or (grown-ups, by holding for 3 seconds) open Settings.
 
-import { createHoldButton } from '../hold.js?v=0.5.3';
-import { avatarIcon } from '../avatars.js?v=0.5.3';
-import { h } from '../ui.js?v=0.5.3';
+import { createHoldButton } from '../hold.js?v=0.5.4';
+import { avatarIcon } from '../avatars.js?v=0.5.4';
+import { h } from '../ui.js?v=0.5.4';
 
 export function homeScreen(ctx) {
   const player = ctx.profiles.active();

@@ -8,15 +8,15 @@
 // Submit. It pauses while Repeat is reading and while the game is in the
 // background. The keypad works the whole time; nothing waits on speech.
 
-import { answerProblem, jumpTo, milestoneSteps, storyText, unlockSticker, withNextProblem } from '../adventure.js?v=0.5.3';
-import { stickerPicture } from '../art.js?v=0.5.3';
-import { avatarIcon } from '../avatars.js?v=0.5.3';
-import { createDetourRoad, loopProgress } from '../detour-road.js?v=0.5.3';
-import { createKeypad } from '../keypad.js?v=0.5.3';
-import { THEMES } from '../settings.js?v=0.5.3';
-import { createThinkingTimer } from '../timer.js?v=0.5.3';
-import { nextSticker } from '../storyline.js?v=0.5.3';
-import { h, topBar } from '../ui.js?v=0.5.3';
+import { answerProblem, jumpTo, milestoneSteps, storyText, unlockSticker, withNextProblem } from '../adventure.js?v=0.5.4';
+import { stickerPicture } from '../art.js?v=0.5.4';
+import { avatarIcon } from '../avatars.js?v=0.5.4';
+import { createDetourRoad, loopProgress } from '../detour-road.js?v=0.5.4';
+import { createKeypad } from '../keypad.js?v=0.5.4';
+import { THEMES } from '../settings.js?v=0.5.4';
+import { createThinkingTimer } from '../timer.js?v=0.5.4';
+import { nextSticker } from '../storyline.js?v=0.5.4';
+import { h, topBar } from '../ui.js?v=0.5.4';
 
 const PRAISE = ['Correct!', 'Great job!', 'You got it!', 'Awesome!', 'Nice work!'];
 // A right answer moves on by itself; after a wrong one the game waits for

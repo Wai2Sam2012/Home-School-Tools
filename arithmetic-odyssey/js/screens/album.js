@@ -1,10 +1,10 @@
 // 6. Sticker Album: every sticker in order, with locked ones greyed out.
 // Tapping a collected sticker shows its pictures and facts.
 
-import { placeholderArt, stickerPicture } from '../art.js?v=0.5.3';
-import { THEMES } from '../settings.js?v=0.5.3';
-import { nextSticker } from '../storyline.js?v=0.5.3';
-import { choiceRow, flash, h, topBar } from '../ui.js?v=0.5.3';
+import { placeholderArt, stickerPicture } from '../art.js?v=0.5.4';
+import { THEMES } from '../settings.js?v=0.5.4';
+import { nextSticker } from '../storyline.js?v=0.5.4';
+import { choiceRow, flash, h, topBar } from '../ui.js?v=0.5.4';
 
 /** Long one-word names get a smaller size so they fit on one line ("Thecodontosaurus"). */
 function nameSize(name) {
