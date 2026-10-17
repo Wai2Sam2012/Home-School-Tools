@@ -8,11 +8,11 @@
 //   ao.v1.history.<id>   the last 10 finished games
 //   ao.v1.active.<id>    the adventure in progress
 
-import { ADVENTURE_SCHEMA } from './adventure.js?v=0.6.4';
-import { AVATAR_IDS } from './avatars.js?v=0.6.4';
-import { createProblemGenerator, restoreProblem } from './math.js?v=0.6.4';
-import { HISTORY_SIZE, BOARD_SIZE } from './scores.js?v=0.6.4';
-import { DEFAULT_SETTINGS, DEFAULT_SETUP, THEMES, normalizeSettings, normalizeSetup } from './settings.js?v=0.6.4';
+import { ADVENTURE_SCHEMA } from './adventure.js?v=0.6.5';
+import { AVATAR_IDS, checkColor } from './avatars.js?v=0.6.5';
+import { createProblemGenerator, restoreProblem } from './math.js?v=0.6.5';
+import { HISTORY_SIZE, BOARD_SIZE } from './scores.js?v=0.6.5';
+import { DEFAULT_SETTINGS, DEFAULT_SETUP, THEMES, normalizeSettings, normalizeSetup } from './settings.js?v=0.6.5';
 
 export const RECORD_SCHEMA = 1;
 export const MAX_PROFILES = 8;
@@ -85,7 +85,7 @@ export function checkIndex(data) {
   for (const p of record.profiles) {
     if (!isObject(p) || !isId(p.id) || seen.has(p.id)) continue;
     seen.add(p.id);
-    profiles.push({ id: p.id, name: cleanName(p.name).slice(0, NAME_MAX_LENGTH) || 'Player', avatar: AVATAR_IDS.includes(p.avatar) ? p.avatar : AVATAR_IDS[0] });
+    profiles.push({ id: p.id, name: cleanName(p.name).slice(0, NAME_MAX_LENGTH) || 'Player', avatar: AVATAR_IDS.includes(p.avatar) ? p.avatar : AVATAR_IDS[0], color: checkColor(p.color) });
   }
   return {
     schema: RECORD_SCHEMA,
@@ -161,6 +161,7 @@ export function checkProfile(data, expectedId = null) {
     id: record.id,
     name: cleanName(record.name).slice(0, NAME_MAX_LENGTH) || 'Player',
     avatar: AVATAR_IDS.includes(record.avatar) ? record.avatar : AVATAR_IDS[0],
+    color: checkColor(record.color), // 1-5; players saved before 0.6.5 have none and get 1
     settings: normalizeSettings(record.settings ?? DEFAULT_SETTINGS),
     setup: normalizeSetup(record.setup ?? DEFAULT_SETUP),
     collected: checkCollected(record.collected),
@@ -278,6 +279,7 @@ export function profileRecord(player) {
     id: player.id,
     name: player.name,
     avatar: player.avatar,
+    color: player.color,
     settings: player.settings,
     setup: player.setup,
     collected: player.collected,

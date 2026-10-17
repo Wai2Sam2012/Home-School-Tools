@@ -1,9 +1,11 @@
-// 2. Profiles: choose a player or make a new one. Deleting a player is in
-// the grown-up Settings, so it can't happen by accident.
+// 2. Profiles: choose a player or make a new one, or change a player's
+// picture. Deleting a player is in the grown-up Settings, so it can't happen by
+// accident.
 
-import { AVATARS, MAX_PROFILES, NAME_MAX_LENGTH, checkProfileName } from '../profiles.js?v=0.6.4';
-import { avatarIcon, avatarInfo } from '../avatars.js?v=0.6.4';
-import { h, topBar } from '../ui.js?v=0.6.4';
+import { AVATARS, MAX_PROFILES, NAME_MAX_LENGTH, checkProfileName } from '../profiles.js?v=0.6.5';
+import { createAvatarPicker } from '../avatar-picker.js?v=0.6.5';
+import { playerIcon } from '../avatars.js?v=0.6.5';
+import { h, topBar } from '../ui.js?v=0.6.5';
 
 
 export function profilesScreen(ctx) {
@@ -16,7 +18,7 @@ export function profilesScreen(ctx) {
         ctx.profiles.select(p.id);
         ctx.show('home');
       },
-    }, h('span', { class: 'player-avatar', 'aria-hidden': 'true' }, avatarIcon(p.avatar)), h('span', { class: 'player-name' }, p.name)),
+    }, h('span', { class: 'player-avatar', 'aria-hidden': 'true' }, playerIcon(p)), h('span', { class: 'player-name' }, p.name)),
   );
   if (ctx.profiles.canAdd()) {
     cards.push(h('button', { type: 'button', class: 'player-card new-player', onclick: () => ctx.show('newPlayer') },
@@ -32,7 +34,7 @@ export function profilesScreen(ctx) {
 }
 
 export function newPlayerScreen(ctx) {
-  let avatar = AVATARS[ctx.profiles.list().length % AVATARS.length];
+  const picker = createAvatarPicker({ avatar: AVATARS[ctx.profiles.list().length % AVATARS.length] });
   const error = h('p', { class: 'form-error', role: 'alert' });
   // The only text box in the game: a grown-up usually types the name.
   const input = h('input', {
@@ -48,20 +50,6 @@ export function newPlayerScreen(ctx) {
 
   input.spellcheck = false;
 
-  const avatarButtons = AVATARS.map((a) =>
-    h('button', {
-      type: 'button',
-      class: 'avatar-choice',
-      'aria-pressed': String(a === avatar),
-      'aria-label': avatarInfo(a).label,
-      dataset: { avatar: a },
-      onclick: (event) => {
-        avatar = a;
-        for (const b of avatarButtons) b.setAttribute('aria-pressed', String(b === event.currentTarget));
-      },
-    }, avatarIcon(a), h('span', { class: 'avatar-name' }, avatarInfo(a).label)),
-  );
-
   function create() {
     const problem = checkProfileName(input.value, ctx.profiles.list());
     if (problem) {
@@ -70,7 +58,8 @@ export function newPlayerScreen(ctx) {
       return;
     }
     try {
-      const player = ctx.profiles.add(input.value, avatar);
+      const { avatar, color } = picker.value();
+      const player = ctx.profiles.add(input.value, avatar, color);
       ctx.profiles.select(player.id);
       ctx.show('home');
     } catch (e) {
@@ -91,12 +80,32 @@ export function newPlayerScreen(ctx) {
   return h('main', { class: 'screen new-player-screen' },
     topBar('New player', () => ctx.show('profiles')),
     h('section', { class: 'panel' },
-      h('h2', {}, 'Pick a picture'),
-      h('div', { class: 'avatar-grid', role: 'group', 'aria-label': 'Player picture' }, avatarButtons),
+      picker.el,
       h('h2', {}, h('label', { for: 'player-name' }, "What's your name?")),
-      input,
+      // Side by side on a wide screen, so the whole form fits without scrolling.
+      h('div', { class: 'name-row' },
+        input,
+        h('button', { type: 'button', class: 'big-button primary', onclick: create }, 'Create player')),
       error,
-      h('button', { type: 'button', class: 'big-button primary', onclick: create }, 'Create player'),
+    ),
+  );
+}
+
+/** A player changes their picture or its color (opened by tapping the picture on Home). */
+export function playerPictureScreen(ctx) {
+  const player = ctx.profiles.active();
+  const picker = createAvatarPicker({ avatar: player.avatar, color: player.color });
+  function done() {
+    // A saving problem shows the game's usual notice (js/app.js), so just carry on.
+    const { avatar, color } = picker.value();
+    ctx.profiles.setPicture(player.id, avatar, color);
+    ctx.show('home');
+  }
+  return h('main', { class: 'screen player-picture-screen' },
+    topBar(`${player.name}'s picture`, () => ctx.show('home')),
+    h('section', { class: 'panel' },
+      picker.el,
+      h('button', { type: 'button', class: 'big-button primary', onclick: done }, 'Use this picture'),
     ),
   );
 }

@@ -1,9 +1,10 @@
-// The player's home: start an adventure, see stickers and stats, switch
-// player, or (grown-ups, by holding for 3 seconds) open Settings.
+// The player's home: start an adventure, see stickers and stats, change
+// their picture, switch player, or (grown-ups, by holding for 3 seconds) open
+// Settings.
 
-import { createHoldButton } from '../hold.js?v=0.6.4';
-import { avatarIcon } from '../avatars.js?v=0.6.4';
-import { h } from '../ui.js?v=0.6.4';
+import { createHoldButton } from '../hold.js?v=0.6.5';
+import { playerIcon } from '../avatars.js?v=0.6.5';
+import { h } from '../ui.js?v=0.6.5';
 
 export function homeScreen(ctx) {
   const player = ctx.profiles.active();
@@ -11,7 +12,10 @@ export function homeScreen(ctx) {
   const trip = player.adventure && player.adventure.mode !== 'done' ? player.adventure : null;
   return h('main', { class: 'screen home-screen' },
     h('header', { class: 'home-header' },
-      h('span', { class: 'player-avatar large', 'aria-hidden': 'true' }, avatarIcon(player.avatar)),
+      // Tapping the picture lets the player choose another picture or color.
+      h('button', { type: 'button', class: 'player-avatar large avatar-button', 'aria-label': 'Change your picture', onclick: () => ctx.show('playerPicture') },
+        playerIcon(player, { title: '' }),
+        h('span', { class: 'avatar-edit', 'aria-hidden': 'true' }, '✏️')),
       h('h1', { tabIndex: -1 }, `Hi, ${player.name}!`),
       h('p', { class: 'lead' }, stickers ? `You have ${stickers} ${stickers === 1 ? 'sticker' : 'stickers'}.` : 'Ready for an adventure?'),
     ),

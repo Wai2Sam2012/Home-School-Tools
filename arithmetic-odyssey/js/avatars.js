@@ -1,10 +1,11 @@
-// Player pictures. Each one is a file in images/avatars/ (see the README
-// there), so it can be edited or replaced without touching the code. Every
-// picture faces right, so on the trail map it moves toward the finish.
+// Player pictures. Each of the 16 pictures comes in 5 colors, each a file in
+// images/avatars/<id>/<color>.png (see the README there), so it can be
+// replaced without touching the code. Every picture faces right, so on the
+// trail map it moves toward the finish.
 //
-// To change a picture, edit or replace its file. To use a PNG or JPEG
-// instead, put the file in images/avatars/ and change `file` below. To add a
-// picture, add a line here with a new id.
+// `file` is the older drawing of each picture, shown if a color's file is
+// missing. To add a picture, add a line here with a new id and its 5 colors in
+// AVATAR_COLORS below.
 
 export const AVATAR_FOLDER = 'images/avatars/';
 
@@ -14,11 +15,11 @@ export const AVATARS = Object.freeze([
   { id: 'trex', label: 'T. rex', file: 'trex.svg' },
   { id: 'mosasaur', label: 'Mosasaur', file: 'mosasaur.svg' },
   { id: 'pterosaur', label: 'Pterosaur', file: 'pterosaur.svg' },
-  { id: 'pickup', label: 'Blue pickup truck', file: 'pickup.svg' },
+  { id: 'pickup', label: 'Pickup truck', file: 'pickup.svg' },
   { id: 'monstertruck', label: 'Monster truck', file: 'monstertruck.svg' },
   { id: 'dirtbike', label: 'Dirt bike', file: 'dirtbike.svg' },
-  { id: 'suv', label: 'Blue SUV', file: 'suv.svg' },
-  { id: 'atv', label: 'Blue ATV', file: 'atv.svg' },
+  { id: 'suv', label: 'SUV', file: 'suv.svg' },
+  { id: 'atv', label: 'ATV', file: 'atv.svg' },
   { id: 'robot', label: 'Robot', file: 'robot.svg' },
   { id: 'rocket', label: 'Rocket', file: 'rocket.svg' },
   { id: 'butterfly', label: 'Butterfly', file: 'butterfly.svg' },
@@ -33,25 +34,61 @@ export function avatarInfo(id) {
   return AVATARS.find((a) => a.id === id) ?? AVATARS[0];
 }
 
-/** The picture's address, relative to the game's page. */
-export function avatarUrl(id) {
+/** A color number 1 to 5; anything else (an old save, a damaged one) is 1. */
+export function checkColor(color) {
+  return Number.isInteger(color) && color >= 1 && color <= COLOR_COUNT ? color : 1;
+}
+
+/** The color's file name, for example colorName('cat', 2) -> 'gray'. */
+export function colorName(id, color = 1) {
+  return AVATAR_COLORS[avatarInfo(id).id][checkColor(color) - 1];
+}
+
+/** The color as words, for example 'light brown'. */
+export function colorLabel(id, color = 1) {
+  const name = colorName(id, color);
+  return COLOR_WORDS[name] ?? name;
+}
+
+/** The picture and color in words, for example 'Cat (light brown)'. */
+export function avatarLabel(id, color = 1) {
+  return `${avatarInfo(id).label} (${colorLabel(id, color)})`;
+}
+
+/** The picture's address in a color, relative to the game's page. */
+export function avatarUrl(id, color = 1) {
+  return `${AVATAR_FOLDER}${avatarInfo(id).id}/${colorName(id, color)}.png`;
+}
+
+/** The older drawing of the picture (shown if a color's file is missing). */
+export function avatarDrawingUrl(id) {
   return AVATAR_FOLDER + encodeURIComponent(avatarInfo(id).file);
 }
 
-/** The picture as an <img> element. */
-export function avatarIcon(id, { className = 'avatar-icon', title = '' } = {}) {
+/** The picture as an <img> element, in a color (1-5). */
+export function avatarIcon(id, { color = 1, className = 'avatar-icon', title = '' } = {}) {
   const img = document.createElement('img');
   img.className = className;
-  img.src = avatarUrl(id);
-  img.alt = title || avatarInfo(id).label;
+  img.addEventListener('error', () => {
+    // A missing or damaged file: show the drawing instead (once, so a missing drawing can't loop).
+    if (img.dataset.fallback) return;
+    img.dataset.fallback = '1';
+    img.src = avatarDrawingUrl(id);
+  });
+  img.src = avatarUrl(id, color);
+  img.alt = title || avatarLabel(id, color);
   img.draggable = false;
   return img;
 }
 
+/** A player's picture as an <img> element. */
+export function playerIcon(player, options = {}) {
+  return avatarIcon(player.avatar, { ...options, color: player.color });
+}
+
 /**
- * The five colors of each picture, in the order players will see them (color 1
- * first). Each is a file in images/avatars/<id>/<color>.png. Players choose a
- * color in Stage 7 (see GAME-PLAN.md); until then the game shows the drawings above.
+ * The five colors of each picture, in the order players see them (color 1
+ * first). Each is a file in images/avatars/<id>/<color>.png.
  */
 export const AVATAR_COLORS = Object.freeze({
   longneck: ['green', 'blue', 'brown', 'purple', 'teal'],
@@ -71,3 +108,8 @@ export const AVATAR_COLORS = Object.freeze({
   dog: ['golden', 'black', 'brownwhite', 'husky', 'white'],
   cat: ['orange', 'gray', 'black', 'lightbrown', 'calico'],
 });
+
+export const COLOR_COUNT = 5;
+
+/** Color names that are more than one word. */
+const COLOR_WORDS = Object.freeze({ lightbrown: 'light brown', brownwhite: 'brown and white', whitegold: 'white and gold' });

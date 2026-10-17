@@ -1,32 +1,33 @@
 // Starts the game: keeps the players and story files, and switches between
 // screens. Each screen is a function in js/screens/ that builds its page.
 
-import { APP_VERSION } from './version.js?v=0.6.4';
-import { addDebugAction, addDebugInfo, isDebugOn, showDebugPanel } from './debug.js?v=0.6.4';
-import { audioSuspended, loadRecording, pickDifferent, playRecording, playSound, soundLength, unlockAudio } from './audio.js?v=0.6.4';
-import { AVATARS, createProfileStore } from './profiles.js?v=0.6.4';
-import { askToKeepData, createStorage, deviceStorage } from './storage.js?v=0.6.4';
-import { SPEECH_RATES, chooseVoice, createSpeaker, loadVoices } from './speech.js?v=0.6.4';
-import { THEMES } from './settings.js?v=0.6.4';
-import { collectNext, loadStoryline, pictureUrl } from './storyline.js?v=0.6.4';
-import { h } from './ui.js?v=0.6.4';
-import { startScreen } from './screens/start.js?v=0.6.4';
-import { newPlayerScreen, profilesScreen } from './screens/profiles.js?v=0.6.4';
-import { homeScreen } from './screens/home.js?v=0.6.4';
-import { setupScreen } from './screens/setup.js?v=0.6.4';
-import { adventureScreen } from './screens/adventure.js?v=0.6.4';
-import { trailEndScreen } from './screens/trail-end.js?v=0.6.4';
-import { albumScreen } from './screens/album.js?v=0.6.4';
-import { statsScreen } from './screens/stats.js?v=0.6.4';
-import { learnScreen } from './screens/learn.js?v=0.6.4';
-import { settingsScreen } from './screens/settings.js?v=0.6.4';
-import { voiceLabScreen } from './screens/voice-lab.js?v=0.6.4';
+import { APP_VERSION } from './version.js?v=0.6.5';
+import { addDebugAction, addDebugInfo, isDebugOn, showDebugPanel } from './debug.js?v=0.6.5';
+import { audioSuspended, loadRecording, pickDifferent, playRecording, playSound, soundLength, unlockAudio } from './audio.js?v=0.6.5';
+import { AVATARS, createProfileStore } from './profiles.js?v=0.6.5';
+import { askToKeepData, createStorage, deviceStorage } from './storage.js?v=0.6.5';
+import { SPEECH_RATES, chooseVoice, createSpeaker, loadVoices } from './speech.js?v=0.6.5';
+import { THEMES } from './settings.js?v=0.6.5';
+import { collectNext, loadStoryline, pictureUrl } from './storyline.js?v=0.6.5';
+import { h } from './ui.js?v=0.6.5';
+import { startScreen } from './screens/start.js?v=0.6.5';
+import { newPlayerScreen, playerPictureScreen, profilesScreen } from './screens/profiles.js?v=0.6.5';
+import { homeScreen } from './screens/home.js?v=0.6.5';
+import { setupScreen } from './screens/setup.js?v=0.6.5';
+import { adventureScreen } from './screens/adventure.js?v=0.6.5';
+import { trailEndScreen } from './screens/trail-end.js?v=0.6.5';
+import { albumScreen } from './screens/album.js?v=0.6.5';
+import { statsScreen } from './screens/stats.js?v=0.6.5';
+import { learnScreen } from './screens/learn.js?v=0.6.5';
+import { settingsScreen } from './screens/settings.js?v=0.6.5';
+import { voiceLabScreen } from './screens/voice-lab.js?v=0.6.5';
 
 const SCREENS = {
   start: { build: startScreen },
   profiles: { build: profilesScreen },
   newPlayer: { build: newPlayerScreen },
   home: { build: homeScreen, needsPlayer: true },
+  playerPicture: { build: playerPictureScreen, needsPlayer: true },
   setup: { build: setupScreen, needsPlayer: true },
   adventure: { build: adventureScreen, needsPlayer: true },
   trailEnd: { build: trailEndScreen, needsPlayer: true },
