@@ -96,9 +96,12 @@ test('T3.3 answers are never typed into a text box (no <input> outside the new-p
   assert.doesNotMatch(read('index.html'), /<input|<textarea|contenteditable/);
 });
 
-test('T3.5 the styles turn off double-tap zoom, text selection and pull-to-refresh', () => {
+test('T3.5 the styles turn off double-tap and pinch zoom, text selection and pull-to-refresh', () => {
   const css = read('css/style.css');
-  assert.match(css, /touch-action: manipulation/);
+  assert.match(css, /touch-action: pan-x pan-y/);
+  assert.doesNotMatch(css, /touch-action: (manipulation|auto)/);
+  assert.match(read('js/app.js'), /addEventListener\(type, \(event\) => event\.preventDefault\(\), \{ passive: false \}\)/);
+  assert.match(css, /#app\[data-screen="adventure"\] \{\s*overflow-y: hidden;/);
   assert.match(css, /body \{[^}]*user-select: none/);
   assert.match(css, /body \{[^}]*-webkit-touch-callout: none/);
   assert.match(css, /body \{[^}]*overscroll-behavior: none/);

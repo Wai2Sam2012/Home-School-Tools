@@ -444,7 +444,7 @@ Every stage ends with its tests passing, the site republished, and a short repor
 **Notes from building Stage 5:**
 
 - The thinking timer starts when the question has been read aloud, **or at the first key press** if that comes sooner, so a player who answers while it is still being read never gets a time of zero.
-- Besides the question, the voice reads the story moments (flags, detours, going back to a flag), "Not quite. 7 times 8 is 56." after a wrong answer, and the new sticker on Trail's End.
+- Besides the question, the voice reads the story moments (flags, detours, going back to a flag), "Incorrect. 7 times 8 is 56." after a wrong answer, and the new sticker on Trail's End.
 - Settings has **Sound effects: On/Off** as the mute control, and says which voice is used, or that none was found and the game is text only.
 - An English voice that works offline is preferred. If the device only has voices that need the internet, one of those is used and Settings says so.
 - The automatic voice is the most natural one: Premium, then Enhanced, then known natural voices (Ava, Samantha, Daniel …). The novelty and older robotic voices Apple lists among the English voices (Albert, Bad News, Zarvox, Eddy, Flo …) are never picked automatically, but a grown-up can choose any voice in Settings, where tapping a voice plays a sample, and set the speed to Slower or Normal.
@@ -464,7 +464,12 @@ Every stage ends with its tests passing, the site republished, and a short repor
 - The voice waits for a sound effect to finish before reading: the flag roar, the detour sound, the wrong-answer sound and the Trail's End fanfare.
 - The sticker card changes pictures by itself every 3 seconds (dots show which one); there are no arrows.
 - Album tiles and the finish picture show the whole picture (many dinosaur pictures are about twice as wide as the tile), and long names such as Thecodontosaurus get a smaller size so they stay on one line.
-- After a wrong answer the screen shows the player's answer in red and crossed out, "✗ Incorrect ✗", and the question with the right answer in green in the answer box (the voice still says "Not quite. 7 times 8 is 56."). (0.5.5)
+- After a wrong answer the screen shows the player's answer in red and crossed out, "✗ Incorrect ✗", and the question with the right answer in green in the answer box (0.5.5)
+- The voice now says "Incorrect. 7 times 8 is 56." after a wrong answer, matching the screen. (0.5.6)
+- No zooming or scrolling while playing (T3.5 on the iPad, 0.5.6):
+  - pinch zoom is blocked everywhere, and double-tap zoom on quick taps is blocked without losing fast typing;
+  - the adventure screen never scrolls: on a short window it steps down to more compact sizes, and only if even those don't fit does it scroll, so the keypad can always be reached;
+  - a double tap on "Got it" no longer types a digit with its second tap.
 - `tools/Get-ParkPictures.ps1` downloads about 5 Wikimedia Commons photos of each park attraction, with their credits, for the Off-Roading theme.
 - Voice lists show each voice once, in its best version; the iPad can list a name two or three times, including Apple's lowest-quality "super-compact" copies, which are labelled Basic. The tester can still show every copy.
 - `?debug=1` can make speech "never finish", to check the safety timeout (T5.3). Automated browser checks use a fake speech engine; the real voices are checked on the iPad (T5.2, T5.6).

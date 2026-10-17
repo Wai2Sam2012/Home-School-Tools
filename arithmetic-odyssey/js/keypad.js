@@ -1,8 +1,8 @@
 // The on-screen number keypad. Answers are only ever typed here (or on a PC
 // keyboard), never in a text box, so the iPad's keyboard never opens.
 
-import { MAX_ANSWER_DIGITS } from './math.js?v=0.5.5';
-import { h } from './ui.js?v=0.5.5';
+import { MAX_ANSWER_DIGITS } from './math.js?v=0.5.6';
+import { h } from './ui.js?v=0.5.6';
 
 export const BACK = 'back';
 export const SUBMIT = 'submit';
@@ -53,12 +53,13 @@ const NAMES = { [BACK]: 'Backspace', [SUBMIT]: 'Submit' };
  * Builds the keypad with its answer display.
  *   onSubmit(value)  called when Submit is pressed
  *   onChange(value)  called after each change
- * Returns { el, display, value(), clear(), setEnabled(bool), destroy() }.
+ * Returns { el, display, value(), clear(), setEnabled(bool), ignoreTaps(ms), destroy() }.
  * Call destroy() when the screen closes, to stop listening to the PC keyboard.
  */
 export function createKeypad({ maxDigits = MAX_ANSWER_DIGITS, onSubmit = () => {}, onChange = () => {} } = {}) {
   let value = '';
   let enabled = true;
+  let ignoreUntil = 0;
 
   const display = h('output', { class: 'answer-display empty', 'aria-live': 'polite', 'aria-label': 'Your answer' }, '?');
 
@@ -76,7 +77,7 @@ export function createKeypad({ maxDigits = MAX_ANSWER_DIGITS, onSubmit = () => {
   }
 
   function press(key) {
-    if (!enabled) return;
+    if (!enabled || performance.now() < ignoreUntil) return;
     const result = pressKey(value, key, maxDigits);
     if (result.action === 'submit') {
       onSubmit(value);
@@ -134,6 +135,10 @@ export function createKeypad({ maxDigits = MAX_ANSWER_DIGITS, onSubmit = () => {
     setEnabled(on) {
       enabled = on;
       for (const button of buttons) button.disabled = !on;
+    },
+    /** Ignores key presses for a moment, e.g. the second tap of a double tap on "Got it". */
+    ignoreTaps(ms) {
+      ignoreUntil = performance.now() + ms;
     },
     destroy() {
       document.removeEventListener('keydown', onKeyDown);
