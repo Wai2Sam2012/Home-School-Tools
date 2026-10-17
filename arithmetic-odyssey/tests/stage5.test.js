@@ -406,7 +406,7 @@ test('each theme has its own flag sound: a roar for dinosaurs, an engine for tru
   assert.equal(THEMES.parks.flagSound, 'engine');
   for (const theme of Object.values(THEMES)) {
     assert.equal(typeof SYNTHS[theme.flagSound], 'function', theme.id);
-    assert.ok(SYNTH_LENGTHS[theme.flagSound] <= 2, `${theme.flagSound} is short`);
+    assert.ok(SYNTH_LENGTHS[theme.flagSound] <= 3, `${theme.flagSound} is short`);
   }
   assert.equal(playSound('roar'), false, 'not before Tap to Start');
 });
@@ -427,7 +427,7 @@ test('each voice is listed once, in its best version (an iPad lists some two or 
 });
 
 test('every sound knows how long it lasts, so the voice can wait for it', () => {
-  assert.equal(soundLength('roar'), 1500);
+  assert.equal(soundLength('roar'), 2600);
   assert.equal(soundLength('engine'), 1800);
   assert.equal(soundLength('right'), 1100);
   assert.ok(soundLength('wrong') > 300 && soundLength('wrong') < 1000);

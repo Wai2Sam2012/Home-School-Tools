@@ -3,6 +3,8 @@
 //     found; national parks: names, regions, locations, key attractions),
 //   - the theme's game-text.json (kid-friendly facts and story text),
 //   - the pictures in the theme's pictures/ folder,
+//   - a recorded flag sound, if the theme's sounds/ folder has flag.mp3
+//     (or .m4a or .wav); without one the game makes its own,
 //   - the theme's CREDITS.md.
 //
 // Usage (from the arithmetic-odyssey folder):
@@ -21,6 +23,17 @@ import { fileURLToPath } from 'node:url';
 export const GAME_DIR = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 
 export const PICTURE_TYPES = ['.jpg', '.jpeg', '.png', '.webp'];
+// Recorded sounds iPad Safari can play.
+export const SOUND_TYPES = ['.mp3', '.m4a', '.wav'];
+
+/** The theme's recorded sounds: { flag: 'sounds/flag.mp3' } (empty if there are none). */
+export function findSounds(themeDir) {
+  const folder = join(themeDir, 'sounds');
+  if (!existsSync(folder)) return {};
+  const files = readdirSync(folder).sort();
+  const flag = SOUND_TYPES.map((ext) => `flag${ext}`).find((name) => files.some((f) => f.toLowerCase() === name));
+  return flag ? { flag: `sounds/${files.find((f) => f.toLowerCase() === flag)}` } : {};
+}
 
 // ---------------------------------------------------------------- helpers
 
@@ -165,7 +178,7 @@ export function parseCredits(markdown) {
     const cell = line.match(/^\|\s*`?([^|`]+?)`?\s*\|/);
     if (!cell) continue;
     const value = cell[1].trim();
-    if (value.startsWith('pictures/')) entries.push(value);
+    if (value.startsWith('pictures/') || value.startsWith('sounds/')) entries.push(value);
   }
   return entries;
 }
@@ -299,12 +312,15 @@ function addFactsAndPictures(themeDir, text, stickers, folders, item) {
     s.pictures = pictures.byId[s.id];
     for (const p of s.pictures) if (!isCredited(p, credits)) uncredited.push(p);
   }
-  return { problems, uncredited };
+  const sounds = findSounds(themeDir);
+  for (const p of Object.values(sounds)) if (!isCredited(p, credits)) uncredited.push(p);
+  return { problems, uncredited, sounds };
 }
 
-/** The story text every theme's storyline carries, from its game-text.json. */
-function storyParts(text) {
+/** The story text every theme's storyline carries, from its game-text.json (and its recorded sounds). */
+function storyParts(text, sounds = {}) {
   return {
+    sounds,
     milestones: text.milestones,
     detours: text.detours,
     detourCleared: text.detourCleared,
@@ -312,7 +328,7 @@ function storyParts(text) {
   };
 }
 
-function report(stickers, checks, where) {
+function report(stickers, { sounds, ...checks }, where) {
   return {
     stickers: stickers.length,
     withPictures: stickers.filter((s) => s.pictures.length > 0).length,
@@ -342,7 +358,7 @@ export function buildDinoStoryline(themeDir = join(GAME_DIR, 'themes', 'dino')) 
     stickers: stickers.map(({ id, number, periodNumber, name, period, group, diet, when, found, facts, pictures: pics }) => ({
       id, number, periodNumber, name, period, group, diet, when, found, facts, pictures: pics,
     })),
-    ...storyParts(text),
+    ...storyParts(text, checks.sounds),
   };
   return { storyline, report: report(stickers, checks, (s) => `${s.period} #${s.periodNumber} ${s.name}`) };
 }
@@ -388,7 +404,7 @@ export function buildParksStoryline(themeDir = join(GAME_DIR, 'themes', 'nationa
       facts: s.facts,
       pictures: s.pictures,
     })),
-    ...storyParts(text),
+    ...storyParts(text, checks.sounds),
   };
   return { storyline, report: report(stickers, checks, (s) => `${s.regionFolder} #${s.regionNumber} ${s.name}`) };
 }

@@ -1,11 +1,10 @@
 // 2. Profiles: choose a player or make a new one. Deleting a player is in
 // the grown-up Settings, so it can't happen by accident.
 
-import { AVATARS, MAX_PROFILES, NAME_MAX_LENGTH, checkProfileName } from '../profiles.js?v=0.5.6';
-import { avatarIcon, avatarInfo } from '../avatars.js?v=0.5.6';
-import { h, topBar } from '../ui.js?v=0.5.6';
+import { AVATARS, MAX_PROFILES, NAME_MAX_LENGTH, checkProfileName } from '../profiles.js?v=0.6.1';
+import { avatarIcon, avatarInfo } from '../avatars.js?v=0.6.1';
+import { h, topBar } from '../ui.js?v=0.6.1';
 
-const NOT_SAVED_NOTE = 'Test version: players and stickers are not saved yet, so they reset when the page reloads.';
 
 export function profilesScreen(ctx) {
   const players = ctx.profiles.list();
@@ -29,7 +28,6 @@ export function profilesScreen(ctx) {
     players.length ? null : h('p', { class: 'lead' }, 'Make a player to start your adventure.'),
     h('div', { class: 'player-grid' }, cards),
     players.length >= MAX_PROFILES ? h('p', { class: 'note' }, `There can be up to ${MAX_PROFILES} players. A grown-up can delete one in Settings.`) : null,
-    h('p', { class: 'note notice' }, NOT_SAVED_NOTE),
   );
 }
 

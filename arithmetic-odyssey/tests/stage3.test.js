@@ -89,7 +89,8 @@ test('T3.2 a PC keyboard works too: digits, Backspace/Delete and Enter', () => {
 test('T3.3 answers are never typed into a text box (no <input> outside the new-player screen)', () => {
   const files = readdirSync(join(GAME, 'js'), { recursive: true }).filter((f) => f.endsWith('.js'));
   for (const file of files) {
-    const source = read(join('js', file));
+    // The Restore button's file picker (type "file") opens Files, never the keyboard.
+    const source = read(join('js', file)).replace(/h\('input', \{ type: 'file'/g, '');
     const hasInput = /h\('(input|textarea)'|createElement\('(input|textarea)'|contentEditable =|contenteditable:/.test(source);
     assert.equal(hasInput, file.replace(/\\/g, '/') === 'screens/profiles.js', `js/${file}`);
   }
@@ -117,7 +118,7 @@ test('T3.1 buttons are large: at least 60 px high', () => {
 test('T3.1 every screen in the app has its module', () => {
   const app = read('js/app.js');
   const screens = [...app.matchAll(/^ {2}(\w+): \{ build: (\w+)/gm)];
-  assert.deepEqual(screens.map((m) => m[1]), ['start', 'profiles', 'newPlayer', 'home', 'setup', 'adventure', 'trailEnd', 'album', 'stats', 'settings', 'voiceLab']);
+  assert.deepEqual(screens.map((m) => m[1]), ['start', 'profiles', 'newPlayer', 'home', 'setup', 'adventure', 'trailEnd', 'album', 'stats', 'learn', 'settings', 'voiceLab']);
   for (const [, , builder] of screens) assert.match(app, new RegExp(`import \\{[^}]*\\b${builder}\\b[^}]*\\} from './screens/`), builder);
 });
 

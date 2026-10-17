@@ -62,6 +62,41 @@ export function confirmDialog({ title, message, yes = 'Yes', no = 'Cancel', dang
 }
 
 /**
+ * Asks the grown-up to pick one of several answers in a large dialog.
+ * choices: [{ value, label, detail?, danger? }]. Resolves the chosen value,
+ * or null for Cancel.
+ */
+export function choiceDialog({ title, message, details = [], choices, cancel = 'Cancel' }) {
+  return new Promise((resolve) => {
+    const finish = (answer) => {
+      overlay.remove();
+      document.removeEventListener('keydown', onKey);
+      resolve(answer);
+    };
+    const onKey = (event) => {
+      if (event.key === 'Escape') finish(null);
+    };
+    const cancelButton = h('button', { type: 'button', class: 'big-button', onclick: () => finish(null) }, cancel);
+    const overlay = h('div', { class: 'overlay', role: 'dialog', 'aria-modal': 'true', 'aria-label': title },
+      h('div', { class: 'dialog' },
+        h('h2', {}, title),
+        message ? h('p', {}, message) : null,
+        details.length ? h('ul', { class: 'detail-list' }, details.map((d) => h('li', {}, d))) : null,
+        h('div', { class: 'dialog-choices' },
+          choices.map((c) => h('button', { type: 'button', class: `big-button${c.danger ? ' danger' : ' primary'}`, onclick: () => finish(c.value) },
+            c.label, c.detail ? h('span', { class: 'button-detail' }, c.detail) : null)),
+          cancelButton,
+        ),
+      ),
+    );
+    overlay.closeOverlay = () => finish(null);
+    document.addEventListener('keydown', onKey);
+    document.body.append(overlay);
+    cancelButton.focus();
+  });
+}
+
+/**
  * A row of large buttons where one is chosen (like radio buttons).
  * options: [{ value, label, detail? }]. onChange(value) runs on a new choice.
  */

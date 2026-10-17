@@ -33,9 +33,10 @@ Each theme keeps all of its resources (facts, story text, pictures, sounds and t
 | 1. Math engine | Done: `js/math.js` |
 | 2. Theme content | Both themes can be played. **Dino Tour:** Triassic pictures are in; Jurassic and Cretaceous show a drawing until their pictures are added. **Off-Roading (first version, 0.5.6):** all 63 parks with kid-friendly facts and truck story text; the 8 Alaska parks have pictures, the other parks show a drawing until theirs are added. |
 | 3. Screens and keypad | Done: Tap to Start, players, home, Setup, Sticker Album, Stats and grown-up Settings, with the on-screen keypad, in portrait and landscape. |
-| 4. The adventure | Done: the trail map with a flag every 10 steps, detours after a wrong answer, going back to the last flag when a whole detour is missed, Resume Adventure, and Trail's End with the new sticker, a slideshow of its pictures and a trip summary. Players, stickers and trips are not saved yet (Stage 6). |
+| 4. The adventure | Done: the trail map with a flag every 10 steps, detours after a wrong answer, going back to the last flag when a whole detour is missed, Resume Adventure, and Trail's End with the new sticker, a slideshow of its pictures and a trip summary. |
 | 5. Sound, voice and timer | Done: sound effects, questions and story moments read aloud with a Repeat button, the thinking timer (shown on Trail's End), and a "Tap to continue" screen when the iPad pauses sound. Grown-ups can turn the voice and the sound effects on or off in Settings, choose the voice and its speed (tap a voice to hear it), and see which voice is used. |
-| 6–8 | Not started |
+| 6. Saving, stats, high scores and backup | Done (0.6.0): players, settings, stickers and the adventure in progress are saved on the iPad and survive closing the game; Need More Practice and high scores in My Stats; Back up and Restore (with undo) in Grown-up Settings. See [Saving and backup](#saving-and-backup). **0.6.1:** Learn from Incorrect, and recorded flag sounds. |
+| 7–8 | Not started |
 
 ## Running the tests
 
@@ -46,7 +47,7 @@ cd arithmetic-odyssey
 node --test
 ```
 
-You should see `# fail 0` (146 tests in version 0.5.6). Each test name starts with its ID from the test plan in [GAME-PLAN.md](GAME-PLAN.md) where it has one, for example `T1.3`.
+You should see `# fail 0` (186 tests in version 0.6.1). Each test name starts with its ID from the test plan in [GAME-PLAN.md](GAME-PLAN.md) where it has one, for example `T1.3`.
 
 ## Testing in a browser on your PC
 
@@ -62,7 +63,7 @@ It first rebuilds the story files if Node.js is installed (otherwise it warns an
 
 To see the game at iPad size, press **F12** in Chrome or Edge, then **Ctrl+Shift+M**, and choose an iPad from the device list.
 
-The debug panel sits in the top-right corner; **Hide** folds it away. Besides the device facts, it has buttons to **add a test player**, **collect the next 5 Dino stickers** (to try the Sticker Album) and **remove the player's stickers**. It can also open the **voice and sound tester**, which plays every English voice on the device with a choice of sample line, speed and pitch (or all of them in turn, saying each name) and every sound effect, and make speech **pretend the end event never comes**, to check the game never waits on speech. During an adventure, it can also **answer right** or **answer wrong** (to force a detour or a trip back to the flag) and **jump to just before the next flag** or **to the last step**. Players only last until the page reloads in this version.
+The debug panel sits in the top-right corner; **Hide** folds it away. Besides the device facts, it has buttons to **add a test player**, **collect the next 5 Dino stickers** (to try the Sticker Album) and **remove the player's stickers**. It can also open the **voice and sound tester**, which plays every English voice on the device with a choice of sample line, speed and pitch (or all of them in turn, saying each name) and every sound effect, and make speech **pretend the end event never comes**, to check the game never waits on speech. During an adventure, it can also **answer right** or **answer wrong** (to force a detour or a trip back to the flag) and **jump to just before the next flag** or **to the last step**. **Delete this game's saved data** starts over with no players.
 
 **Grown-up Settings** opens by holding the **Grown-ups** button on a player's home screen for 3 seconds. Deleting a player is there, so children can't do it by accident.
 
@@ -77,6 +78,27 @@ Every push to the repository's `main` branch runs `.github/workflows/deploy.yml`
 
 The **Actions** tab shows each run; a green tick means it published. Tests, tools and `downloaded-pictures` are never published. To preview exactly what will be published, run `node .github/scripts/assemble-site.mjs` from the repository folder; it copies the site into `_site`.
 
+## Saving and backup
+
+**What is saved.** Players, their settings, stickers, high scores, the last 10 games and any adventure in progress are saved on the iPad as they change: an adventure after every question, so closing the game never loses more than the question on screen. When the game opens again, **Resume Adventure** carries on from the same question.
+
+**Where.** Only on this iPad, in the browser's storage. Nothing is sent anywhere, and it is not synced to other devices. The Safari tab and the Home Screen app (Stage 7) keep **separate** saves, so always play from the same one. Grown-up Settings shows how much space the save uses.
+
+**My Stats.**
+- **Need More Practice:** the problems missed most often in the last 10 games, then ones that took 5 seconds or more.
+- **High Scores:** one board for each adventure length and difficulty, top 10. Fewer setbacks (trips back to a flag) win; then the shortest total thinking time. A trip with setbacks still counts when it is finished.
+- **Learn from Incorrect** (under Need More Practice): a short, calm round with those problems (up to 8), with no trail or setbacks. Each problem has to be answered right twice (a slow one, within 5 seconds); a wrong answer shows the right one, and the problem comes back two questions later. The round ends when all are learned or after 4 tries each. A learned problem leaves Need More Practice until it is missed or slow again in a later game.
+
+**Back up** (Grown-up Settings) makes one file, `arithmetic-odyssey-backup-YYYY-MM-DD.json`, with every player. On the iPad the share sheet opens: choose **Save to Files** (iCloud Drive keeps it off the iPad too). Settings reminds you after 5 finished adventures without a backup. Backups hold the children's names, so keep them private and never add them to this repository.
+
+**Restore** opens Files to pick a backup, checks it and shows what is in it, then asks:
+- **Replace everything:** the players on this iPad are replaced by the backup's.
+- **Add as new players:** the backup's players are added; a name that is taken gets a number ("Sam 2").
+
+A wrong or damaged file is refused and nothing changes. Before a restore the game keeps a copy of everything, so **Undo the last restore** puts it all back.
+
+**If something goes wrong:** damaged saved data is set aside (kept under a `quarantine` name) and the game carries on with safe settings; a full or blocked storage shows a message suggesting a backup, and the game keeps working until it is closed. Settings lists any saving problems from this session.
+
 ## Changing the game
 
 Most things can be changed without knowing much code. After a change, run the tests (see [Running the tests](#running-the-tests)) and try it with the local server.
@@ -90,7 +112,11 @@ Most things can be changed without knowing much code. After a change, run the te
 | **Praise after a right answer** ("Great job!") | `PRAISE` at the top of `js/screens/adventure.js`. |
 | **How long the game waits** after a right answer | `NEXT_AFTER_RIGHT_MS` at the top of `js/screens/adventure.js` (in milliseconds). |
 | **Sound effects** | `js/audio.js`: `SOUNDS` lists the notes of each sound; `playRoar()` and `playEngine()` make the flag sounds. Hear them all in the voice and sound tester (`?debug=1`). |
-| **Which sound plays at a flag** | `flagSound` for each theme in `js/settings.js`. |
+| **Which sound plays at a flag** | A recording: put `flag.mp3` in the theme's `sounds/` folder (see [themes/dino/sounds/README.md](themes/dino/sounds/README.md)). Otherwise `flagSound` for each theme in `js/settings.js`. |
+| **Learn from Incorrect** | `LEARN_NEEDS` (right answers to learn a problem), `LEARN_SPACING` and `LEARN_MAX_PROBLEMS` at the top of `js/learn.js`. |
+| **How high scores are ranked** | `compareScores()` in `js/scores.js`; the board size and history length (10) at the top of the same file. |
+| **When a problem counts as slow** in Need More Practice | `SLOW_MS` at the top of `js/scores.js` (5000 milliseconds). |
+| **The backup reminder** | `BACKUP_REMINDER_GAMES` at the top of `js/profiles.js` (5 adventures). |
 | **The detour road** on the trail map | Its shape in `js/detour-road.js` (`LOOP`); its colours in `css/style.css` under `.detour-road`. |
 
 After changing any `.js` file, give the game a new version number so iPads load the new files: `node tools/set-version.mjs 1.2.3`.

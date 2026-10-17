@@ -1,10 +1,12 @@
 // 8. Settings (grown-ups, behind the 3-second hold): voice, adventure and
-// detour length, backup and restore (Stage 6), and deleting the player.
+// detour length, saving, backup and restore, and deleting the player.
 
-import { ADVENTURE_LENGTHS, DETOUR_MAX, DETOUR_MIN, stepDetourLength } from '../settings.js?v=0.5.6';
-import { bestVersions, chooseVoice, isFunVoice, voiceId, voiceQuality } from '../speech.js?v=0.5.6';
-import { avatarIcon } from '../avatars.js?v=0.5.6';
-import { choiceRow, confirmDialog, h, topBar } from '../ui.js?v=0.5.6';
+import { ADVENTURE_LENGTHS, DETOUR_MAX, DETOUR_MIN, stepDetourLength } from '../settings.js?v=0.6.1';
+import { bestVersions, chooseVoice, isFunVoice, voiceId, voiceQuality } from '../speech.js?v=0.6.1';
+import { avatarIcon } from '../avatars.js?v=0.6.1';
+import { canUndoRestore, makeBackup, parseBackup, restoreBackup, saveBackupFile, undoRestore } from '../backup.js?v=0.6.1';
+import { formatBytes } from '../storage.js?v=0.6.1';
+import { choiceDialog, choiceRow, confirmDialog, h, topBar } from '../ui.js?v=0.6.1';
 
 const REGIONS = { US: 'US', GB: 'UK', AU: 'Australia', IE: 'Ireland', IN: 'India', ZA: 'South Africa', NZ: 'New Zealand', CA: 'Canada', SG: 'Singapore' };
 const SAMPLE = 'Hi! What is 7 times 8?';
@@ -112,6 +114,102 @@ export function settingsScreen(ctx) {
     ctx.onLeave(() => clearTimeout(later));
   }
 
+  // ---- saving, backup and restore (GAME-PLAN.md 1.10 and 1.11)
+  const store = ctx.profiles;
+  const backupStatus = h('p', { class: 'status-line', role: 'status' });
+  const savingInfo = h('div', { class: 'saving-info' });
+  const undoButton = h('button', { type: 'button', class: 'big-button quiet', onclick: undo }, 'Undo the last restore');
+  function showSaving() {
+    const { gamesSinceBackup, lastBackupAt, remind } = store.backupStatus();
+    const lines = [
+      store.storage.saving
+        ? h('p', { class: 'note' }, `Saved on this iPad only (${formatBytes(store.storage.usage())}). It is not copied anywhere else.`)
+        : h('p', { class: 'note notice' }, "This browser won't let the game save, so players and stickers last only until the page closes. Make a backup to keep them."),
+      h('p', { class: 'note' }, 'The Safari tab and the Home Screen app keep separate saves, so always play from the same one (the Home Screen icon is best).'),
+      h('p', { class: `note${remind ? ' notice' : ''}` }, lastBackupAt
+        ? `Last backup: ${new Date(lastBackupAt).toLocaleDateString()}${gamesSinceBackup ? `, ${gamesSinceBackup} ${gamesSinceBackup === 1 ? 'adventure' : 'adventures'} ago` : ''}.`
+        : (gamesSinceBackup ? `No backup yet (${gamesSinceBackup} ${gamesSinceBackup === 1 ? 'adventure' : 'adventures'} finished).` : 'No backup yet.')),
+    ];
+    if (ctx.problems.length) {
+      lines.push(h('div', { class: 'note notice' },
+        h('p', {}, 'Saving problems this session:'),
+        h('ul', {}, [...new Set(ctx.problems.map((p) => p.message))].map((m) => h('li', {}, m)))));
+    }
+    savingInfo.replaceChildren(...lines);
+    undoButton.hidden = !canUndoRestore(store);
+  }
+  showSaving();
+
+  async function backUp() {
+    try {
+      const outcome = await saveBackupFile(makeBackup(store, { appVersion: ctx.version }));
+      if (outcome === 'cancelled') {
+        backupStatus.textContent = 'Backup cancelled.';
+        return;
+      }
+      store.markBackedUp();
+      backupStatus.textContent = outcome === 'shared'
+        ? 'Backup ready. Choose "Save to Files" to keep it on the iPad or in iCloud Drive.'
+        : 'Backup file saved (look in Downloads).';
+      showSaving();
+    } catch (error) {
+      backupStatus.textContent = `The backup could not be made: ${error.message}`;
+    }
+  }
+
+  const fileInput = h('input', { type: 'file', accept: '.json,application/json', class: 'file-input', 'aria-label': 'Backup file' });
+  fileInput.addEventListener('change', async () => {
+    const file = fileInput.files?.[0];
+    fileInput.value = '';
+    if (!file) return;
+    const parsed = parseBackup(await file.text().catch(() => ''));
+    if (!parsed.ok) {
+      backupStatus.textContent = parsed.error;
+      return;
+    }
+    const made = parsed.exportedAt ? ` made on ${new Date(parsed.exportedAt).toLocaleDateString()}` : '';
+    const mode = await choiceDialog({
+      title: 'Restore this backup?',
+      message: `The backup${made} has ${parsed.preview.text}.`,
+      details: [`Players: ${parsed.preview.names.join(', ')}`],
+      choices: [
+        { value: 'replace', label: 'Replace everything', detail: 'All players on this iPad are replaced by the backup', danger: true },
+        { value: 'add', label: 'Add as new players', detail: 'Players already here stay as they are' },
+      ],
+    });
+    if (!mode) return;
+    try {
+      const added = restoreBackup(store, parsed.players, mode, { appVersion: ctx.version });
+      ctx.notify(`Restored ${added.length} ${added.length === 1 ? 'player' : 'players'}. You can undo this in Settings.`);
+      // After "Replace everything" the player whose settings were open is gone.
+      if (store.active()) {
+        showSaving();
+        backupStatus.textContent = 'Restore done. "Undo the last restore" puts everything back as it was.';
+      } else {
+        ctx.show('profiles');
+      }
+    } catch (error) {
+      backupStatus.textContent = error.message;
+    }
+  });
+
+  async function undo() {
+    const yes = await confirmDialog({
+      title: 'Undo the last restore?',
+      message: 'Every player goes back to how they were just before the restore.',
+      yes: 'Undo restore',
+    });
+    if (!yes) return;
+    try {
+      undoRestore(store);
+      ctx.notify('The restore was undone.');
+      if (store.active()) ctx.refresh();
+      else ctx.show('profiles');
+    } catch (error) {
+      backupStatus.textContent = error.message;
+    }
+  }
+
   async function deletePlayer() {
     const yes = await confirmDialog({
       title: `Delete ${player.name}?`,
@@ -169,12 +267,15 @@ export function settingsScreen(ctx) {
       ),
       h('section', { class: 'panel' },
         h('h2', {}, 'Saving and backup'),
-        h('p', { class: 'note notice' }, "This test version doesn't save yet: players and stickers reset when the page reloads."),
+        savingInfo,
         h('div', { class: 'button-row' },
-          h('button', { type: 'button', class: 'big-button', disabled: true }, 'Back up'),
-          h('button', { type: 'button', class: 'big-button', disabled: true }, 'Restore'),
+          h('button', { type: 'button', class: 'big-button primary backup-button', onclick: backUp }, 'Back up'),
+          h('button', { type: 'button', class: 'big-button restore-button', onclick: () => fileInput.click() }, 'Restore'),
+          fileInput,
         ),
-        h('p', { class: 'note' }, 'Backup and restore are coming soon.'),
+        h('p', { class: 'note' }, 'A backup is one file with every player, their stickers, stats, high scores and settings.'),
+        undoButton,
+        backupStatus,
         h('h2', {}, 'Player'),
         h('button', { type: 'button', class: 'big-button danger', onclick: deletePlayer }, `Delete ${player.name}`),
       ),
