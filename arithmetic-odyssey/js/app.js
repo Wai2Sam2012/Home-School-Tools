@@ -1,26 +1,26 @@
 // Starts the game: keeps the players and story files, and switches between
 // screens. Each screen is a function in js/screens/ that builds its page.
 
-import { APP_VERSION } from './version.js?v=0.6.1';
-import { addDebugAction, addDebugInfo, isDebugOn, showDebugPanel } from './debug.js?v=0.6.1';
-import { audioSuspended, loadRecording, playRecording, playSound, soundLength, unlockAudio } from './audio.js?v=0.6.1';
-import { AVATARS, createProfileStore } from './profiles.js?v=0.6.1';
-import { askToKeepData, createStorage, deviceStorage } from './storage.js?v=0.6.1';
-import { SPEECH_RATES, chooseVoice, createSpeaker, loadVoices } from './speech.js?v=0.6.1';
-import { THEMES } from './settings.js?v=0.6.1';
-import { collectNext, loadStoryline, pictureUrl } from './storyline.js?v=0.6.1';
-import { h } from './ui.js?v=0.6.1';
-import { startScreen } from './screens/start.js?v=0.6.1';
-import { newPlayerScreen, profilesScreen } from './screens/profiles.js?v=0.6.1';
-import { homeScreen } from './screens/home.js?v=0.6.1';
-import { setupScreen } from './screens/setup.js?v=0.6.1';
-import { adventureScreen } from './screens/adventure.js?v=0.6.1';
-import { trailEndScreen } from './screens/trail-end.js?v=0.6.1';
-import { albumScreen } from './screens/album.js?v=0.6.1';
-import { statsScreen } from './screens/stats.js?v=0.6.1';
-import { learnScreen } from './screens/learn.js?v=0.6.1';
-import { settingsScreen } from './screens/settings.js?v=0.6.1';
-import { voiceLabScreen } from './screens/voice-lab.js?v=0.6.1';
+import { APP_VERSION } from './version.js?v=0.6.2';
+import { addDebugAction, addDebugInfo, isDebugOn, showDebugPanel } from './debug.js?v=0.6.2';
+import { audioSuspended, loadRecording, pickDifferent, playRecording, playSound, soundLength, unlockAudio } from './audio.js?v=0.6.2';
+import { AVATARS, createProfileStore } from './profiles.js?v=0.6.2';
+import { askToKeepData, createStorage, deviceStorage } from './storage.js?v=0.6.2';
+import { SPEECH_RATES, chooseVoice, createSpeaker, loadVoices } from './speech.js?v=0.6.2';
+import { THEMES } from './settings.js?v=0.6.2';
+import { collectNext, loadStoryline, pictureUrl } from './storyline.js?v=0.6.2';
+import { h } from './ui.js?v=0.6.2';
+import { startScreen } from './screens/start.js?v=0.6.2';
+import { newPlayerScreen, profilesScreen } from './screens/profiles.js?v=0.6.2';
+import { homeScreen } from './screens/home.js?v=0.6.2';
+import { setupScreen } from './screens/setup.js?v=0.6.2';
+import { adventureScreen } from './screens/adventure.js?v=0.6.2';
+import { trailEndScreen } from './screens/trail-end.js?v=0.6.2';
+import { albumScreen } from './screens/album.js?v=0.6.2';
+import { statsScreen } from './screens/stats.js?v=0.6.2';
+import { learnScreen } from './screens/learn.js?v=0.6.2';
+import { settingsScreen } from './screens/settings.js?v=0.6.2';
+import { voiceLabScreen } from './screens/voice-lab.js?v=0.6.2';
 
 const SCREENS = {
   start: { build: startScreen },
@@ -42,7 +42,8 @@ const SCREENS = {
 const root = document.getElementById('app') ?? document.body.appendChild(Object.assign(document.createElement('div'), { id: 'app' }));
 for (const leftover of document.body.querySelectorAll(':scope > main')) leftover.remove();
 const storylines = new Map();
-const flagRecordings = new Map(); // theme -> a loaded recording (themes/<theme>/sounds/flag.mp3)
+const flagRecordings = new Map(); // theme -> its loaded recordings (themes/<theme>/sounds/flag-1.mp3, ...)
+const lastFlag = new Map(); // theme -> the recording played last time
 let current = { name: null, params: {}, leave: [] };
 
 // Saving problems (damaged data set aside, storage full or unavailable) are
@@ -114,24 +115,27 @@ const ctx = {
   },
 
   /**
-   * Plays a theme's flag sound: its recording if it has one, otherwise the
-   * sound made in js/audio.js (a roar or an engine). Returns how long it
-   * lasts in milliseconds, so the voice can wait for it.
+   * Plays a theme's flag sound: one of its recordings, picked at random (a
+   * different one each time), or if it has none the sound made in
+   * js/audio.js (a roar or an engine). Returns how long it lasts in
+   * milliseconds, so the voice can wait for it.
    */
   flagSound(theme) {
     if (ctx.profiles.active()?.settings.sound === false) return 0;
-    const ms = playRecording(flagRecordings.get(theme));
+    const recordings = flagRecordings.get(theme) ?? [];
+    const i = pickDifferent(recordings.length, lastFlag.get(theme));
+    lastFlag.set(theme, i);
+    const ms = i >= 0 ? playRecording(recordings[i]) : 0;
     return ms || ctx.sound(THEMES[theme]?.flagSound ?? 'milestone');
   },
 
-  /** Loads a theme's recorded flag sound ahead of time (after Tap to Start). Resolves the recording or null. */
+  /** Loads a theme's recorded flag sounds ahead of time (after Tap to Start). Resolves the list of recordings (maybe empty). */
   async prepareSounds(theme) {
     const storyline = await ctx.getStoryline(theme).catch(() => null);
-    const path = storyline?.sounds?.flag;
-    if (!path) return null;
-    const recording = await loadRecording(pictureUrl(theme, path));
-    if (recording) flagRecordings.set(theme, recording);
-    return recording;
+    const paths = [].concat(storyline?.sounds?.flag ?? []);
+    const recordings = (await Promise.all(paths.map((path) => loadRecording(pictureUrl(theme, path))))).filter(Boolean);
+    flagRecordings.set(theme, recordings);
+    return recordings;
   },
 
   /** The theme's story file, loaded once. A failed load is tried again next time. */

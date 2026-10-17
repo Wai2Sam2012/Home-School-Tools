@@ -13,6 +13,7 @@ An offline math adventure game for the iPad, with two themes: **Dino Tour** and 
 | [tools/Get-DinoPictures.ps1](tools/Get-DinoPictures.ps1) | PowerShell script that downloads each dinosaur's pictures from dinosaurpictures.org. See below. |
 | [tools/Run-DinoPictures.cmd](tools/Run-DinoPictures.cmd) | Double-click launcher for the script. |
 | [tools/Get-ParkPictures.ps1](tools/Get-ParkPictures.ps1) | PowerShell script that downloads about 5 photos of each national park attraction from Wikimedia Commons, with their credits. See [Downloading the national park pictures](#downloading-the-national-park-pictures). |
+| [images/blocks/](images/blocks/) | Counting blocks (1 to 10, and 100), each value in its own color, for counting tips; made by `js/blocks.js` and `tools/build-blocks.mjs`. See [its README](images/blocks/README.md). |
 | [tools/Run-ParkPictures.cmd](tools/Run-ParkPictures.cmd) | Double-click launcher for the park script. |
 | [js/](js/) | The game's code. `app.js` starts the game and switches screens; each screen is in `js/screens/`. `adventure.js` has the adventure rules (steps, flags, detours, going back to a flag, unlocking stickers). `avatars.js` lists the player pictures (the files are in `images/avatars/`), `detour-road.js` draws the detour loop on the trail map, `audio.js` makes the sound effects, `speech.js` reads aloud (and knows reliably when it has finished), and `timer.js` is the thinking timer. `math.js` is the math engine: it makes problems for each operation and difficulty and checks answers. `keypad.js` is the on-screen keypad, `hold.js` the grown-up "hold for 3 seconds" button, `profiles.js` and `settings.js` the players and their settings, `storyline.js` loads a theme's story file, and `art.js` draws a picture for stickers that don't have one. `debug.js` is the debug panel; `version.js` holds the version number. |
 | [css/style.css](css/style.css) | The game's styles. |
@@ -35,7 +36,7 @@ Each theme keeps all of its resources (facts, story text, pictures, sounds and t
 | 3. Screens and keypad | Done: Tap to Start, players, home, Setup, Sticker Album, Stats and grown-up Settings, with the on-screen keypad, in portrait and landscape. |
 | 4. The adventure | Done: the trail map with a flag every 10 steps, detours after a wrong answer, going back to the last flag when a whole detour is missed, Resume Adventure, and Trail's End with the new sticker, a slideshow of its pictures and a trip summary. |
 | 5. Sound, voice and timer | Done: sound effects, questions and story moments read aloud with a Repeat button, the thinking timer (shown on Trail's End), and a "Tap to continue" screen when the iPad pauses sound. Grown-ups can turn the voice and the sound effects on or off in Settings, choose the voice and its speed (tap a voice to hear it), and see which voice is used. |
-| 6. Saving, stats, high scores and backup | Done (0.6.0): players, settings, stickers and the adventure in progress are saved on the iPad and survive closing the game; Need More Practice and high scores in My Stats; Back up and Restore (with undo) in Grown-up Settings. See [Saving and backup](#saving-and-backup). **0.6.1:** Learn from Incorrect, and recorded flag sounds. |
+| 6. Saving, stats, high scores and backup | Done (0.6.0): players, settings, stickers and the adventure in progress are saved on the iPad and survive closing the game; Need More Practice and high scores in My Stats; Back up and Restore (with undo) in Grown-up Settings. See [Saving and backup](#saving-and-backup). **0.6.1:** Learn from Incorrect, and recorded flag sounds. **0.6.2:** three dinosaur roars and two truck engines, picked at random at each flag. |
 | 7–8 | Not started |
 
 ## Running the tests
@@ -47,7 +48,7 @@ cd arithmetic-odyssey
 node --test
 ```
 
-You should see `# fail 0` (186 tests in version 0.6.1). Each test name starts with its ID from the test plan in [GAME-PLAN.md](GAME-PLAN.md) where it has one, for example `T1.3`.
+You should see `# fail 0` (194 tests in version 0.6.2). Each test name starts with its ID from the test plan in [GAME-PLAN.md](GAME-PLAN.md) where it has one, for example `T1.3`.
 
 ## Testing in a browser on your PC
 
@@ -99,6 +100,14 @@ A wrong or damaged file is refused and nothing changes. Before a restore the gam
 
 **If something goes wrong:** damaged saved data is set aside (kept under a `quarantine` name) and the game carries on with safe settings; a full or blocked storage shows a message suggesting a backup, and the game keeps working until it is closed. Settings lists any saving problems from this session.
 
+## Credits
+
+Picture and sound credits are in each theme's `CREDITS.md` ([Dino Tour](themes/dino/CREDITS.md), [Off-Roading](themes/national-parks/CREDITS.md)). The flag sounds are from [Freesound](https://freesound.org/); four are public domain (CC0), and one needs this credit:
+
+- "Truck-Uphill.wav" by moshwe — https://freesound.org/s/554426/
+  Licensed under CC BY 3.0: https://creativecommons.org/licenses/by/3.0/
+  (Modified: trimmed/converted)
+
 ## Changing the game
 
 Most things can be changed without knowing much code. After a change, run the tests (see [Running the tests](#running-the-tests)) and try it with the local server.
@@ -112,7 +121,8 @@ Most things can be changed without knowing much code. After a change, run the te
 | **Praise after a right answer** ("Great job!") | `PRAISE` at the top of `js/screens/adventure.js`. |
 | **How long the game waits** after a right answer | `NEXT_AFTER_RIGHT_MS` at the top of `js/screens/adventure.js` (in milliseconds). |
 | **Sound effects** | `js/audio.js`: `SOUNDS` lists the notes of each sound; `playRoar()` and `playEngine()` make the flag sounds. Hear them all in the voice and sound tester (`?debug=1`). |
-| **Which sound plays at a flag** | A recording: put `flag.mp3` in the theme's `sounds/` folder (see [themes/dino/sounds/README.md](themes/dino/sounds/README.md)). Otherwise `flagSound` for each theme in `js/settings.js`. |
+| **Which sound plays at a flag** | The recordings in the theme's `sounds/` folder, `flag-1.mp3`, `flag-2.mp3` and so on: one is picked at random at each flag, never the same twice in a row (see [themes/dino/sounds/README.md](themes/dino/sounds/README.md)). Without any, `flagSound` for each theme in `js/settings.js`. |
+| **Counting blocks** (colors and sizes) | `BLOCKS` in `js/blocks.js`, then `node tools/build-blocks.mjs` to write the pictures again. See [images/blocks/README.md](images/blocks/README.md). |
 | **Learn from Incorrect** | `LEARN_NEEDS` (right answers to learn a problem), `LEARN_SPACING` and `LEARN_MAX_PROBLEMS` at the top of `js/learn.js`. |
 | **How high scores are ranked** | `compareScores()` in `js/scores.js`; the board size and history length (10) at the top of the same file. |
 | **When a problem counts as slow** in Need More Practice | `SLOW_MS` at the top of `js/scores.js` (5000 milliseconds). |

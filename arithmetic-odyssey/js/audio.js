@@ -106,7 +106,7 @@ export function playSound(name) {
 // ---------------------------------------------------------------- recorded sounds
 
 // The voice waits at most this long for a recording (a long file doesn't hold up the game).
-export const RECORDING_WAIT_MAX_MS = 4000;
+export const RECORDING_WAIT_MAX_MS = 5000;
 // Recordings are evened out to this peak, about as loud as the voice.
 const RECORDING_PEAK = 0.9;
 const recordings = new Map(); // url -> Promise<{ buffer, gain } | null>
@@ -141,6 +141,19 @@ export function loadRecording(url, fetchFile = globalThis.fetch) {
     recordings.set(url, loading);
   }
   return recordings.get(url);
+}
+
+/**
+ * Picks one of count sounds at random, never the same as last time (when
+ * there is more than one). Returns its index, or -1 if there are none.
+ */
+export function pickDifferent(count, last = -1, random = Math.random) {
+  if (count <= 0) return -1;
+  if (count === 1) return 0;
+  // The first time, any of them; after that, one of the others.
+  if (!(last >= 0 && last < count)) return Math.floor(random() * count);
+  const i = Math.floor(random() * (count - 1));
+  return i >= last ? i + 1 : i;
 }
 
 /**
