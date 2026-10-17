@@ -1,10 +1,10 @@
 // 8. Settings (grown-ups, behind the 3-second hold): voice, adventure and
 // detour length, backup and restore (Stage 6), and deleting the player.
 
-import { ADVENTURE_LENGTHS, DETOUR_MAX, DETOUR_MIN, stepDetourLength } from '../settings.js?v=0.5.5';
-import { bestVersions, chooseVoice, isFunVoice, voiceId, voiceQuality } from '../speech.js?v=0.5.5';
-import { avatarIcon } from '../avatars.js?v=0.5.5';
-import { choiceRow, confirmDialog, h, topBar } from '../ui.js?v=0.5.5';
+import { ADVENTURE_LENGTHS, DETOUR_MAX, DETOUR_MIN, stepDetourLength } from '../settings.js?v=0.5.6';
+import { bestVersions, chooseVoice, isFunVoice, voiceId, voiceQuality } from '../speech.js?v=0.5.6';
+import { avatarIcon } from '../avatars.js?v=0.5.6';
+import { choiceRow, confirmDialog, h, topBar } from '../ui.js?v=0.5.6';
 
 const REGIONS = { US: 'US', GB: 'UK', AU: 'Australia', IE: 'Ireland', IN: 'India', ZA: 'South Africa', NZ: 'New Zealand', CA: 'Canada', SG: 'Singapore' };
 const SAMPLE = 'Hi! What is 7 times 8?';

@@ -1,0 +1,353 @@
+{
+  "title": "Off-Roading",
+  "intro": "Hop in your truck and drive to the national parks of the United States, from the glaciers of Alaska to the islands of the Caribbean!",
+  "traveler": "🛻",
+  "milestones": [
+    "You made it over the rocky pass!",
+    "You splashed across the shallow creek!",
+    "You reached the top of the switchbacks!",
+    "You drove through the tall pine forest!",
+    "You found a great lookout point!",
+    "You crossed the old wooden bridge!",
+    "You made it through the sandy wash!",
+    "You reached the campground by the lake!",
+    "You climbed the steep dirt road!",
+    "You can see the park entrance ahead!"
+  ],
+  "detours": [
+    "Oh no, a mudslide blocked the road! Solve {count} problems to winch the truck out.",
+    "A flat tire! Solve {count} problems to change it and get rolling again.",
+    "A herd of bison is crossing the road. Solve {count} problems while you wait for them to pass!",
+    "A fallen tree is in the way! Solve {count} problems to saw a path around it.",
+    "The truck is stuck in deep sand! Solve {count} problems to dig it out.",
+    "The creek is too deep to cross here. Solve {count} problems to find a shallow spot.",
+    "Thick fog rolled in! Solve {count} problems to find the trail markers.",
+    "The truck needs gas! Solve {count} problems to reach the next gas station."
+  ],
+  "detourCleared": [
+    "Back on the road! Nice driving.",
+    "You did it! The road is clear again.",
+    "Detour done! Let's keep rolling."
+  ],
+  "setback": [
+    "That was a bumpy detour! Let's drive back to the last flag and try again. You can do it!",
+    "No problem! Every driver takes a wrong turn sometimes. Back to the last flag we go!"
+  ],
+  "kidFacts": {
+    "denali": [
+      "Denali is in Alaska and has the tallest mountain in North America, over 20,000 feet tall.",
+      "Grizzly bears, moose, caribou, wolves and Dall sheep all live in the park.",
+      "It is the only national park with working sled dogs, who patrol it in winter."
+    ],
+    "gates-of-the-arctic": [
+      "Gates of the Arctic is in Alaska and lies completely north of the Arctic Circle.",
+      "It has no roads or trails, so visitors arrive by small plane or on foot.",
+      "One of the biggest caribou herds in North America roams across the park."
+    ],
+    "glacier-bay": [
+      "Glacier Bay is in Alaska, where giant glaciers drop icebergs right into the sea.",
+      "Humpback whales, sea otters, harbor seals and puffins live in and around the bay.",
+      "Its glaciers shrank back about 48 miles, one of the fastest glacier retreats ever recorded."
+    ],
+    "katmai": [
+      "Katmai is in Alaska and is famous for brown bears catching salmon at a waterfall.",
+      "Every fall, people vote online for the fattest bear during Fat Bear Week.",
+      "A huge volcano eruption buried its Valley of Ten Thousand Smokes in ash."
+    ],
+    "kenai-fjords": [
+      "Kenai Fjords is in Alaska and has a giant ice field that feeds nearly 40 glaciers.",
+      "Boat tours spot orcas, humpback whales, sea lions and puffins in the fjords.",
+      "At Exit Glacier, trail signs show how far the ice has shrunk back over time."
+    ],
+    "kobuk-valley": [
+      "Kobuk Valley is in Alaska and has Arctic sand dunes up to 100 feet high.",
+      "Hundreds of thousands of caribou cross the Kobuk River every spring and fall.",
+      "People have hunted caribou at one river crossing here for about 9,000 years."
+    ],
+    "lake-clark": [
+      "Lake Clark is in Alaska and has two active volcanoes, each over 10,000 feet tall.",
+      "Brown bears eat clams and grassy plants along the park's coast.",
+      "Richard Proenneke built a log cabin here by hand and lived in it about 30 years."
+    ],
+    "wrangell-st-elias": [
+      "Wrangell-Saint Elias is in Alaska and is the largest national park in the US.",
+      "Mount Saint Elias is over 18,000 feet tall, the second-highest peak in the US.",
+      "Kennecott is an old copper-mining town with a giant red mill 14 stories tall."
+    ],
+    "channel-islands": [
+      "Channel Islands is in California and is made of five islands out in the ocean.",
+      "A small island fox lives here and nowhere else on Earth.",
+      "Painted Cave is one of the largest sea caves in the world."
+    ],
+    "death-valley": [
+      "Death Valley is in California and Nevada and once hit 134 degrees Fahrenheit, Earth's hottest ever.",
+      "Badwater Basin is the lowest point in North America, 282 feet below sea level.",
+      "At the Racetrack, rocks slide across a dry lake bed on thin ice."
+    ],
+    "joshua-tree": [
+      "Joshua Tree is in California and is named for its twisted yucca trees, called Joshua trees.",
+      "Two different deserts, one cooler and one hotter, meet inside the park.",
+      "Giant piles of boulders make it one of the world's top places for rock climbing."
+    ],
+    "kings-canyon": [
+      "Kings Canyon is in California and has one of the deepest canyons in the US.",
+      "In places, the canyon is over 8,000 feet deep.",
+      "The giant General Grant Tree is known as the Nation's Christmas Tree."
+    ],
+    "lassen-volcanic": [
+      "Lassen Volcanic is in California and has all four types of volcanoes.",
+      "Lassen Peak is one of the largest plug-dome volcanoes in the world, over 10,000 feet tall.",
+      "Boiling mud pots and steaming vents bubble beside a boardwalk trail."
+    ],
+    "pinnacles": [
+      "Pinnacles is in California and has rocky spires left from an ancient volcano.",
+      "Visitors explore dark caves made of boulders wedged in narrow canyons, so bring a flashlight.",
+      "Endangered California condors have been released back into the wild here."
+    ],
+    "redwood": [
+      "Redwood is in California and has the tallest trees on Earth.",
+      "Its coast redwoods grow over 350 feet tall, and the tallest one is a secret.",
+      "Herds of Roosevelt elk graze in the meadows and along the beaches."
+    ],
+    "sequoia": [
+      "Sequoia is in California and has the General Sherman Tree, the largest tree on Earth.",
+      "The Giant Forest is home to thousands of giant sequoia trees.",
+      "You can climb about 350 steps to the top of Moro Rock, a granite dome."
+    ],
+    "yosemite": [
+      "Yosemite is in California and is famous for the giant rocks El Capitan and Half Dome.",
+      "Yosemite Falls is over 2,400 feet tall, one of the tallest waterfalls in North America.",
+      "Mariposa Grove has more than 500 giant sequoia trees."
+    ],
+    "american-samoa": [
+      "American Samoa is a US territory with the only US national park south of the equator.",
+      "Big fruit bats called flying foxes fly around during the day.",
+      "Some of the healthiest coral reefs in US waters make it great for snorkeling."
+    ],
+    "crater-lake": [
+      "Crater Lake is in Oregon and is the deepest lake in the US, almost 2,000 feet.",
+      "Its bright blue water fills the bowl of a volcano that collapsed about 7,700 years ago.",
+      "Wizard Island is a small volcano cone that pokes up out of the lake."
+    ],
+    "haleakala": [
+      "Haleakala is on Maui in Hawaii, where people watch the sun rise above the clouds.",
+      "Its summit is over 10,000 feet high, with a huge crater full of cinder cones.",
+      "The rare silversword plant and the nene, Hawaii's state bird, live here."
+    ],
+    "hawaii-volcanoes": [
+      "Hawaii Volcanoes is in Hawaii and has Kilauea, one of the most active volcanoes on Earth.",
+      "Mauna Loa, also in the park, is the largest active volcano on Earth.",
+      "You can walk through a lava tube, a tunnel made by flowing lava."
+    ],
+    "mount-rainier": [
+      "Mount Rainier is in Washington and is a tall volcano over 14,000 feet high.",
+      "It has more glacier ice than any other mountain in the lower 48 states.",
+      "Paradise has wildflowers in summer and is one of the snowiest places on Earth in winter."
+    ],
+    "north-cascades": [
+      "North Cascades is in Washington and has more than 300 glaciers.",
+      "Its jagged, rugged peaks are nicknamed the American Alps.",
+      "Diablo Lake is bright turquoise because of fine rock dust from glaciers."
+    ],
+    "olympic": [
+      "Olympic is in Washington and has icy mountains, rainforests and wild beaches all in one park.",
+      "The Hoh Rain Forest is full of mossy trees and is super wet.",
+      "Its beaches have tall sea stacks and tide pools to explore."
+    ],
+    "arches": [
+      "Arches is in Utah and has over 2,000 natural stone arches.",
+      "Delicate Arch is so famous that it is shown on Utah license plates.",
+      "Landscape Arch stretches about 300 feet, one of the longest arches in the world."
+    ],
+    "big-bend": [
+      "Big Bend is in Texas and has a whole mountain range, the Chisos Mountains, inside it.",
+      "Santa Elena Canyon has rock walls 1,500 feet tall rising straight up from the Rio Grande.",
+      "More than 450 kinds of birds can be found in Big Bend."
+    ],
+    "bryce-canyon": [
+      "Bryce Canyon is in Utah and has more hoodoos, tall thin rock spires, than anywhere else.",
+      "Paiute stories say the hoodoos are Legend People who were turned to stone.",
+      "Bryce Canyon is not really a canyon but a set of natural rock bowls called amphitheaters."
+    ],
+    "canyonlands": [
+      "Canyonlands is in Utah and has a high, flat mesa called Island in the Sky.",
+      "The Needles are colorful sandstone spires that poke up toward the sky.",
+      "The Great Gallery has life-size rock paintings made by ancient people."
+    ],
+    "capitol-reef": [
+      "Capitol Reef is in Utah and has a wrinkle in the Earth nearly 100 miles long.",
+      "Some white rock domes there look like the dome of the US Capitol building.",
+      "Visitors can pick fruit from old orchards and eat fresh pies there."
+    ],
+    "carlsbad-caverns": [
+      "Carlsbad Caverns is in New Mexico and has one of the biggest cave rooms in North America.",
+      "Hundreds of thousands of bats fly out of the cave at dusk in the warm months.",
+      "Most of its over 119 caves were dissolved out of an ancient reef by acid."
+    ],
+    "grand-canyon": [
+      "The Grand Canyon is in Arizona and is about a mile deep and up to 18 miles wide.",
+      "The canyon stretches 277 miles along the Colorado River.",
+      "Rafting trips down the river through the canyon can take one to three weeks."
+    ],
+    "great-basin": [
+      "Great Basin is in Nevada and has trees nearly 5,000 years old, among the oldest on Earth.",
+      "Wheeler Peak is over 13,000 feet tall and has a small glacier.",
+      "Lehman Caves is a marble cave full of rare rock formations called shields."
+    ],
+    "guadalupe-mountains": [
+      "Guadalupe Mountains is in Texas and has Guadalupe Peak, the highest point in Texas.",
+      "The mountains hold an ancient fossil reef about 265 million years old.",
+      "El Capitan is a sheer limestone cliff that rises high above the desert."
+    ],
+    "petrified-forest": [
+      "Petrified Forest is in Arizona and has ancient logs that turned into colorful stone.",
+      "These stone logs are about 218 million years old.",
+      "Fossils of early dinosaurs, like Chindesaurus, have been found there."
+    ],
+    "saguaro": [
+      "Saguaro is in Arizona and has giant saguaro cactuses that grow over 40 feet tall.",
+      "A saguaro cactus can live 150 years or more.",
+      "Saguaros grow only in the Sonoran Desert and bloom in May and June."
+    ],
+    "white-sands": [
+      "White Sands is in New Mexico and has the world's biggest dunes of white gypsum sand.",
+      "Kids can zoom down the dunes on plastic sleds shaped like saucers.",
+      "Fossil human footprints found there are more than 20,000 years old."
+    ],
+    "zion": [
+      "Zion is in Utah and has towering red and cream cliffs along the Virgin River.",
+      "In the Narrows, hikers wade up a river through a skinny slot canyon.",
+      "A road in the park goes through a tunnel more than a mile long."
+    ],
+    "cuyahoga-valley": [
+      "Cuyahoga Valley is in Ohio and has Brandywine Falls, a 60-foot waterfall.",
+      "You can ride a scenic train one way and bike back on the Towpath Trail.",
+      "Beaver Marsh is full of wildlife, and the Ledges are cliffs of sandstone."
+    ],
+    "gateway-arch": [
+      "Gateway Arch is in Missouri and is the tallest arch in the world, at 630 feet.",
+      "Little pod-shaped tram cars ride up inside the arch to the top.",
+      "It is the smallest of all the national parks."
+    ],
+    "indiana-dunes": [
+      "Indiana Dunes is in Indiana and has tall sand dunes and beaches on Lake Michigan.",
+      "One of its sand dunes slowly moves inland several feet every year.",
+      "More than 1,100 kinds of native plants grow in the park."
+    ],
+    "isle-royale": [
+      "Isle Royale is an island park in Michigan where wolves and moose live.",
+      "Scientists there run the world's longest-running study of wolves and moose.",
+      "Ten big shipwrecks lie in the cold, clear water of Lake Superior."
+    ],
+    "voyageurs": [
+      "Voyageurs is in Minnesota and is a park of big lakes along the Canadian border.",
+      "Long ago, fur traders called voyageurs paddled canoes through these waters.",
+      "Its dark skies can show the northern lights, and winter brings roads made of ice."
+    ],
+    "badlands": [
+      "Badlands is in South Dakota and is full of striped rock towers and spires.",
+      "Its rocks hold fossils of ancient mammals like early horses, rhinos, and saber-toothed cats.",
+      "Bison, bighorn sheep, prairie dogs, and rare black-footed ferrets live here."
+    ],
+    "black-canyon-of-the-gunnison": [
+      "Black Canyon of the Gunnison is in Colorado and is a super deep, narrow canyon.",
+      "Its steep walls let only about 33 minutes of sunlight reach parts of the bottom each day.",
+      "The Painted Wall is the tallest cliff in Colorado, at 2,250 feet high."
+    ],
+    "glacier": [
+      "Glacier National Park is in Montana and is nicknamed the Crown of the Continent.",
+      "Mountain goats, bighorn sheep, and grizzly bears live in the park.",
+      "The Going-to-the-Sun Road winds 50 miles up and over the mountains."
+    ],
+    "grand-teton": [
+      "Grand Teton is in Wyoming, where giant mountains rise straight up from the valley floor.",
+      "The tallest peak, called Grand Teton, is 13,775 feet high.",
+      "Moose, bison, elk, pronghorn, and bears all live in the park."
+    ],
+    "great-sand-dunes": [
+      "Great Sand Dunes is in Colorado and has the tallest sand dunes in North America.",
+      "The tallest one, Star Dune, rises about 750 feet high.",
+      "In late spring, Medano Creek sends waves across the sand, like a beach in the mountains."
+    ],
+    "mesa-verde": [
+      "Mesa Verde is in Colorado, where Ancestral Puebloan people built homes right in the cliffs.",
+      "Cliff Palace is the biggest cliff home in North America, with about 150 rooms.",
+      "On some tours, you climb ladders and go through tunnels to reach the cliff homes."
+    ],
+    "rocky-mountain": [
+      "Rocky Mountain National Park in Colorado has more than 60 peaks over 12,000 feet tall.",
+      "Trail Ridge Road climbs to 12,183 feet, one of the highest paved roads in the US.",
+      "In fall, male elk make loud bugling calls that echo across Moraine Park."
+    ],
+    "theodore-roosevelt": [
+      "Theodore Roosevelt National Park, in North Dakota, is the only national park named directly after a person.",
+      "Bison, wild horses, elk, and whole towns of prairie dogs live here.",
+      "Theodore Roosevelt once had cattle ranches here, and you can visit his cabin."
+    ],
+    "wind-cave": [
+      "Wind Cave, in South Dakota, was the first cave in the world to become a national park.",
+      "The cave seems to breathe, with wind blowing in or out of its entrance.",
+      "It has most of the world's known boxwork, thin rock shaped like a honeycomb."
+    ],
+    "yellowstone": [
+      "Yellowstone is in Wyoming, Montana and Idaho and was the first national park in the world.",
+      "It has more than half of the world's geysers, including the famous Old Faithful.",
+      "Bison, elk, grizzly bears, and wolves roam its valleys."
+    ],
+    "acadia": [
+      "Acadia is in Maine and was the first national park east of the Mississippi River.",
+      "For part of the year, Cadillac Mountain is among the first US places to see sunrise.",
+      "It has 45 miles of gravel carriage roads with stone bridges, and no cars allowed."
+    ],
+    "biscayne": [
+      "Biscayne is in Florida, and about 95 percent of the park is water.",
+      "It protects part of the only living coral barrier reef in the continental US.",
+      "Divers can explore a trail of shipwrecks under the water."
+    ],
+    "congaree": [
+      "Congaree is in South Carolina and protects a huge, very old forest that often floods.",
+      "Some of the tallest trees in eastern North America grow here.",
+      "In late spring, fireflies here flash their lights all at the same time."
+    ],
+    "dry-tortugas": [
+      "Dry Tortugas is a park of islands about 70 miles west of Key West, Florida.",
+      "Fort Jefferson is the biggest all-brick fort in the Americas, built with about 16 million bricks.",
+      "Tortugas means turtles in Spanish, and you can snorkel with sea turtles right off the beach."
+    ],
+    "everglades": [
+      "The Everglades, in Florida, is the only place where alligators and crocodiles live side by side.",
+      "Its River of Grass is a slow sheet of water flowing across a sawgrass prairie.",
+      "Florida panthers, manatees, turtles, and wading birds live here too."
+    ],
+    "great-smoky-mountains": [
+      "Great Smoky Mountains, in Tennessee and North Carolina, is called the Salamander Capital of the World.",
+      "About 1,900 black bears live in the park.",
+      "Cades Cove is a valley with old cabins, churches, and lots of wildlife."
+    ],
+    "hot-springs": [
+      "Hot Springs is in Arkansas, right in the middle of a city also named Hot Springs.",
+      "Its spring water is about 143 degrees Fahrenheit and fell as rain about 4,000 years ago.",
+      "You can fill bottles with hot spring water at public fountains."
+    ],
+    "mammoth-cave": [
+      "Mammoth Cave is in Kentucky and is the longest known cave system in the world.",
+      "About 426 miles of its passages have been mapped, and the number keeps growing.",
+      "Frozen Niagara is a rock formation that looks like a frozen waterfall."
+    ],
+    "new-river-gorge": [
+      "New River Gorge is in West Virginia and is the newest national park.",
+      "Its giant steel arch bridge stands 876 feet above the river.",
+      "Despite its name, the New River may be one of the oldest rivers in North America."
+    ],
+    "shenandoah": [
+      "Shenandoah is in Virginia, and Skyline Drive runs 105 miles along the Blue Ridge Mountains.",
+      "About 100 miles of the famous Appalachian Trail go through the park.",
+      "In October, the forest bursts with bright fall colors."
+    ],
+    "virgin-islands": [
+      "Virgin Islands National Park covers about 60 percent of Saint John, an island in the Caribbean.",
+      "Trunk Bay has an underwater snorkeling trail you can swim along.",
+      "Snorkelers can swim with sea turtles, especially at Maho Bay."
+    ]
+  }
+}

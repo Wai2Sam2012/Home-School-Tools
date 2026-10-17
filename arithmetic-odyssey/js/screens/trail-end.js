@@ -2,11 +2,11 @@
 // facts, and a summary of the trip. When every sticker is collected, a
 // "Collection complete!" celebration with all the theme's pictures.
 
-import { stickerPicture } from '../art.js?v=0.5.5';
-import { soundLength } from '../audio.js?v=0.5.5';
-import { THEMES } from '../settings.js?v=0.5.5';
-import { formatDuration } from '../timer.js?v=0.5.5';
-import { h } from '../ui.js?v=0.5.5';
+import { stickerPicture } from '../art.js?v=0.5.6';
+import { soundLength } from '../audio.js?v=0.5.6';
+import { THEMES } from '../settings.js?v=0.5.6';
+import { formatDuration } from '../timer.js?v=0.5.6';
+import { h } from '../ui.js?v=0.5.6';
 
 const SLIDE_MS = 3500;
 
@@ -46,7 +46,7 @@ export function trailEndScreen(ctx, result = {}) {
     if (sticker) {
       const count = Math.max(1, sticker.pictures.length);
       runSlideshow(Array.from({ length: count }, (_, picture) => ({ sticker, picture })));
-      say(`You made it! Your new sticker is ${sticker.name}.`);
+      say(`You made it! Your new sticker is ${sticker.spokenName ?? sticker.name}.`);
       about.replaceChildren(
         h('h2', {}, `New sticker: ${sticker.number}. ${sticker.name}`),
         h('ul', { class: 'fact-list' }, sticker.facts.map((f) => h('li', {}, f))),

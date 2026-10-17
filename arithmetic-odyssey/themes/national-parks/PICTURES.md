@@ -6,15 +6,17 @@ Each of the 63 parks becomes a sticker. Like the Dino theme, the game shows a pa
 
 | | Best | Allowed |
 | --- | --- | --- |
-| **Shape** | Landscape (wider than tall), about 3:2, for example 1200 × 800 | Any shape; the whole picture is always shown |
-| **Size** | 1200 to 1600 pixels on the longest side | At most **1600 pixels** on the longest side |
-| **File size** | 150 to 300 KB | At most **400 KB** per picture |
-| **Format** | JPEG (`.jpg`), quality about 80% | JPEG, PNG or WebP |
+| **Shape** | Landscape (wider than tall), about 3:2, for example 1024 × 683 | Any shape; the whole picture is always shown |
+| **Size** | **1024 pixels** on the longest side | At most **1600 pixels** on the longest side |
+| **File size** | 100 to 200 KB | At most **400 KB** per picture |
+| **Format** | JPEG (`.jpg`), quality about 75% | JPEG, PNG or WebP |
 | **How many** | 3 to 5 per park | Any number; a park with none shows a drawing |
 
-All 63 parks with 4 pictures each at about 250 KB is about 63 MB. The game should stay under about 50 MB per theme, so aim for about 3 pictures per park, or 4 smaller ones (about 200 KB).
+The biggest a picture is shown is on the sticker card, about 700 × 440 points; 1024 pixels is sharp there on an iPad screen and keeps the files small. The Alaska pictures are made this way: 71 pictures, 1024 pixels on the longest side, 50 to 200 KB each (about 130 KB on average), 9.2 MB in all.
 
-To make a photo smaller on Windows: open it in **Photos** › **⋯** › **Resize image**, choose a custom width of 1600 pixels and quality 80, and save a copy. (A resize script will be added with this theme.)
+The game must stay under 50 MB per theme (the tests stop the publish above that). At about 130 KB a picture, that is about 380 pictures, or about 6 per park for all 63 parks.
+
+To make a photo smaller on Windows: open it in **Photos** › **⋯** › **Resize image**, choose a custom width of 1024 pixels and quality 75, and save a copy. The downloader's photos are already 1024 pixels wide. The tests name any picture that is over the limits.
 
 ## Downloading them with the script
 
@@ -28,7 +30,7 @@ The game is published, so only use pictures you are allowed to share:
 - **Wikimedia Commons** ([commons.wikimedia.org](https://commons.wikimedia.org/)) has photos of every park; most allow sharing with a credit (write the author and license in `CREDITS.md`).
 - **Your own photos** from your trips.
 
-Add a line to [CREDITS.md](CREDITS.md) for each picture (or one line for a whole folder, such as `pictures/**` if they all come from the NPS).
+Add a line to [CREDITS.md](CREDITS.md) for each picture (or one line for a whole folder, such as `pictures/**` if they all come from the NPS). For photos from the downloader, copy its `credits.csv` into this folder instead: every picture listed in it counts as credited.
 
 ## Folders
 

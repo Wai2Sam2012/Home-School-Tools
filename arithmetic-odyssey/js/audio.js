@@ -113,43 +113,76 @@ function noise(ctx, seconds) {
   return source;
 }
 
+/** How much the flag sounds are turned up after their peaks are evened out. */
+export const FLAG_BOOST = 3.2;
+
+/**
+ * The flag sounds play through a compressor, which evens out their peaks,
+ * then are turned up (FLAG_BOOST) to about as loud as the voice; a limiter
+ * at the end stops them crackling.
+ */
+function loudOutput(ctx) {
+  const squeeze = ctx.createDynamicsCompressor();
+  squeeze.threshold.value = -24;
+  squeeze.knee.value = 6;
+  squeeze.ratio.value = 10;
+  squeeze.attack.value = 0.001;
+  squeeze.release.value = 0.2;
+  const boost = ctx.createGain();
+  boost.gain.value = FLAG_BOOST;
+  const limiter = ctx.createDynamicsCompressor();
+  limiter.threshold.value = -8;
+  limiter.knee.value = 0;
+  limiter.ratio.value = 20;
+  limiter.attack.value = 0.001;
+  limiter.release.value = 0.1;
+  squeeze.connect(boost).connect(limiter).connect(ctx.destination);
+  return squeeze;
+}
+
 /** Shapes a sound's loudness: up quickly, held, then fading out. */
-function envelope(ctx, t0, { attack, hold, release, level }) {
+function envelope(ctx, t0, { attack, hold, release, level, to = ctx.destination }) {
   const gain = ctx.createGain();
   gain.gain.setValueAtTime(0.0001, t0);
   gain.gain.exponentialRampToValueAtTime(level, t0 + attack);
   gain.gain.setValueAtTime(level, t0 + attack + hold);
   gain.gain.exponentialRampToValueAtTime(0.0001, t0 + attack + hold + release);
-  gain.connect(ctx.destination);
+  gain.connect(to);
   return gain;
 }
 
-/** Dinosaur roar: a low growl that rises then falls, with a rough throat flutter and breath. */
+/**
+ * Dinosaur roar: a growl that rises then falls, with a rough throat flutter
+ * and breath. iPad speakers hardly play deep sounds, so most of the roar is
+ * kept above about 300 Hz (an octave-up growl and a brighter filter); it is
+ * about as loud as the voice.
+ */
 function playRoar(ctx, t0) {
   const length = SYNTH_LENGTHS.roar;
-  const out = envelope(ctx, t0, { attack: 0.12, hold: 0.55, release: 0.8, level: VOLUME * 1.6 });
+  const out = envelope(ctx, t0, { attack: 0.1, hold: 0.6, release: 0.75, level: VOLUME * 4, to: loudOutput(ctx) });
   const lowpass = ctx.createBiquadFilter();
   lowpass.type = 'lowpass';
-  lowpass.frequency.setValueAtTime(700, t0);
-  lowpass.frequency.linearRampToValueAtTime(1100, t0 + 0.3);
-  lowpass.frequency.exponentialRampToValueAtTime(350, t0 + length);
+  lowpass.frequency.setValueAtTime(1500, t0);
+  lowpass.frequency.linearRampToValueAtTime(2600, t0 + 0.3);
+  lowpass.frequency.exponentialRampToValueAtTime(700, t0 + length);
   lowpass.connect(out);
 
-  // The growl: two slightly different saw waves, swept up then down.
-  for (const detune of [0, 7]) {
+  // The growl: saw waves swept up then down, two a fifth apart for roughness
+  // and one an octave up so small speakers can play it.
+  for (const [detune, level] of [[0, 0.5], [700, 0.5], [1200, 0.45]]) {
     const growl = ctx.createOscillator();
     growl.type = 'sawtooth';
-    growl.detune.value = detune * 100;
-    growl.frequency.setValueAtTime(95, t0);
-    growl.frequency.linearRampToValueAtTime(150, t0 + 0.3);
-    growl.frequency.exponentialRampToValueAtTime(55, t0 + length);
+    growl.detune.value = detune; // in cents: 700 is a fifth up, 1200 an octave up
+    growl.frequency.setValueAtTime(110, t0);
+    growl.frequency.linearRampToValueAtTime(180, t0 + 0.3);
+    growl.frequency.exponentialRampToValueAtTime(70, t0 + length);
     // Throat flutter: the loudness wobbles about 30 times a second.
     const flutter = ctx.createGain();
-    flutter.gain.value = 0.6;
+    flutter.gain.value = level;
     const lfo = ctx.createOscillator();
     lfo.frequency.value = 31;
     const depth = ctx.createGain();
-    depth.gain.value = 0.4;
+    depth.gain.value = level * 0.65;
     lfo.connect(depth).connect(flutter.gain);
     growl.connect(flutter).connect(lowpass);
     growl.start(t0);
@@ -162,8 +195,8 @@ function playRoar(ctx, t0) {
   const breath = noise(ctx, length);
   const band = ctx.createBiquadFilter();
   band.type = 'bandpass';
-  band.frequency.setValueAtTime(500, t0);
-  band.frequency.exponentialRampToValueAtTime(250, t0 + length);
+  band.frequency.setValueAtTime(900, t0);
+  band.frequency.exponentialRampToValueAtTime(450, t0 + length);
   band.Q.value = 0.7;
   const breathLevel = ctx.createGain();
   breathLevel.gain.value = 0.9;
@@ -172,15 +205,19 @@ function playRoar(ctx, t0) {
   breath.stop(t0 + length);
 }
 
-/** Truck engine revving: idle, a rev up, a short hold, then back down to idle. */
+/**
+ * Truck engine revving: idle, a rev up, a short hold, then back down to idle.
+ * Like the roar, it is kept bright enough for iPad speakers and about as loud
+ * as the voice.
+ */
 function playEngine(ctx, t0) {
   const length = SYNTH_LENGTHS.engine;
-  const out = envelope(ctx, t0, { attack: 0.08, hold: 1.2, release: 0.5, level: VOLUME * 1.4 });
+  const out = envelope(ctx, t0, { attack: 0.08, hold: 1.2, release: 0.5, level: VOLUME * 3.5, to: loudOutput(ctx) });
   const lowpass = ctx.createBiquadFilter();
   lowpass.type = 'lowpass';
-  lowpass.frequency.setValueAtTime(500, t0);
-  lowpass.frequency.linearRampToValueAtTime(1400, t0 + 0.7);
-  lowpass.frequency.linearRampToValueAtTime(600, t0 + length);
+  lowpass.frequency.setValueAtTime(1000, t0);
+  lowpass.frequency.linearRampToValueAtTime(2600, t0 + 0.7);
+  lowpass.frequency.linearRampToValueAtTime(1100, t0 + length);
 
   // Engine speed: idle 40 Hz, rev to 120 Hz, settle back.
   const rpm = (param, scale) => {
@@ -190,7 +227,7 @@ function playEngine(ctx, t0) {
     param.setValueAtTime(120 * scale, t0 + 1.0);
     param.exponentialRampToValueAtTime(45 * scale, t0 + length);
   };
-  for (const [wave, scale, level] of [['sawtooth', 1, 0.7], ['square', 2, 0.25]]) {
+  for (const [wave, scale, level] of [['sawtooth', 1, 0.6], ['square', 2, 0.3], ['sawtooth', 4, 0.25]]) {
     const osc = ctx.createOscillator();
     osc.type = wave;
     rpm(osc.frequency, scale);

@@ -8,15 +8,15 @@
 // Submit. It pauses while Repeat is reading and while the game is in the
 // background. The keypad works the whole time; nothing waits on speech.
 
-import { answerProblem, jumpTo, milestoneSteps, storyText, unlockSticker, withNextProblem } from '../adventure.js?v=0.5.5';
-import { stickerPicture } from '../art.js?v=0.5.5';
-import { avatarIcon } from '../avatars.js?v=0.5.5';
-import { createDetourRoad, loopProgress } from '../detour-road.js?v=0.5.5';
-import { createKeypad } from '../keypad.js?v=0.5.5';
-import { THEMES } from '../settings.js?v=0.5.5';
-import { createThinkingTimer } from '../timer.js?v=0.5.5';
-import { nextSticker } from '../storyline.js?v=0.5.5';
-import { h, topBar } from '../ui.js?v=0.5.5';
+import { answerProblem, jumpTo, milestoneSteps, storyText, unlockSticker, withNextProblem } from '../adventure.js?v=0.5.6';
+import { stickerPicture } from '../art.js?v=0.5.6';
+import { avatarIcon } from '../avatars.js?v=0.5.6';
+import { createDetourRoad, loopProgress } from '../detour-road.js?v=0.5.6';
+import { createKeypad } from '../keypad.js?v=0.5.6';
+import { THEMES } from '../settings.js?v=0.5.6';
+import { createThinkingTimer } from '../timer.js?v=0.5.6';
+import { nextSticker } from '../storyline.js?v=0.5.6';
+import { h, topBar } from '../ui.js?v=0.5.6';
 
 const PRAISE = ['Correct!', 'Great job!', 'You got it!', 'Awesome!', 'Nice work!'];
 // A right answer moves on by itself; after a wrong one the game waits for
@@ -24,6 +24,8 @@ const PRAISE = ['Correct!', 'Great job!', 'You got it!', 'Awesome!', 'Nice work!
 const NEXT_AFTER_RIGHT_MS = 1100;
 // A short pause between a sound effect ending and the voice starting.
 const SOUND_GAP_MS = 150;
+// How long the keys ignore taps after "Got it" (a double tap must not type a digit).
+const GOT_IT_SETTLE_MS = 350;
 
 export function adventureScreen(ctx) {
   const player = ctx.profiles.active();
@@ -257,7 +259,7 @@ export function adventureScreen(ctx) {
       feedback.replaceChildren(h('span', { 'aria-hidden': 'true' }, '✗ '), 'Incorrect', h('span', { 'aria-hidden': 'true' }, ' ✗'));
       keypad.showCorrect(`${problem.text} = ${problem.answer}`);
       feedback.className = 'feedback wrong';
-      say(`Not quite. ${problem.speech} is ${problem.answer}.`, null, ctx.sound('wrong'));
+      say(`Incorrect. ${problem.speech} is ${problem.answer}.`, null, ctx.sound('wrong'));
     }
     showMap();
     if (check.correct) {
@@ -274,6 +276,8 @@ export function adventureScreen(ctx) {
     const events = waitingFor;
     waitingFor = null;
     gotItCover.hidden = true;
+    // A double tap on "Got it" must not type a digit with its second tap.
+    keypad.ignoreTaps(GOT_IT_SETTLE_MS);
     afterAnswer(events);
   }
 
@@ -305,12 +309,37 @@ export function adventureScreen(ctx) {
       return `Jumped to step ${state.step}.`;
     },
   };
+  // ---- fit: the screen never scrolls. Each time its size or the window
+  // changes, start from full size and step down to more compact sizes until
+  // it fits; if even the smallest doesn't fit, let it scroll (see style.css).
+  let page = null;
+  let fitFrame = 0;
+  function fit() {
+    cancelAnimationFrame(fitFrame);
+    fitFrame = requestAnimationFrame(() => {
+      const app = page?.parentElement;
+      if (!app) return;
+      const tooTall = () => app.scrollHeight > app.clientHeight + 1;
+      app.classList.remove('fit-scroll');
+      let level = 0;
+      page.dataset.fit = '0';
+      while (tooTall() && level < 3) page.dataset.fit = String(++level);
+      app.classList.toggle('fit-scroll', tooTall());
+    });
+  }
+  const resizes = new ResizeObserver(fit);
+  window.addEventListener('resize', fit);
+
   ctx.onLeave(() => {
     clearTimeout(timer);
     silence();
     document.removeEventListener('visibilitychange', onVisibility);
     keypad.destroy();
     ctx.debugAdventure = null;
+    cancelAnimationFrame(fitFrame);
+    resizes.disconnect();
+    window.removeEventListener('resize', fit);
+    page?.parentElement?.classList.remove('fit-scroll');
   });
 
   // The destination: the sticker this trail unlocks.
@@ -333,12 +362,17 @@ export function adventureScreen(ctx) {
   showMap();
   showQuestion(opening);
 
-  return h('main', { class: 'screen adventure-screen' },
+  const layout = h('div', { class: 'adventure-layout' },
+    h('section', { class: 'question-area' }, story, detourCount, h('div', { class: 'question-row' }, question, repeat), feedback),
+    keypad.el,
+  );
+  page = h('main', { class: `screen adventure-screen theme-${state.theme}`, dataset: { fit: '0' } },
     topBar(`${theme.icon} ${theme.title}`, () => ctx.show('home')),
     h('section', { class: 'trail-area' }, map),
-    h('div', { class: 'adventure-layout' },
-      h('section', { class: 'question-area' }, story, detourCount, h('div', { class: 'question-row' }, question, repeat), feedback),
-      keypad.el,
-    ),
+    layout,
   );
+  // The screen is at least as tall as the window, so watch what is inside it.
+  resizes.observe(layout);
+  resizes.observe(page);
+  return page;
 }

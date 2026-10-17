@@ -18,8 +18,9 @@
     PICTURES.md), so chosen pictures can be copied straight into
     themes\national-parks\pictures.
 
-    Commons sends resized copies (1280 pixels wide by default), so most files
-    already fit the game's limits (400 KB, 1600 pixels). Maps, logos, signs
+    Commons sends resized copies (1024 pixels wide by default, the size the
+    game uses), so most files are 100 to 200 KB and fit the game's limits
+    (400 KB, 1600 pixels). Maps, logos, signs
     and diagrams are skipped, and only landscape (wide) photos are kept. If an
     attraction has too few photos, general photos of the park fill the gap.
 
@@ -56,8 +57,8 @@
     instead of one set per attraction. Much quicker.
 
 .PARAMETER Width
-    Width in pixels of the copies to download. Default 1280. The game allows
-    up to 1600.
+    Width in pixels of the copies to download. Default 1024 (the size
+    recommended in PICTURES.md). The game allows up to 1600.
 
 .PARAMETER ListOnly
     Search and write what would be downloaded to the log, without downloading.
@@ -107,7 +108,7 @@ param(
     [int]$PicturesPerAttraction = 5,
     [switch]$ParkPicturesOnly,
     [ValidateRange(320, 2560)]
-    [int]$Width = 1280,
+    [int]$Width = 1024,
     [switch]$ListOnly,
     [switch]$Force,
     [ValidateRange(0, 60000)]

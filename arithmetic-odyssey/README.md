@@ -31,7 +31,7 @@ Each theme keeps all of its resources (facts, story text, pictures, sounds and t
 | --- | --- |
 | 0. Project setup and first publish | Done: placeholder page, local server, debug panel and publishing workflow. The iPad check (T0.4) runs after the first publish. |
 | 1. Math engine | Done: `js/math.js` |
-| 2. Theme content | Dino theme done: story file builder, kid-friendly facts, story text and picture checks. Triassic pictures are in; Jurassic and Cretaceous show a drawing until their pictures are added. The Parks theme comes later. |
+| 2. Theme content | Both themes can be played. **Dino Tour:** Triassic pictures are in; Jurassic and Cretaceous show a drawing until their pictures are added. **Off-Roading (first version, 0.5.6):** all 63 parks with kid-friendly facts and truck story text; the 8 Alaska parks have pictures, the other parks show a drawing until theirs are added. |
 | 3. Screens and keypad | Done: Tap to Start, players, home, Setup, Sticker Album, Stats and grown-up Settings, with the on-screen keypad, in portrait and landscape. |
 | 4. The adventure | Done: the trail map with a flag every 10 steps, detours after a wrong answer, going back to the last flag when a whole detour is missed, Resume Adventure, and Trail's End with the new sticker, a slideshow of its pictures and a trip summary. Players, stickers and trips are not saved yet (Stage 6). |
 | 5. Sound, voice and timer | Done: sound effects, questions and story moments read aloud with a Repeat button, the thinking timer (shown on Trail's End), and a "Tap to continue" screen when the iPad pauses sound. Grown-ups can turn the voice and the sound effects on or off in Settings, choose the voice and its speed (tap a voice to hear it), and see which voice is used. |
@@ -46,7 +46,7 @@ cd arithmetic-odyssey
 node --test
 ```
 
-You should see `# fail 0` (134 tests at the end of Stage 5). Each test name starts with its ID from the test plan in [GAME-PLAN.md](GAME-PLAN.md) where it has one, for example `T1.3`.
+You should see `# fail 0` (146 tests in version 0.5.6). Each test name starts with its ID from the test plan in [GAME-PLAN.md](GAME-PLAN.md) where it has one, for example `T1.3`.
 
 ## Testing in a browser on your PC
 
@@ -86,7 +86,7 @@ Most things can be changed without knowing much code. After a change, run the te
 | **Player pictures** | The files in [images/avatars/](images/avatars/); names and order in `js/avatars.js`. See [its README](images/avatars/README.md). |
 | **Story text**: flags, detours, getting back on the trail, going back to a flag | `themes/dino/game-text.json`: `milestones`, `detours` (`{count}` becomes the number of detour questions), `detourCleared` and `setback`. Each list can have any number of lines. |
 | **Kid-friendly dinosaur facts** | `themes/dino/game-text.json`, under `kidFacts` (2 or 3 per dinosaur). |
-| **What happens after a wrong answer** | What the screen shows (the answer crossed out in red, "✗ Incorrect ✗", and the right answer in green in the answer box) and the words read aloud ("Not quite. 7 times 8 is 56."): `js/screens/adventure.js`, in `submit()`; the colours are in `css/style.css` under `.question.wrong-answer` and `.answer-display.correct-answer`. The **Got it ›** button is made just below it. The rules (a wrong answer starts a detour; all detour answers wrong goes back to the last flag): `js/adventure.js`, in `answerProblem()`. The number of detour questions is in the game's grown-up Settings. |
+| **What happens after a wrong answer** | What the screen shows (the answer crossed out in red, "✗ Incorrect ✗", and the right answer in green in the answer box) and the words read aloud ("Incorrect. 7 times 8 is 56."): `js/screens/adventure.js`, in `submit()`; the colours are in `css/style.css` under `.question.wrong-answer` and `.answer-display.correct-answer`. The **Got it ›** button is made just below it. The rules (a wrong answer starts a detour; all detour answers wrong goes back to the last flag): `js/adventure.js`, in `answerProblem()`. The number of detour questions is in the game's grown-up Settings. |
 | **Praise after a right answer** ("Great job!") | `PRAISE` at the top of `js/screens/adventure.js`. |
 | **How long the game waits** after a right answer | `NEXT_AFTER_RIGHT_MS` at the top of `js/screens/adventure.js` (in milliseconds). |
 | **Sound effects** | `js/audio.js`: `SOUNDS` lists the notes of each sound; `playRoar()` and `playEngine()` make the flag sounds. Hear them all in the voice and sound tester (`?debug=1`). |
@@ -203,7 +203,7 @@ themes/national-parks/downloaded-pictures/
 └── CREDITS-lines.md     table lines ready to paste into themes/national-parks/CREDITS.md
 ```
 
-The folders are the same as the game's (see [PICTURES.md](themes/national-parks/PICTURES.md)), so copy the photos you like into `themes/national-parks/pictures/` keeping the region and park folders, and paste their lines from `CREDITS-lines.md` into `CREDITS.md`.
+The folders are the same as the game's (see [PICTURES.md](themes/national-parks/PICTURES.md)), so copy the photos you like into `themes/national-parks/pictures/` keeping the region and park folders. Then copy `credits.csv` to `themes/national-parks/credits.csv`: every picture listed in it counts as credited, so there are no lines to paste. (Pasting the lines from `CREDITS-lines.md` into `CREDITS.md` works too.)
 
 - **Double-click** `tools\Run-ParkPictures.cmd`, or run it from PowerShell like the dinosaur script.
 - **It takes a while:** every attraction is about 6 requests with a 1-second pause between them, so all 63 parks take about 30 minutes. Try one park first: `.\Get-ParkPictures.ps1 -Park Arches -ListOnly` lists what it would download.
@@ -213,7 +213,7 @@ The folders are the same as the game's (see [PICTURES.md](themes/national-parks/
   - `-ParkPicturesOnly`: 5 photos of each park instead of 5 per attraction (about 315 photos instead of about 1,260).
   - `-Force`: download again.
 - **What it keeps:** only JPEG and PNG landscape photos at least 800 pixels wide. It skips maps, logos, signs and diagrams. If an attraction has too few photos (for example "Sled dog kennels"), general photos of the park fill the gap.
-- **Size:** Commons sends copies 1280 pixels wide, so most photos already fit the game (at most 400 KB and 1600 pixels). The log marks any that are over 400 KB.
+- **Size:** Commons sends copies 1024 pixels wide, the size the game uses, so most photos are 100 to 200 KB and already fit the game (at most 400 KB and 1600 pixels). The log marks any that are over 400 KB.
 - **Re-running resumes:** photos already downloaded are skipped and never downloaded twice. A photo that fails to download is replaced by the next one found.
 - **Exit codes:** 0 everything worked, 1 something failed (see `download-log.csv`), 2 the script could not start.
 - **Credits:** every photo on Commons may be shared, but most licenses (CC BY, CC BY-SA) ask for a credit with the author and license. That is what `CREDITS-lines.md` is for. Public domain photos (most US government photos) need no credit, but keeping the line is good practice.

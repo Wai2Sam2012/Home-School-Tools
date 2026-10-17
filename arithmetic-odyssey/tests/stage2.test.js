@@ -9,7 +9,8 @@ import { tmpdir } from 'node:os';
 import { dirname, join } from 'node:path';
 
 import {
-  GAME_DIR, PICTURE_TYPES, buildDinoStoryline, findPictures, isCredited, parseCredits, parseDinoPeriod, slug,
+  GAME_DIR, PARK_FOLDERS, PARK_REGIONS, PICTURE_TYPES, buildDinoStoryline, buildParksStoryline, findPictures, isCredited,
+  parseCredits, parseCreditsCsv, parseDinoPeriod, parseParkRegion, shortParkName, slug, spokenName,
 } from '../tools/build-storyline.mjs';
 
 const DINO_DIR = join(GAME_DIR, 'themes', 'dino');
@@ -253,4 +254,156 @@ test('a theme with no pictures folder builds with every sticker using the drawn 
   } finally {
     rmSync(theme, { recursive: true, force: true });
   }
+});
+
+// ================================================================ Off-Roading (national parks) theme
+
+const PARKS_DIR = join(GAME_DIR, 'themes', 'national-parks');
+const parks = buildParksStoryline(PARKS_DIR);
+const parkPictures = parks.storyline.stickers.flatMap((s) => s.pictures);
+const PARKS_PER_REGION = [8, 9, 7, 13, 10, 5, 11];
+
+test('T2.1 Off-Roading has 63 stickers: region by region in the README order, alphabetical inside each region', () => {
+  const stickers = parks.storyline.stickers;
+  assert.equal(stickers.length, 63);
+  assert.equal(new Set(stickers.map((s) => s.id)).size, 63, 'sticker ids are unique');
+  stickers.forEach((s, i) => assert.equal(s.number, i + 1, `${s.name} should be sticker ${i + 1}`));
+  let start = 0;
+  PARK_REGIONS.forEach((region, r) => {
+    const inRegion = stickers.slice(start, start + PARKS_PER_REGION[r]);
+    for (const s of inRegion) assert.equal(s.region, region.title, `${s.name} region`);
+    assert.deepEqual(inRegion.map((s) => s.regionNumber), inRegion.map((_, i) => i + 1));
+    const names = inRegion.map((s) => s.name);
+    assert.deepEqual(names, [...names].sort((a, b) => a.localeCompare(b, 'en', { sensitivity: 'base' })), `${region.title} is alphabetical`);
+    start += PARKS_PER_REGION[r];
+  });
+  assert.equal(stickers[0].name, 'Denali');
+  assert.equal(stickers[62].name, 'Virgin Islands');
+});
+
+test('T2.1 the region order matches the README region table', () => {
+  const readme = readFileSync(join(PARKS_DIR, 'README.md'), 'utf8');
+  const table = [...readme.matchAll(/^\| \[[^\]]+\]\(([a-z-]+)\.md\) \| (\d+) \|/gm)].map((m) => [m[1], Number(m[2])]);
+  assert.deepEqual(table, PARK_REGIONS.map((r, i) => [r.file, PARKS_PER_REGION[i]]));
+});
+
+test('T2.2 every park has a name, 2-3 short facts and its details', () => {
+  for (const s of parks.storyline.stickers) {
+    assert.ok(s.name.length > 0);
+    assert.ok(s.facts.length >= 2 && s.facts.length <= 3, `${s.name} has ${s.facts.length} facts`);
+    for (const fact of s.facts) {
+      assert.ok(fact.length >= 10 && fact.length <= 120, `${s.name}: fact should be one short sentence: "${fact}"`);
+      assert.match(fact, /[.!]["”]?$/, `${s.name}: fact should end with a full stop: "${fact}"`);
+      assert.doesNotMatch(fact, /\bSt\./, `${s.name}: write "Saint" so the voice doesn't say "street": "${fact}"`);
+    }
+    assert.ok(s.location, `${s.name} location`);
+    assert.match(s.established, /^(18|19|20)\d\d$/, `${s.name} year`);
+    assert.match(s.details[0], /^Location: /);
+    assert.ok(s.details.some((d) => d.startsWith('Famous for: ')), `${s.name} attractions`);
+  }
+});
+
+test('T2.2 every park picture exists on disk and every picture folder matches a park', () => {
+  for (const p of parkPictures) {
+    assert.ok(statSync(join(PARKS_DIR, p)).isFile(), `${p} is missing`);
+    assert.ok(PICTURE_TYPES.some((ext) => p.toLowerCase().endsWith(ext)), `${p} type`);
+  }
+  assert.deepEqual(parks.report.problems, []);
+});
+
+test('T2.2 every folder name in PICTURES.md matches its park', () => {
+  const guide = readFileSync(join(PARKS_DIR, 'PICTURES.md'), 'utf8');
+  const rows = [...guide.matchAll(/^\| `([A-Za-z-]+)` \| ([^|]+) \|$/gm)];
+  assert.equal(rows.length, 7, 'one row per region');
+  const theme = mkdtempSync(join(tmpdir(), 'ao-parks-'));
+  try {
+    const expected = {};
+    for (const [, region, list] of rows) {
+      for (const park of list.split(',').map((p) => p.trim())) {
+        const where = `pictures/${region}/${park}/x.jpg`;
+        mkdirSync(dirname(join(theme, where)), { recursive: true });
+        writeFileSync(join(theme, where), 'x');
+        expected[where] = true;
+      }
+    }
+    const { byId, problems } = findPictures(theme, parks.storyline.stickers.map((s) => ({ ...s, regionFolder: PARK_REGIONS.find((r) => r.title === s.region).folder })), PARK_FOLDERS);
+    assert.deepEqual(problems, []);
+    const found = Object.values(byId).flat();
+    assert.equal(found.length, 63, 'each folder matches exactly one park');
+    assert.ok(Object.values(byId).every((list) => list.length === 1), 'every park gets its folder');
+  } finally {
+    rmSync(theme, { recursive: true, force: true });
+  }
+});
+
+test('T2.4 no park picture is over 400 KB or wider/taller than 1600 px', () => {
+  for (const p of parkPictures) {
+    const bytes = readFileSync(join(PARKS_DIR, p));
+    assert.ok(bytes.length <= MAX_PICTURE_BYTES, `${p} is ${Math.round(bytes.length / 1024)} KB (limit 400 KB)`);
+    const size = pictureSize(bytes);
+    assert.ok(size, `${p} is not a readable JPEG, PNG or WebP file`);
+    assert.ok(Math.max(size.width, size.height) <= MAX_PICTURE_SIDE, `${p} is ${size.width}x${size.height} (limit ${MAX_PICTURE_SIDE} px)`);
+  }
+});
+
+test('T2.4 the Off-Roading theme is under its 50 MB size budget', () => {
+  const total = parkPictures.reduce((n, p) => n + statSync(join(PARKS_DIR, p)).size, 0);
+  assert.ok(total <= THEME_BUDGET_BYTES, `Off-Roading pictures total ${(total / 1e6).toFixed(1)} MB; keep about 3 pictures per park`);
+});
+
+test('T2.5 every park picture has a credit (CREDITS.md or the downloader\'s credits.csv)', () => {
+  assert.deepEqual(parks.report.uncredited, []);
+});
+
+test('the Off-Roading story text has milestones, detours with a {count}, and kind setback messages', () => {
+  const s = parks.storyline;
+  assert.equal(s.theme, 'parks');
+  assert.ok(s.title && s.intro && s.traveler);
+  assert.ok(s.milestones.length >= 9);
+  assert.ok(s.detours.length >= 3);
+  for (const d of s.detours) assert.match(d, /\{count\}/, `detour text needs {count}: "${d}"`);
+  for (const text of [...s.milestones, ...s.detours, ...s.detourCleared, ...s.setback]) {
+    assert.ok(text.length <= 140, `story text is too long to read aloud quickly: "${text}"`);
+  }
+});
+
+test('park names: short names, ids and how the voice says them', () => {
+  assert.equal(shortParkName('Arches National Park'), 'Arches');
+  assert.equal(shortParkName('National Park of American Samoa'), 'American Samoa');
+  assert.equal(shortParkName('Wrangell–St. Elias National Park'), 'Wrangell–St. Elias');
+  assert.equal(slug('Hawaiʻi Volcanoes'), 'hawaii-volcanoes');
+  assert.equal(slug('Haleakalā'), 'haleakala');
+  assert.equal(spokenName('Wrangell–St. Elias'), 'Wrangell Saint Elias');
+  assert.equal(spokenName('Hawaiʻi Volcanoes'), 'Hawaii Volcanoes');
+  assert.equal(spokenName('Denali'), 'Denali');
+  const wrangell = parks.storyline.stickers.find((s) => s.id === 'wrangell-st-elias');
+  assert.equal(wrangell.spokenName, 'Wrangell Saint Elias');
+  assert.equal(parks.storyline.stickers.find((s) => s.id === 'denali').spokenName, undefined);
+});
+
+test('the region file reader picks up location, year and attractions', () => {
+  const md = [
+    '# Test', '', '## Zeta National Park', '', '| | |', '|---|---|', '| **Location** | Utah |',
+    '| **Became a national park** | November 12, 1971 (national monument from 1929) |', '',
+    '**Key attractions**', '', '- **Delicate Arch:** The famous one.', '- **Fiery Furnace:** A maze.', '',
+    '## Alpha National Park', '', '| **Location** | Alaska |', '| **Became a national park** | 1980 |', '', '- **Ice:** Cold.',
+    '## Not a park', 'text',
+  ].join('\n');
+  const list = parseParkRegion(md, { title: 'Test', folder: 'Test' });
+  assert.deepEqual(list.map((p) => p.name), ['Alpha', 'Zeta'], 'alphabetical, and only park sections');
+  assert.equal(list[1].location, 'Utah');
+  assert.equal(list[1].established, '1971');
+  assert.deepEqual(list[1].attractions, ['Delicate Arch', 'Fiery Furnace']);
+});
+
+test('the downloader\'s credits.csv counts as credits, one picture per row', () => {
+  const csv = '﻿"File","Park","Attraction","Title","Source","Author","License","LicenseUrl"\r\n'
+    + '"pictures/Alaska/Denali/Denali - Wildlife_1.jpg","Denali","Wildlife","File:A, ""B"".jpg","https://x","Ann","CC BY-SA 4.0","https://y"\r\n'
+    + '"pictures/Alaska/Katmai/Katmai - Brooks Falls_1.jpg","Katmai","Brooks\nFalls","t","s","a","l","u"\r\n';
+  const credits = parseCreditsCsv(csv);
+  assert.deepEqual(credits, ['pictures/Alaska/Denali/Denali - Wildlife_1.jpg', 'pictures/Alaska/Katmai/Katmai - Brooks Falls_1.jpg']);
+  assert.ok(isCredited('pictures/Alaska/Denali/Denali - Wildlife_1.jpg', credits));
+  assert.ok(!isCredited('pictures/Alaska/Denali/Denali - Wildlife_2.jpg', credits));
+  assert.deepEqual(parseCreditsCsv('"Name","Other"\n"a","b"\n'), [], 'no File column: nothing');
+  assert.deepEqual(parseCreditsCsv(''), []);
 });

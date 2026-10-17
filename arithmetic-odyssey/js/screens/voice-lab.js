@@ -2,10 +2,10 @@
 // voice on this device with a choice of sample line, speed and pitch, and
 // every sound effect, so a grown-up can compare them and pick the best.
 
-import { describeVoice } from './settings.js?v=0.5.5';
-import { bestVersions, chooseVoice, isFunVoice, loadVoices, rankVoices, voiceId } from '../speech.js?v=0.5.5';
-import { SOUNDS, SYNTHS, playSound } from '../audio.js?v=0.5.5';
-import { choiceRow, h, topBar } from '../ui.js?v=0.5.5';
+import { describeVoice } from './settings.js?v=0.5.6';
+import { bestVersions, chooseVoice, isFunVoice, loadVoices, rankVoices, voiceId } from '../speech.js?v=0.5.6';
+import { SOUNDS, SYNTHS, playSound } from '../audio.js?v=0.5.6';
+import { choiceRow, h, topBar } from '../ui.js?v=0.5.6';
 
 const SOUND_NAMES = {
   right: 'Right answer (ding)',
@@ -22,7 +22,7 @@ const SOUND_NAMES = {
 const SAMPLES = {
   question: 'What is 7 times 8?',
   story: 'You crossed the steaming swamp! What is 12 plus 9?',
-  wrong: 'Not quite. 7 times 8 is 56.',
+  wrong: 'Incorrect. 7 times 8 is 56.',
   sticker: 'You made it! Your new sticker is Eoraptor.',
 };
 const RATES = [0.7, 0.8, 0.9, 0.95, 1, 1.1];

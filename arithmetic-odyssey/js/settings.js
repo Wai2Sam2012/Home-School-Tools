@@ -2,7 +2,7 @@
 // (chosen by the player on the Setup screen), with their allowed values.
 // normalize...() turns anything, including damaged saved data, into valid values.
 
-import { DIFFICULTIES, OPERATIONS } from './math.js?v=0.5.5';
+import { DIFFICULTIES, OPERATIONS } from './math.js?v=0.5.6';
 
 export const ADVENTURE_LENGTHS = Object.freeze([20, 40, 60, 80, 100]);
 export const DETOUR_MIN = 3;
@@ -12,7 +12,7 @@ export const DETOUR_MAX = 10;
 export const THEMES = Object.freeze({
   // flagSound: played when the player reaches a flag (a save point); see js/audio.js.
   dino: Object.freeze({ id: 'dino', title: 'Dino Tour', icon: '🦕', folder: 'themes/dino/', ready: true, flagSound: 'roar' }),
-  parks: Object.freeze({ id: 'parks', title: 'Off-Roading', icon: '🛻', folder: 'themes/national-parks/', ready: false, flagSound: 'engine' }),
+  parks: Object.freeze({ id: 'parks', title: 'Off-Roading', icon: '🛻', folder: 'themes/national-parks/', ready: true, flagSound: 'engine' }),
 });
 
 export const DIFFICULTY_LABELS = Object.freeze({
