@@ -8,4 +8,4 @@ A line below can name one picture (`pictures/Alaska/Denali/denali-1.jpg`) or a w
 
 | Picture file | National park | Source (website or photographer) | License or permission |
 | --- | --- | --- | --- |
-| `pictures/Alaska/**` | Alaska parks | Wikimedia Commons, downloaded with `tools/Get-ParkPictures.ps1`. | Various Creative Commons and public-domain licenses. **To do:** add the downloader's `credits.csv` to this folder so every picture's author and license are listed, then remove this line. |
+| `pictures/Alaska/**` | Alaska parks | Wikimedia Commons, downloaded with `tools/Get-ParkPictures.ps1`. The author of each picture is not recorded yet. | Unknown. |

@@ -480,6 +480,7 @@ Every stage ends with its tests passing, the site republished, and a short repor
   - the trail uses the truck colours, and the engine revs at each flag.
 
   The 8 Alaska parks have pictures, and the rest show a drawing for now. The story file builder also accepts the downloader's `credits.csv` as the credits for its pictures.
+- The Alaska pictures were resized to 1024 pixels on the longest side and 200 KB at most (71 pictures, 19 MB down to 9.2 MB), the size now recommended in `themes/national-parks/PICTURES.md`. Their credit is listed as unknown for now.
 - `tools/Get-ParkPictures.ps1` downloads about 5 Wikimedia Commons photos of each park attraction, with their credits, for the Off-Roading theme.
 - Voice lists show each voice once, in its best version; the iPad can list a name two or three times, including Apple's lowest-quality "super-compact" copies, which are labelled Basic. The tester can still show every copy.
 - `?debug=1` can make speech "never finish", to check the safety timeout (T5.3). Automated browser checks use a fake speech engine; the real voices are checked on the iPad (T5.2, T5.6).

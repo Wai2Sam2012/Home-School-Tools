@@ -213,7 +213,7 @@ The folders are the same as the game's (see [PICTURES.md](themes/national-parks/
   - `-ParkPicturesOnly`: 5 photos of each park instead of 5 per attraction (about 315 photos instead of about 1,260).
   - `-Force`: download again.
 - **What it keeps:** only JPEG and PNG landscape photos at least 800 pixels wide. It skips maps, logos, signs and diagrams. If an attraction has too few photos (for example "Sled dog kennels"), general photos of the park fill the gap.
-- **Size:** Commons sends copies 1280 pixels wide, so most photos already fit the game (at most 400 KB and 1600 pixels). The log marks any that are over 400 KB.
+- **Size:** Commons sends copies 1024 pixels wide, the size the game uses, so most photos are 100 to 200 KB and already fit the game (at most 400 KB and 1600 pixels). The log marks any that are over 400 KB.
 - **Re-running resumes:** photos already downloaded are skipped and never downloaded twice. A photo that fails to download is replaced by the next one found.
 - **Exit codes:** 0 everything worked, 1 something failed (see `download-log.csv`), 2 the script could not start.
 - **Credits:** every photo on Commons may be shared, but most licenses (CC BY, CC BY-SA) ask for a credit with the author and license. That is what `CREDITS-lines.md` is for. Public domain photos (most US government photos) need no credit, but keeping the line is good practice.
