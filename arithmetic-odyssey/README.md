@@ -12,6 +12,8 @@ An offline math adventure game for the iPad, with two themes: **Dino Tour** and 
 | [themes/national-parks/](themes/national-parks/) | Off-Roading theme. All 63 US national parks, grouped by region, with location, size, 2025 visitors, key attractions and history. [PICTURES.md](themes/national-parks/PICTURES.md) says what pictures to collect, their size, and the folder for each park. |
 | [tools/Get-DinoPictures.ps1](tools/Get-DinoPictures.ps1) | PowerShell script that downloads each dinosaur's pictures from dinosaurpictures.org. See below. |
 | [tools/Run-DinoPictures.cmd](tools/Run-DinoPictures.cmd) | Double-click launcher for the script. |
+| [tools/Get-ParkPictures.ps1](tools/Get-ParkPictures.ps1) | PowerShell script that downloads about 5 photos of each national park attraction from Wikimedia Commons, with their credits. See [Downloading the national park pictures](#downloading-the-national-park-pictures). |
+| [tools/Run-ParkPictures.cmd](tools/Run-ParkPictures.cmd) | Double-click launcher for the park script. |
 | [js/](js/) | The game's code. `app.js` starts the game and switches screens; each screen is in `js/screens/`. `adventure.js` has the adventure rules (steps, flags, detours, going back to a flag, unlocking stickers). `avatars.js` lists the player pictures (the files are in `images/avatars/`), `detour-road.js` draws the detour loop on the trail map, `audio.js` makes the sound effects, `speech.js` reads aloud (and knows reliably when it has finished), and `timer.js` is the thinking timer. `math.js` is the math engine: it makes problems for each operation and difficulty and checks answers. `keypad.js` is the on-screen keypad, `hold.js` the grown-up "hold for 3 seconds" button, `profiles.js` and `settings.js` the players and their settings, `storyline.js` loads a theme's story file, and `art.js` draws a picture for stickers that don't have one. `debug.js` is the debug panel; `version.js` holds the version number. |
 | [css/style.css](css/style.css) | The game's styles. |
 | [images/avatars/](images/avatars/) | The 16 player pictures, one file each, so they can be edited or replaced. See its [README](images/avatars/README.md). |
@@ -185,6 +187,36 @@ What happens when something goes wrong:
 - **Missing pictures on the site.** Some pictures linked from the site no longer exist (the image server answers "NoSuchKey"). Those are logged as failed and can't be downloaded.
 
 **This repository is public.** The pictures on dinosaurpictures.org come from many different artists, and their licenses are often unclear. `downloaded-pictures/` is listed in `.gitignore` so the raw downloads are never committed by accident. Only commit pictures you are allowed to share.
+
+## Downloading the national park pictures
+
+`tools/Get-ParkPictures.ps1` reads every park and its **Key attractions** from the region files in `themes/national-parks/` (63 parks, 252 attractions), searches [Wikimedia Commons](https://commons.wikimedia.org/) (the free photo library behind Wikipedia) for each attraction, and saves about 5 landscape photos of each one:
+
+```
+themes/national-parks/downloaded-pictures/
+├── Southwest/
+│   └── Arches/          Arches - Delicate Arch_1.jpg ... Arches - Landscape Arch_5.jpg
+├── Alaska/
+│   └── Denali/          Denali - The mountain_1.jpg ... Denali - Wildlife_5.jpg
+├── download-log.csv
+├── credits.csv          author, license and source page of every photo
+└── CREDITS-lines.md     table lines ready to paste into themes/national-parks/CREDITS.md
+```
+
+The folders are the same as the game's (see [PICTURES.md](themes/national-parks/PICTURES.md)), so copy the photos you like into `themes/national-parks/pictures/` keeping the region and park folders, and paste their lines from `CREDITS-lines.md` into `CREDITS.md`.
+
+- **Double-click** `tools\Run-ParkPictures.cmd`, or run it from PowerShell like the dinosaur script.
+- **It takes a while:** every attraction is about 6 requests with a 1-second pause between them, so all 63 parks take about 30 minutes. Try one park first: `.\Get-ParkPictures.ps1 -Park Arches -ListOnly` lists what it would download.
+- **Useful options:**
+  - `-Park Arches,Zion` or `-Region Southwest`: only some parks.
+  - `-PicturesPerAttraction 3`: fewer pictures.
+  - `-ParkPicturesOnly`: 5 photos of each park instead of 5 per attraction (about 315 photos instead of about 1,260).
+  - `-Force`: download again.
+- **What it keeps:** only JPEG and PNG landscape photos at least 800 pixels wide. It skips maps, logos, signs and diagrams. If an attraction has too few photos (for example "Sled dog kennels"), general photos of the park fill the gap.
+- **Size:** Commons sends copies 1280 pixels wide, so most photos already fit the game (at most 400 KB and 1600 pixels). The log marks any that are over 400 KB.
+- **Re-running resumes:** photos already downloaded are skipped and never downloaded twice. A photo that fails to download is replaced by the next one found.
+- **Exit codes:** 0 everything worked, 1 something failed (see `download-log.csv`), 2 the script could not start.
+- **Credits:** every photo on Commons may be shared, but most licenses (CC BY, CC BY-SA) ask for a credit with the author and license. That is what `CREDITS-lines.md` is for. Public domain photos (most US government photos) need no credit, but keeping the line is good practice.
 
 ## Moving pictures you already downloaded
 

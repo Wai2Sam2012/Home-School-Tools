@@ -16,6 +16,10 @@ All 63 parks with 4 pictures each at about 250 KB is about 63 MB. The game shoul
 
 To make a photo smaller on Windows: open it in **Photos** › **⋯** › **Resize image**, choose a custom width of 1600 pixels and quality 80, and save a copy. (A resize script will be added with this theme.)
 
+## Downloading them with the script
+
+`tools/Run-ParkPictures.cmd` (or `tools/Get-ParkPictures.ps1`) downloads about 5 photos of each park's key attractions from Wikimedia Commons into `downloaded-pictures/`, in these same folders, and writes the credit lines for you. See "Downloading the national park pictures" in the [game's README](../../README.md#downloading-the-national-park-pictures).
+
 ## Where to find pictures you may share
 
 The game is published, so only use pictures you are allowed to share:
