@@ -71,7 +71,7 @@ Home-School-Tools/                public repository
     ├── js/audio.js               sound effects and voice
     ├── icons/                    app icons (192×192, 512×512, Apple touch icon)
     ├── themes/
-    │   ├── dino/                 "Dino Tour" theme
+    │   ├── dino/                 "Dinosaur Adventure" theme
     │   │   ├── triassic.md, jurassic.md, cretaceous.md   facts for 60 dinosaurs
     │   │   ├── game-text.json    kid-friendly facts and story text (milestones, detours)
     │   │   ├── storyline.json    built, not stored in git: stickers in order, facts, pictures
@@ -96,7 +96,7 @@ Each theme's Markdown files in its `themes/` folder, plus the kid-friendly facts
 
 | Theme | Journey | Fact source | Stickers, in this order |
 |---|---|---|---|
-| **Dino Tour** | Travel through the Triassic, Jurassic and Cretaceous | `themes/dino/triassic.md`, `jurassic.md`, `cretaceous.md` | 60 dinosaurs: Triassic #1–20, then Jurassic #1–20, then Cretaceous #1–20 |
+| **Dinosaur Adventure** | Travel through the Triassic, Jurassic and Cretaceous | `themes/dino/triassic.md`, `jurassic.md`, `cretaceous.md` | 60 dinosaurs: Triassic #1–20, then Jurassic #1–20, then Cretaceous #1–20 |
 | **Off-Roading** | Drive a truck to national parks across the US | `themes/national-parks/README.md` and the region files | 63 parks: region by region in the order of the README's region table, alphabetically within each region |
 
 **Facts**
@@ -126,7 +126,7 @@ Keep each theme's pictures under about 50 MB (the Dino theme with 3–5 pictures
 1. **Tap to Start**: shown on every launch. It unlocks sound and speech (see 1.9) and then shows the profile screen.
 2. **Profiles**: create, choose or delete a profile. Each profile has its own Sticker Album, stats, high scores and saved adventure. If a saved adventure exists, offer **Resume Adventure**.
 3. **Setup**:
-   - Theme: Dino Tour or Off-Roading. The screen shows where the trip is going, for example *"Next stop: Eoraptor!"*
+   - Theme: Dinosaur Adventure or Off-Roading. The screen shows where the trip is going, for example *"Next stop: Eoraptor!"*
    - Operations: checkboxes for +, −, × and ÷. At least one must be selected.
    - Difficulty: Beginner, Intermediate or Advanced (see 1.7).
 4. **Adventure**: the question, the progress map with milestones, the on-screen keypad, and detours.
@@ -454,7 +454,7 @@ Every stage ends with its tests passing, the site republished, and a short repor
 
 - Players choose from 16 pictures: long-neck dinosaur, triceratops, T. rex, mosasaur, pterosaur, blue pickup truck, monster truck, dirt bike, blue SUV, blue ATV, robot, rocket, butterfly, unicorn, dog and cat. They are drawn in `js/avatars.js` (there are no emoji for several of them, and iPad emoji face left); all face right.
 - The player's picture travels the trail map. On a detour it leaves the trail onto a road that loops below it, moves round the loop with each detour question, and rejoins the trail where it left.
-- A right answer plays a bell "ding". Reaching a flag plays the theme's sound: a dinosaur roar in Dino Tour, an engine revving in Off-Roading. Both are made in code and can be replaced with recorded sounds in the theme's `sounds/` folder later.
+- A right answer plays a bell "ding". Reaching a flag plays the theme's sound: a dinosaur roar in Dinosaur Adventure, an engine revving in Off-Roading. Both are made in code and can be replaced with recorded sounds in the theme's `sounds/` folder later.
 - The keypad's ✔ and ⌫ are drawn icons (a white check on green), because the iPad can show those characters as small grey emoji.
 - The page never scrolls or bounces. Every game screen fits the iPad in both orientations; only the Sticker Album and Settings, which are long lists, scroll inside the screen.
 
@@ -523,12 +523,13 @@ Every stage ends with its tests passing, the site republished, and a short repor
 
 **Counting blocks (for tips, added after 0.6.2):** `js/blocks.js` defines 11 blocks, each made of unit squares and colored by value: 1 Green (1x1), 2 Orange (1x2), 3 Pink (1x3), 4 Yellow (1x4), 5 Light Blue (1x5), 6 Purple (1x6), 7 Tan (1x7), 8 Brown (1x8), 9 Mint Green (1x9), 10 Dark Blue (1x10) and 100 Red (10x10). `blockSvg()` draws one (lying down or standing up, any size, with its value or with numbered squares) and `numberAsBlocks()` splits a number into the fewest blocks. `tools/build-blocks.mjs` writes them as pictures to `images/blocks/`. They are not used in the game yet; they are meant for counting tips later (for example, 7 + 5 shown as a 7 block and a 5 block, then as a 10 block and a 2 block).
 
-**0.6.3:** two more Off-Roading flag sounds, both CC0: a dirt bike passing and jumping a ramp ("motorcycle dirt bike motocross pass by medium speed and jump dirt ramp1.wav" by kyles) and a motorbike pulling away ("motorbike crm 250 cc onboard ride pullaway.wav" by martian), cleaned up the same way (4.8 s each). Off-Roading now picks from 4 flag sounds, Dino Tour from 3.
+**0.6.3:** two more Off-Roading flag sounds, both CC0: a dirt bike passing and jumping a ramp ("motorcycle dirt bike motocross pass by medium speed and jump dirt ramp1.wav" by kyles) and a motorbike pulling away ("motorbike crm 250 cc onboard ride pullaway.wav" by martian), cleaned up the same way (4.8 s each). Off-Roading now picks from 4 flag sounds, Dinosaur Adventure from 3.
 
 **0.6.3 (also):**
 - **Help** (🙏, counting blocks) for addition and subtraction: the question drawn with counting blocks in place of the trail map (`tipSvg()` in `js/blocks.js`, `js/tip-card.js`); each question's Help counts once in the trip's "Help used". Learn from Incorrect has it too, not counted.
 - **High scores** now rank by the most right answers (as a share of all answers; a trip with more wandering questions isn't favoured), then the shortest thinking time, then the least Help. (This replaces "fewest setbacks first".)
 - **Layout:** the answer box above the keypad is gone; typed digits show in orange in the question in place of the ?. The 🙏 Help button sits in front of the question on an upright iPad and under it on a sideways one; the Help picture takes the place of the trail map and story while open, so it can be bigger.
+- **Theme name:** "Dino Tour" is now called **Dinosaur Adventure** (the theme button, the top bar, Trail's End and the docs), with new story text from the author in `themes/dino/game-text.json`.
 - The block badge sits on the last square (right end lying down, bottom standing up); the 3 block is a lighter pink.
 - Detours are called **wandering** wherever players see or hear it ("Wandering question 1 of 3", Wandering length, Wanderings on Trail's End); the code still says detour.
 
@@ -543,6 +544,39 @@ Every stage ends with its tests passing, the site republished, and a short repor
 | T7.3 | "Ready to play offline" appears only after everything is saved; a failed file stops it from appearing | PC |
 | T7.4 | A new version installs without interrupting an adventure and applies on the next launch | PC |
 | T7.5 | It works from a subpath (`http://localhost:8080/arithmetic-odyssey/`), and the service worker does not control pages outside `arithmetic-odyssey/` | PC |
+
+**Also in Stage 7: five colors of each player picture.** Players pick one of the 16 pictures, then one of its 5 colors (80 in all), from the author's picture set:
+
+| Picture (id) | Colors 1–5 |
+|---|---|
+| Cat (`cat`) | orange, gray, black, light brown, calico |
+| T. rex (`trex`) | green, blue, orange, purple, olive |
+| Monster truck (`monstertruck`) | red, blue, green, purple, yellow |
+| Pterosaur (`pterosaur`) | orange, green, blue, red, purple |
+| Robot (`robot`) | white, red, teal, yellow, green |
+| Rocket (`rocket`) | red, blue, teal, black, purple (each with white) |
+| Triceratops (`triceratops`) | green, blue, brown, purple, gold |
+| Unicorn (`unicorn`) | pink, blue, rainbow, lavender, white and gold |
+| SUV (`suv`) | white, black, blue, red, green |
+| ATV (`atv`) | red, blue, green, yellow, purple |
+| Butterfly (`butterfly`) | orange, blue, pink, purple, green |
+| Dirt bike (`dirtbike`) | red, blue, green, orange, yellow |
+| Dog (`dog`) | golden, black, brown and white, husky, white |
+| Long-neck dinosaur (`longneck`) | green, blue, brown, purple, teal |
+| Mosasaur (`mosasaur`) | blue, teal, gray, purple, green |
+| Pickup truck (`pickup`) | red, blue, black, white, green |
+
+- **Files:** `images/avatars/<id>/<color>.png`, for example `images/avatars/cat/gray.png`. Each is square with a transparent background, made smaller from the 512 × 512 originals to 256 × 256 (about 2–3 MB for all 80, so they can be saved for offline play). Every picture faces right, toward the finish on the trail map; any that face left are flipped when they are made smaller. The originals are not kept in the repository.
+- **Choosing:** on the new-player and edit-player screens, tap a picture, then one of 5 color dots under it. The choice shows straight away.
+- **Saving:** the player keeps their picture `id` and adds a `color` (1–5). Players saved before this, and backups from older versions, get color 1. The game falls back to the drawn picture (the current `.svg`) if a picture file is missing.
+- **Credits:** where the pictures came from goes in `images/avatars/README.md`.
+
+| ID | Test | Kind |
+|---|---|---|
+| T7.6 | Every picture has 5 color files; each is square, about 256 × 256, under 100 KB, and in the offline file list | Automated |
+| T7.7 | A player's color is saved, survives a reload, is kept in a backup, and an old save or backup without one reads as color 1; a damaged color reads as 1 | Automated |
+| T7.8 | Choosing a picture and a color on the new-player and edit-player screens shows that color on Home, the trail map and My Stats | PC |
+| T7.9 | Every picture faces right on the trail map, and the color dots are easy to tap on the iPad | iPad |
 
 ### Stage 8: Release and iPad acceptance
 
