@@ -369,10 +369,22 @@ h1:focus {
   line-height: 1.1;
 }
 
-.start-art span {
+.start-art .start-symbol {
+  display: inline-block;
+  width: 1.2em;
   margin: 0 0.15em;
   font-size: 0.5em;
+  text-align: center;
   vertical-align: middle;
+}
+
+.start-symbol.flip {
+  animation: symbol-flip 0.45s ease;
+}
+
+@keyframes symbol-flip {
+  from { transform: rotateY(90deg) scale(0.6); }
+  to { transform: rotateY(0) scale(1); }
 }
 
 .start-screen h1 {
@@ -614,6 +626,12 @@ h1:focus {
   color: var(--ok);
 }
 
+.question.wrong-answer {
+  color: var(--error);
+  text-decoration: line-through;
+  text-decoration-thickness: 4px;
+}
+
 .feedback.wrong {
   color: var(--error);
 }
@@ -649,6 +667,15 @@ h1:focus {
   line-height: 64px;
   text-align: center;
   font-variant-numeric: tabular-nums;
+}
+
+/* After a wrong answer: the question with the right answer, in green. */
+.answer-display.correct-answer {
+  border-color: var(--ok);
+  background: #e7f6ec;
+  color: var(--ok);
+  font-size: clamp(30px, 4.5vw, 44px);
+  white-space: nowrap;
 }
 
 .answer-display.empty {
@@ -872,7 +899,7 @@ h1:focus {
   display: block;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
 }
 
 .trail-count {
@@ -1131,7 +1158,18 @@ h1:focus {
 .tile-name {
   font-size: 17px;
   font-weight: 700;
-  overflow-wrap: anywhere;
+  line-height: 1.2;
+  /* Names only break between words; long one-word names get a smaller size (js/screens/album.js). */
+  overflow-wrap: normal;
+  hyphens: none;
+}
+
+.tile-name.long {
+  font-size: 14px;
+}
+
+.tile-name.longest {
+  font-size: 12.5px;
 }
 
 .tile-badge {
@@ -1160,7 +1198,8 @@ h1:focus {
   display: block;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  /* Show the whole picture: many are much wider than the tile, and cropping cut the dinosaur. */
+  object-fit: contain;
 }
 
 .sticker-art {
@@ -1230,17 +1269,22 @@ h1:focus {
   object-fit: contain;
 }
 
-.picture-arrows {
+.picture-dots {
   display: flex;
-  align-items: center;
   justify-content: center;
-  gap: 20px;
+  gap: 8px;
   margin-top: 10px;
 }
 
-.picture-count {
-  min-width: 4em;
-  color: var(--muted);
+.picture-dots .dot {
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  background: var(--line);
+}
+
+.picture-dots .dot.on {
+  background: var(--accent);
 }
 
 .detail-list,

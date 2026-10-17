@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="256" height="256">
+  <title>Mosasaur</title>
+  <path d="M2 50 Q10 46 18 50 T34 50 T50 50 T64 50" stroke="#8fd3f5" stroke-width="3" fill="none"/>
+  <path d="M2 22 L11 30 L2 38Z" fill="#1f6fa8"/>
+  <path d="M8 30 Q16 21 28 25 Q42 20 52 24 Q62 27 63 31 Q57 35 47 35 Q32 39 20 35 Q12 37 8 30Z" fill="#2e86c1"/>
+  <path d="M20 34 Q32 37 47 34 Q36 31 22 31Z" fill="#a9d6f2"/>
+  <ellipse cx="27" cy="38" rx="6" ry="2.5" transform="rotate(25 27 38)" fill="#1f6fa8"/>
+  <ellipse cx="42" cy="37" rx="5" ry="2.2" transform="rotate(25 42 37)" fill="#1f6fa8"/>
+  <path d="M50 31 L63 31" stroke="#174f78" stroke-width="1.5"/>
+  <path d="M52 31 L53.5 33 L55 31 L56.5 33 L58 31 L59.5 33 L61 31Z" fill="#fff"/>
+  <circle cx="53" cy="27" r="1.5" fill="#1d1d1d"/>
+  <path d="M30 22 L34 16 L38 22Z" fill="#1f6fa8"/>
+</svg>

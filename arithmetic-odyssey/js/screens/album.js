@@ -1,10 +1,18 @@
 // 6. Sticker Album: every sticker in order, with locked ones greyed out.
 // Tapping a collected sticker shows its pictures and facts.
 
-import { placeholderArt, stickerPicture } from '../art.js?v=0.5.2';
-import { THEMES } from '../settings.js?v=0.5.2';
-import { nextSticker } from '../storyline.js?v=0.5.2';
-import { choiceRow, flash, h, topBar } from '../ui.js?v=0.5.2';
+import { placeholderArt, stickerPicture } from '../art.js?v=0.5.5';
+import { THEMES } from '../settings.js?v=0.5.5';
+import { nextSticker } from '../storyline.js?v=0.5.5';
+import { choiceRow, flash, h, topBar } from '../ui.js?v=0.5.5';
+
+/** Long one-word names get a smaller size so they fit on one line ("Thecodontosaurus"). */
+function nameSize(name) {
+  const longestWord = Math.max(0, ...name.split(/\s+/).map((w) => w.length));
+  if (longestWord > 17) return ' longest';
+  if (longestWord > 13) return ' long';
+  return '';
+}
 
 export function albumScreen(ctx, { theme = 'dino' } = {}) {
   const player = ctx.profiles.active();
@@ -30,7 +38,7 @@ export function albumScreen(ctx, { theme = 'dino' } = {}) {
           onclick: () => (have ? showSticker(theme, s) : flash(status, `Keep exploring to unlock sticker ${s.number}!`)),
         },
         have ? stickerPicture(theme, s, 0, { className: 'tile-picture' }) : h('div', { class: 'tile-picture' }, placeholderArt(theme, s, { locked: true })),
-        h('span', { class: 'tile-name' }, have ? s.name : `#${s.number}`),
+        h('span', { class: `tile-name${nameSize(have ? s.name : '')}` }, have ? s.name : `#${s.number}`),
         s === upNext ? h('span', { class: 'tile-badge' }, 'Next!') : null);
       });
       body.replaceChildren(
@@ -61,34 +69,29 @@ export function albumScreen(ctx, { theme = 'dino' } = {}) {
   );
 }
 
-/** A large card with the sticker's pictures (with arrows if there are several) and facts. */
+/** How long each picture shows on the sticker card before the next one. */
+export const PICTURE_MS = 3000;
+
+/** A large card with the sticker's pictures (changing by themselves every few seconds) and facts. */
 function showSticker(theme, sticker) {
   let index = 0;
+  let timer = 0;
+  const total = sticker.pictures.length;
   const pictureBox = h('div', { class: 'detail-picture-box' });
-  const count = h('span', { class: 'picture-count' });
+  // Dots show how many pictures there are and which one is showing.
+  const dots = total > 1 ? h('div', { class: 'picture-dots', 'aria-hidden': 'true' }, sticker.pictures.map(() => h('span', { class: 'dot' }))) : null;
   const showPicture = () => {
-    pictureBox.replaceChildren(stickerPicture(theme, sticker, index, { className: 'detail-picture' }));
-    count.textContent = sticker.pictures.length > 1 ? `${index + 1} / ${sticker.pictures.length}` : '';
-  };
-  const step = (change) => {
-    index = (index + change + sticker.pictures.length) % sticker.pictures.length;
-    showPicture();
+    pictureBox.replaceChildren(stickerPicture(theme, sticker, index, { className: 'detail-picture slide' }));
+    if (dots) [...dots.children].forEach((dot, i) => dot.classList.toggle('on', i === index));
   };
   const close = () => {
+    clearInterval(timer);
     overlay.remove();
     document.removeEventListener('keydown', onKey);
   };
   const onKey = (event) => {
     if (event.key === 'Escape') close();
-    if (sticker.pictures.length > 1 && event.key === 'ArrowLeft') step(-1);
-    if (sticker.pictures.length > 1 && event.key === 'ArrowRight') step(1);
   };
-  const arrows = sticker.pictures.length > 1
-    ? h('div', { class: 'picture-arrows' },
-      h('button', { type: 'button', class: 'round-button', 'aria-label': 'Previous picture', onclick: () => step(-1) }, '‹'),
-      count,
-      h('button', { type: 'button', class: 'round-button', 'aria-label': 'Next picture', onclick: () => step(1) }, '›'))
-    : null;
   const details = [
     sticker.group && `${sticker.group}${sticker.diet ? ` · ${sticker.diet}` : ''}`,
     sticker.when,
@@ -98,7 +101,7 @@ function showSticker(theme, sticker) {
   const overlay = h('div', { class: 'overlay', role: 'dialog', 'aria-modal': 'true', 'aria-label': sticker.name },
     h('div', { class: 'dialog sticker-detail' },
       pictureBox,
-      arrows,
+      dots,
       h('h2', {}, `${sticker.number}. ${sticker.name}`),
       h('ul', { class: 'detail-list' }, details.map((d) => h('li', {}, d))),
       h('ul', { class: 'fact-list' }, sticker.facts.map((f) => h('li', {}, f))),
@@ -109,6 +112,12 @@ function showSticker(theme, sticker) {
     if (event.target === overlay) close();
   });
   showPicture();
+  if (total > 1) {
+    timer = setInterval(() => {
+      index = (index + 1) % total;
+      showPicture();
+    }, PICTURE_MS);
+  }
   document.addEventListener('keydown', onKey);
   document.body.append(overlay);
   overlay.closeOverlay = close;

@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="256" height="256">
+  <title>Blue ATV</title>
+  <circle cx="15" cy="45" r="11" fill="#2b2b2b"/><circle cx="15" cy="45" r="4" fill="#95a5a6"/>
+  <circle cx="49" cy="45" r="11" fill="#2b2b2b"/><circle cx="49" cy="45" r="4" fill="#95a5a6"/>
+  <path d="M3 36 Q15 24 27 34Z" fill="#2f6fd6"/>
+  <path d="M37 34 Q49 24 61 36Z" fill="#2f6fd6"/>
+  <rect x="20" y="27" width="24" height="9" rx="3" fill="#2f6fd6"/>
+  <rect x="18" y="23" width="16" height="5" rx="2" fill="#2b2b2b"/>
+  <path d="M42 27 L46 17" stroke="#555" stroke-width="3"/>
+  <path d="M42 16 L50 16" stroke="#2b2b2b" stroke-width="3" stroke-linecap="round"/>
+</svg>

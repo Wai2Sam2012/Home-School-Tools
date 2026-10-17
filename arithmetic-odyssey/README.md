@@ -9,11 +9,14 @@ An offline math adventure game for the iPad, with two themes: **Dino Tour** and 
 | [index.html](index.html) | The game's page. The screens are drawn by `js/app.js`. |
 | [GAME-PLAN.md](GAME-PLAN.md) | Plan and AI-agent brief for the game, with build stages, a test plan and decisions. |
 | [themes/dino/](themes/dino/) | Dino Tour theme. The top 20 dinosaurs from each period, with a quick list and a detailed summary of each one: [Triassic](themes/dino/triassic.md), [Jurassic](themes/dino/jurassic.md), [Cretaceous](themes/dino/cretaceous.md). [game-text.json](themes/dino/game-text.json) has the kid-friendly facts and story text; `pictures/` has the pictures (see [Adding pictures](#adding-pictures)). |
-| [themes/national-parks/](themes/national-parks/) | Off-Roading theme. All 63 US national parks, grouped by region, with location, size, 2025 visitors, key attractions and history. |
+| [themes/national-parks/](themes/national-parks/) | Off-Roading theme. All 63 US national parks, grouped by region, with location, size, 2025 visitors, key attractions and history. [PICTURES.md](themes/national-parks/PICTURES.md) says what pictures to collect, their size, and the folder for each park. |
 | [tools/Get-DinoPictures.ps1](tools/Get-DinoPictures.ps1) | PowerShell script that downloads each dinosaur's pictures from dinosaurpictures.org. See below. |
 | [tools/Run-DinoPictures.cmd](tools/Run-DinoPictures.cmd) | Double-click launcher for the script. |
-| [js/](js/) | The game's code. `app.js` starts the game and switches screens; each screen is in `js/screens/`. `adventure.js` has the adventure rules (steps, flags, detours, going back to a flag, unlocking stickers). `avatars.js` has the 16 player pictures (drawn, all facing right), `detour-road.js` draws the detour loop on the trail map, `audio.js` makes the sound effects, `speech.js` reads aloud (and knows reliably when it has finished), and `timer.js` is the thinking timer. `math.js` is the math engine: it makes problems for each operation and difficulty and checks answers. `keypad.js` is the on-screen keypad, `hold.js` the grown-up "hold for 3 seconds" button, `profiles.js` and `settings.js` the players and their settings, `storyline.js` loads a theme's story file, and `art.js` draws a picture for stickers that don't have one. `debug.js` is the debug panel; `version.js` holds the version number. |
+| [tools/Get-ParkPictures.ps1](tools/Get-ParkPictures.ps1) | PowerShell script that downloads about 5 photos of each national park attraction from Wikimedia Commons, with their credits. See [Downloading the national park pictures](#downloading-the-national-park-pictures). |
+| [tools/Run-ParkPictures.cmd](tools/Run-ParkPictures.cmd) | Double-click launcher for the park script. |
+| [js/](js/) | The game's code. `app.js` starts the game and switches screens; each screen is in `js/screens/`. `adventure.js` has the adventure rules (steps, flags, detours, going back to a flag, unlocking stickers). `avatars.js` lists the player pictures (the files are in `images/avatars/`), `detour-road.js` draws the detour loop on the trail map, `audio.js` makes the sound effects, `speech.js` reads aloud (and knows reliably when it has finished), and `timer.js` is the thinking timer. `math.js` is the math engine: it makes problems for each operation and difficulty and checks answers. `keypad.js` is the on-screen keypad, `hold.js` the grown-up "hold for 3 seconds" button, `profiles.js` and `settings.js` the players and their settings, `storyline.js` loads a theme's story file, and `art.js` draws a picture for stickers that don't have one. `debug.js` is the debug panel; `version.js` holds the version number. |
 | [css/style.css](css/style.css) | The game's styles. |
+| [images/avatars/](images/avatars/) | The 16 player pictures, one file each, so they can be edited or replaced. See its [README](images/avatars/README.md). |
 | [tools/Start-LocalServer.ps1](tools/Start-LocalServer.ps1) | Runs the game in a browser on your PC. See [Testing in a browser on your PC](#testing-in-a-browser-on-your-pc). |
 | [tools/set-version.mjs](tools/set-version.mjs) | Sets a new version number, and the matching `?v=` tag on every game file, so browsers never mix cached files from two versions. Run `node tools/set-version.mjs 1.2.3` for each release. |
 | [tools/build-storyline.mjs](tools/build-storyline.mjs) | Builds each theme's story file (`storyline.json`) from its fact files, `game-text.json` and pictures. Run automatically; see [Adding pictures](#adding-pictures). |
@@ -43,7 +46,7 @@ cd arithmetic-odyssey
 node --test
 ```
 
-You should see `# fail 0` (132 tests at the end of Stage 5). Each test name starts with its ID from the test plan in [GAME-PLAN.md](GAME-PLAN.md) where it has one, for example `T1.3`.
+You should see `# fail 0` (134 tests at the end of Stage 5). Each test name starts with its ID from the test plan in [GAME-PLAN.md](GAME-PLAN.md) where it has one, for example `T1.3`.
 
 ## Testing in a browser on your PC
 
@@ -73,6 +76,24 @@ Every push to the repository's `main` branch runs `.github/workflows/deploy.yml`
 **One-time setup:** in the repository on GitHub, open **Settings → Pages** and set **Build and deployment → Source** to **GitHub Actions**. Without this, the deploy step fails.
 
 The **Actions** tab shows each run; a green tick means it published. Tests, tools and `downloaded-pictures` are never published. To preview exactly what will be published, run `node .github/scripts/assemble-site.mjs` from the repository folder; it copies the site into `_site`.
+
+## Changing the game
+
+Most things can be changed without knowing much code. After a change, run the tests (see [Running the tests](#running-the-tests)) and try it with the local server.
+
+| To change | Edit |
+| --- | --- |
+| **Player pictures** | The files in [images/avatars/](images/avatars/); names and order in `js/avatars.js`. See [its README](images/avatars/README.md). |
+| **Story text**: flags, detours, getting back on the trail, going back to a flag | `themes/dino/game-text.json`: `milestones`, `detours` (`{count}` becomes the number of detour questions), `detourCleared` and `setback`. Each list can have any number of lines. |
+| **Kid-friendly dinosaur facts** | `themes/dino/game-text.json`, under `kidFacts` (2 or 3 per dinosaur). |
+| **What happens after a wrong answer** | What the screen shows (the answer crossed out in red, "✗ Incorrect ✗", and the right answer in green in the answer box) and the words read aloud ("Not quite. 7 times 8 is 56."): `js/screens/adventure.js`, in `submit()`; the colours are in `css/style.css` under `.question.wrong-answer` and `.answer-display.correct-answer`. The **Got it ›** button is made just below it. The rules (a wrong answer starts a detour; all detour answers wrong goes back to the last flag): `js/adventure.js`, in `answerProblem()`. The number of detour questions is in the game's grown-up Settings. |
+| **Praise after a right answer** ("Great job!") | `PRAISE` at the top of `js/screens/adventure.js`. |
+| **How long the game waits** after a right answer | `NEXT_AFTER_RIGHT_MS` at the top of `js/screens/adventure.js` (in milliseconds). |
+| **Sound effects** | `js/audio.js`: `SOUNDS` lists the notes of each sound; `playRoar()` and `playEngine()` make the flag sounds. Hear them all in the voice and sound tester (`?debug=1`). |
+| **Which sound plays at a flag** | `flagSound` for each theme in `js/settings.js`. |
+| **The detour road** on the trail map | Its shape in `js/detour-road.js` (`LOOP`); its colours in `css/style.css` under `.detour-road`. |
+
+After changing any `.js` file, give the game a new version number so iPads load the new files: `node tools/set-version.mjs 1.2.3`.
 
 ## Adding pictures
 
@@ -166,6 +187,36 @@ What happens when something goes wrong:
 - **Missing pictures on the site.** Some pictures linked from the site no longer exist (the image server answers "NoSuchKey"). Those are logged as failed and can't be downloaded.
 
 **This repository is public.** The pictures on dinosaurpictures.org come from many different artists, and their licenses are often unclear. `downloaded-pictures/` is listed in `.gitignore` so the raw downloads are never committed by accident. Only commit pictures you are allowed to share.
+
+## Downloading the national park pictures
+
+`tools/Get-ParkPictures.ps1` reads every park and its **Key attractions** from the region files in `themes/national-parks/` (63 parks, 252 attractions), searches [Wikimedia Commons](https://commons.wikimedia.org/) (the free photo library behind Wikipedia) for each attraction, and saves about 5 landscape photos of each one:
+
+```
+themes/national-parks/downloaded-pictures/
+├── Southwest/
+│   └── Arches/          Arches - Delicate Arch_1.jpg ... Arches - Landscape Arch_5.jpg
+├── Alaska/
+│   └── Denali/          Denali - The mountain_1.jpg ... Denali - Wildlife_5.jpg
+├── download-log.csv
+├── credits.csv          author, license and source page of every photo
+└── CREDITS-lines.md     table lines ready to paste into themes/national-parks/CREDITS.md
+```
+
+The folders are the same as the game's (see [PICTURES.md](themes/national-parks/PICTURES.md)), so copy the photos you like into `themes/national-parks/pictures/` keeping the region and park folders, and paste their lines from `CREDITS-lines.md` into `CREDITS.md`.
+
+- **Double-click** `tools\Run-ParkPictures.cmd`, or run it from PowerShell like the dinosaur script.
+- **It takes a while:** every attraction is about 6 requests with a 1-second pause between them, so all 63 parks take about 30 minutes. Try one park first: `.\Get-ParkPictures.ps1 -Park Arches -ListOnly` lists what it would download.
+- **Useful options:**
+  - `-Park Arches,Zion` or `-Region Southwest`: only some parks.
+  - `-PicturesPerAttraction 3`: fewer pictures.
+  - `-ParkPicturesOnly`: 5 photos of each park instead of 5 per attraction (about 315 photos instead of about 1,260).
+  - `-Force`: download again.
+- **What it keeps:** only JPEG and PNG landscape photos at least 800 pixels wide. It skips maps, logos, signs and diagrams. If an attraction has too few photos (for example "Sled dog kennels"), general photos of the park fill the gap.
+- **Size:** Commons sends copies 1280 pixels wide, so most photos already fit the game (at most 400 KB and 1600 pixels). The log marks any that are over 400 KB.
+- **Re-running resumes:** photos already downloaded are skipped and never downloaded twice. A photo that fails to download is replaced by the next one found.
+- **Exit codes:** 0 everything worked, 1 something failed (see `download-log.csv`), 2 the script could not start.
+- **Credits:** every photo on Commons may be shared, but most licenses (CC BY, CC BY-SA) ask for a credit with the author and license. That is what `CREDITS-lines.md` is for. Public domain photos (most US government photos) need no credit, but keeping the line is good practice.
 
 ## Moving pictures you already downloaded
 

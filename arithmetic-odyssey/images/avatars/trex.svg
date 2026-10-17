@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="256" height="256">
+  <title>T. rex</title>
+  <path d="M2 28 L22 25 L24 35Z" fill="#3f8a50"/>
+  <ellipse cx="28" cy="33" rx="12" ry="10" fill="#4e9a5b"/>
+  <path d="M33 26 L38 16 L44 22 L40 31Z" fill="#4e9a5b"/>
+  <rect x="35" y="8" width="25" height="16" rx="6" fill="#4e9a5b"/>
+  <path d="M44 20 L60 20 L58 25 L44 24Z" fill="#3f8a50"/>
+  <path d="M46 20 L48 22.5 L50 20 L52 22.5 L54 20 L56 22.5 L58 20Z" fill="#fff"/>
+  <circle cx="49" cy="13" r="1.8" fill="#1d1d1d"/>
+  <path d="M37 33 L44 37" stroke="#3f8a50" stroke-width="3" stroke-linecap="round"/>
+  <path d="M20 38 L18 56 L26 56 L28 42Z" fill="#3f8a50"/>
+  <path d="M30 40 L32 56 L40 56 L36 40Z" fill="#3f8a50"/>
+  <ellipse cx="28" cy="36" rx="7" ry="4" fill="#8cc58f"/>
+</svg>

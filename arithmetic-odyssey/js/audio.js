@@ -24,6 +24,13 @@ export const VOLUME = 0.25;
 export const SYNTHS = Object.freeze({ roar: playRoar, engine: playEngine });
 export const SYNTH_LENGTHS = Object.freeze({ roar: 1.5, engine: 1.8 });
 
+/** How long a sound lasts, in milliseconds (0 for an unknown sound), so speech can wait for it. */
+export function soundLength(name) {
+  if (SYNTH_LENGTHS[name]) return Math.round(SYNTH_LENGTHS[name] * 1000);
+  const notes = SOUNDS[name]?.notes ?? [];
+  return Math.round(Math.max(0, ...notes.map(([, start, length]) => start + length)) * 1000);
+}
+
 /**
  * Unlocks sound and speech. Must run inside a tap or click handler.
  * Never throws: a device without sound or speech still plays (text only).

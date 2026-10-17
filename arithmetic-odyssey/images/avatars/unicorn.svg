@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="256" height="256">
+  <title>Unicorn</title>
+  <path d="M8 32 Q2 40 6 50 Q10 42 14 38Z" fill="#e17ee8"/>
+  <ellipse cx="28" cy="38" rx="15" ry="9" fill="#fdfdfd" stroke="#c9c3d9" stroke-width="1.5"/>
+  <path d="M36 34 L44 18 L52 20 L44 38Z" fill="#fdfdfd" stroke="#c9c3d9" stroke-width="1.5"/>
+  <path d="M43 17 Q52 14 59 22 Q60 28 54 28 L47 25Z" fill="#fdfdfd" stroke="#c9c3d9" stroke-width="1.5"/>
+  <path d="M47 15 L54 3 L51 17Z" fill="#f5c542"/>
+  <path d="M44 17 Q38 22 38 32 Q34 24 40 16Z" fill="#9b59b6"/>
+  <circle cx="52" cy="20" r="1.5" fill="#1d1d1d"/>
+  <rect x="17" y="44" width="5" height="14" rx="2" fill="#fdfdfd" stroke="#c9c3d9" stroke-width="1.5"/>
+  <rect x="35" y="44" width="5" height="14" rx="2" fill="#fdfdfd" stroke="#c9c3d9" stroke-width="1.5"/>
+</svg>

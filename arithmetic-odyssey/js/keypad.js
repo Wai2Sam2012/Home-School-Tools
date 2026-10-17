@@ -1,8 +1,8 @@
 // The on-screen number keypad. Answers are only ever typed here (or on a PC
 // keyboard), never in a text box, so the iPad's keyboard never opens.
 
-import { MAX_ANSWER_DIGITS } from './math.js?v=0.5.2';
-import { h } from './ui.js?v=0.5.2';
+import { MAX_ANSWER_DIGITS } from './math.js?v=0.5.5';
+import { h } from './ui.js?v=0.5.5';
 
 export const BACK = 'back';
 export const SUBMIT = 'submit';
@@ -65,6 +65,7 @@ export function createKeypad({ maxDigits = MAX_ANSWER_DIGITS, onSubmit = () => {
   function show() {
     display.textContent = value === '' ? '?' : value;
     display.classList.toggle('empty', value === '');
+    display.classList.remove('correct-answer');
   }
 
   function bump() {
@@ -123,6 +124,12 @@ export function createKeypad({ maxDigits = MAX_ANSWER_DIGITS, onSubmit = () => {
     clear() {
       value = '';
       show();
+    },
+    /** Shows the right answer in the answer box (in green) after a wrong one; clear() puts it back. */
+    showCorrect(text) {
+      display.textContent = text;
+      display.classList.remove('empty');
+      display.classList.add('correct-answer');
     },
     setEnabled(on) {
       enabled = on;

@@ -4,7 +4,7 @@
 
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { readFileSync, readdirSync } from 'node:fs';
+import { existsSync, readFileSync, readdirSync } from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -280,8 +280,8 @@ test('placeholder colours stay the same for each sticker', () => {
 });
 
 // ---------------------------------------------------------------- player pictures
-test('there are 16 player pictures, the ones asked for, each a drawing (no emoji, no scripts)', async () => {
-  const { AVATARS: PICTURES, avatarInfo } = await import('../js/avatars.js');
+test('there are 16 player pictures, the ones asked for, each a file in images/avatars', async () => {
+  const { AVATARS: PICTURES, avatarInfo, avatarUrl } = await import('../js/avatars.js');
   assert.deepEqual(PICTURES.map((a) => a.label), [
     'Long-neck dinosaur', 'Triceratops', 'T. rex', 'Mosasaur', 'Pterosaur', 'Blue pickup truck', 'Monster truck', 'Dirt bike',
     'Blue SUV', 'Blue ATV', 'Robot', 'Rocket', 'Butterfly', 'Unicorn', 'Dog', 'Cat',
@@ -289,9 +289,15 @@ test('there are 16 player pictures, the ones asked for, each a drawing (no emoji
   assert.deepEqual(AVATARS, PICTURES.map((a) => a.id), 'players choose from the same list');
   assert.equal(new Set(AVATARS).size, 16);
   for (const a of PICTURES) {
-    assert.match(a.svg, /<(path|ellipse|circle|rect)\b/, a.id);
-    assert.doesNotMatch(a.svg, /<script|on\w+=|href/i, `${a.id} is only shapes`);
-    assert.doesNotMatch(a.svg, /[\u{1F300}-\u{1FAFF}]/u, `${a.id} has no emoji`);
+    const path = join(GAME, 'images/avatars', a.file);
+    assert.ok(existsSync(path), `images/avatars/${a.file} is missing`);
+    assert.match(a.file, /\.(svg|png|jpe?g|webp)$/i, `${a.file} is a picture`);
+    if (a.file.endsWith('.svg')) {
+      const svg = readFileSync(path, 'utf8');
+      assert.match(svg, /^<svg[^>]*xmlns="http:\/\/www\.w3\.org\/2000\/svg"[^>]*viewBox=/, `${a.file} is an SVG drawing`);
+      assert.doesNotMatch(svg, /<script|\son\w+=|href=/i, `${a.file} is only shapes`);
+    }
   }
   assert.equal(avatarInfo('not-a-picture').id, 'longneck', 'an unknown picture falls back to the first');
+  assert.equal(avatarUrl('trex'), 'images/avatars/trex.svg', 'a relative address, so it works under /Home-School-Tools/');
 });

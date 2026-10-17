@@ -44,16 +44,19 @@ test('the folder structure from the Game Plan (1.4) is in place', () => {
     'themes/dino/jurassic.md',
     'themes/dino/cretaceous.md',
     'themes/dino/CREDITS.md',
+    'images/avatars/README.md',
     'themes/dino/pictures',
     'themes/national-parks/README.md',
     'themes/national-parks/CREDITS.md',
+    'themes/national-parks/PICTURES.md',
     'themes/national-parks/pictures',
   ];
   for (const path of required) assert.ok(existsSync(join(GAME, path)), `missing arithmetic-odyssey/${path}`);
   for (const path of ['index.html', '.github/workflows/deploy.yml', '.github/scripts/assemble-site.mjs']) {
     assert.ok(existsSync(join(REPO, path)), `missing ${path} at the top of the repository`);
   }
-  const regions = readdirSync(join(GAME, 'themes/national-parks')).filter((f) => f.endsWith('.md') && f !== 'README.md' && f !== 'CREDITS.md');
+  const notRegions = ['README.md', 'CREDITS.md', 'PICTURES.md'];
+  const regions = readdirSync(join(GAME, 'themes/national-parks')).filter((f) => f.endsWith('.md') && !notRegions.includes(f));
   assert.equal(regions.length, 7, 'the 7 national park region files');
 });
 

@@ -46,12 +46,17 @@ export function isFunVoice(voice) {
   return FUN_VOICES.includes(baseName(voice)) || /eloquence|novelty/i.test(voice.voiceURI ?? '');
 }
 
-/** 0 = Premium, 1 = Enhanced or natural sounding (Neural/Natural/known name), 2 = standard, 3 = fun or robotic. */
+/**
+ * 0 = Premium, 1 = Enhanced or natural sounding (Neural/Natural), 1.5 = a known
+ * natural voice, 2 = standard, 2.5 = "super-compact" (Apple's smallest, lowest
+ * quality copies), 3 = fun or robotic.
+ */
 export function voiceQuality(voice) {
   if (isFunVoice(voice)) return 3;
   const text = `${voice.name ?? ''} ${voice.voiceURI ?? ''}`;
   if (/premium/i.test(text)) return 0;
   if (/enhanced|neural|natural/i.test(text)) return 1;
+  if (/super-?compact/i.test(text)) return 2.5;
   if (NATURAL_VOICES.some((n) => baseName(voice) === n || baseName(voice).startsWith(`${n} `))) return 1.5;
   return 2;
 }
@@ -73,6 +78,21 @@ export function rankVoices(voices, preferredLang = 'en-US') {
     const [ra, rb] = [rank(a), rank(b)];
     for (let i = 0; i < ra.length; i++) if (ra[i] !== rb[i]) return ra[i] - rb[i];
     return String(a.name).localeCompare(String(b.name));
+  });
+}
+
+/**
+ * One entry per voice name: the best version of each. An iPad can list the
+ * same voice two or three times (a Premium or Enhanced copy, a compact one,
+ * and a "super-compact" one, sometimes for another country).
+ */
+export function bestVersions(voices, preferredLang = 'en-US') {
+  const seen = new Set();
+  return rankVoices(voices, preferredLang).filter((v) => {
+    const name = baseName(v).toLowerCase();
+    if (seen.has(name)) return false;
+    seen.add(name);
+    return true;
   });
 }
 
