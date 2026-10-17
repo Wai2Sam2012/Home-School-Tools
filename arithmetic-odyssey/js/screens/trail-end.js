@@ -2,10 +2,11 @@
 // facts, and a summary of the trip. When every sticker is collected, a
 // "Collection complete!" celebration with all the theme's pictures.
 
-import { stickerPicture } from '../art.js?v=0.5.2';
-import { THEMES } from '../settings.js?v=0.5.2';
-import { formatDuration } from '../timer.js?v=0.5.2';
-import { h } from '../ui.js?v=0.5.2';
+import { stickerPicture } from '../art.js?v=0.5.3';
+import { soundLength } from '../audio.js?v=0.5.3';
+import { THEMES } from '../settings.js?v=0.5.3';
+import { formatDuration } from '../timer.js?v=0.5.3';
+import { h } from '../ui.js?v=0.5.3';
 
 const SLIDE_MS = 3500;
 
@@ -13,10 +14,15 @@ export function trailEndScreen(ctx, result = {}) {
   const theme = THEMES[result.theme] ?? THEMES.dino;
   const stats = result.stats ?? { answered: 0, correct: 0, detours: 0, setbacks: 0, thinkingMs: 0 };
   const player = ctx.profiles.active();
+  // The finish fanfare plays as this screen opens; the voice waits for it.
+  let sayTimer = 0;
   const say = (text) => {
-    if (ctx.voiceOn(player)) ctx.speaker.speak(text);
+    if (ctx.voiceOn(player)) sayTimer = setTimeout(() => ctx.speaker.speak(text), soundLength('finish') + 150);
   };
-  ctx.onLeave(() => ctx.speaker.cancel());
+  ctx.onLeave(() => {
+    clearTimeout(sayTimer);
+    ctx.speaker.cancel();
+  });
   const stage = h('div', { class: 'slideshow' }, h('p', {}, 'Loading your sticker…'));
   const about = h('div', { class: 'trail-end-sticker' });
   let slideTimer = 0;

@@ -457,6 +457,14 @@ Every stage ends with its tests passing, the site republished, and a short repor
 - A right answer plays a bell "ding". Reaching a flag plays the theme's sound: a dinosaur roar in Dino Tour, an engine revving in Off-Roading. Both are made in code and can be replaced with recorded sounds in the theme's `sounds/` folder later.
 - The keypad's ✔ and ⌫ are drawn icons (a white check on green), because the iPad can show those characters as small grey emoji.
 - The page never scrolls or bounces. Every game screen fits the iPad in both orientations; only the Sticker Album and Settings, which are long lists, scroll inside the screen.
+
+**More changes after trying it (0.5.3):**
+
+- The player pictures are files in `images/avatars/`, so they can be edited or replaced without touching the code.
+- The voice waits for a sound effect to finish before reading: the flag roar, the detour sound, the wrong-answer sound and the Trail's End fanfare.
+- The sticker card changes pictures by itself every 3 seconds (dots show which one); there are no arrows.
+- Album tiles and the finish picture show the whole picture (many dinosaur pictures are about twice as wide as the tile), and long names such as Thecodontosaurus get a smaller size so they stay on one line.
+- Voice lists show each voice once, in its best version; the iPad can list a name two or three times, including Apple's lowest-quality "super-compact" copies, which are labelled Basic. The tester can still show every copy.
 - `?debug=1` can make speech "never finish", to check the safety timeout (T5.3). Automated browser checks use a fake speech engine; the real voices are checked on the iPad (T5.2, T5.6).
 
 ### Stage 6: Saving, stats, high scores and backup

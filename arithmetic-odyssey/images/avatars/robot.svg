@@ -1,0 +1,12 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="256" height="256">
+  <title>Robot</title>
+  <path d="M32 9 L32 4" stroke="#7f8c8d" stroke-width="2"/><circle cx="32" cy="4" r="2.5" fill="#e74c3c"/>
+  <rect x="18" y="9" width="28" height="20" rx="5" fill="#95a5a6"/>
+  <rect x="22" y="13" width="20" height="9" rx="3" fill="#2b2b2b"/>
+  <circle cx="29" cy="17.5" r="2.4" fill="#7ee0ff"/><circle cx="38" cy="17.5" r="2.4" fill="#7ee0ff"/>
+  <rect x="26" y="24" width="12" height="2" rx="1" fill="#2b2b2b"/>
+  <rect x="16" y="31" width="32" height="20" rx="4" fill="#b2bec3"/>
+  <circle cx="32" cy="41" r="4" fill="#f1c40f"/>
+  <path d="M16 36 L8 44 M48 36 L57 30" stroke="#7f8c8d" stroke-width="4" stroke-linecap="round"/>
+  <rect x="20" y="51" width="8" height="9" rx="2" fill="#7f8c8d"/><rect x="36" y="51" width="8" height="9" rx="2" fill="#7f8c8d"/>
+</svg>

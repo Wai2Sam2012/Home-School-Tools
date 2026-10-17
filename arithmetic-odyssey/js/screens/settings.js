@@ -1,10 +1,10 @@
 // 8. Settings (grown-ups, behind the 3-second hold): voice, adventure and
 // detour length, backup and restore (Stage 6), and deleting the player.
 
-import { ADVENTURE_LENGTHS, DETOUR_MAX, DETOUR_MIN, stepDetourLength } from '../settings.js?v=0.5.2';
-import { chooseVoice, isFunVoice, rankVoices, voiceId, voiceQuality } from '../speech.js?v=0.5.2';
-import { avatarIcon } from '../avatars.js?v=0.5.2';
-import { choiceRow, confirmDialog, h, topBar } from '../ui.js?v=0.5.2';
+import { ADVENTURE_LENGTHS, DETOUR_MAX, DETOUR_MIN, stepDetourLength } from '../settings.js?v=0.5.3';
+import { bestVersions, chooseVoice, isFunVoice, voiceId, voiceQuality } from '../speech.js?v=0.5.3';
+import { avatarIcon } from '../avatars.js?v=0.5.3';
+import { choiceRow, confirmDialog, h, topBar } from '../ui.js?v=0.5.3';
 
 const REGIONS = { US: 'US', GB: 'UK', AU: 'Australia', IE: 'Ireland', IN: 'India', ZA: 'South Africa', NZ: 'New Zealand', CA: 'Canada', SG: 'Singapore' };
 const SAMPLE = 'Hi! What is 7 times 8?';
@@ -13,7 +13,7 @@ const SAMPLE = 'Hi! What is 7 times 8?';
 export function describeVoice(v) {
   const region = String(v.lang).split(/[-_]/)[1]?.toUpperCase();
   return [
-    { 0: 'Premium', 1: 'Enhanced', 1.5: 'Standard', 2: 'Standard' }[voiceQuality(v)] ?? '',
+    { 0: 'Premium', 1: 'Enhanced', 1.5: 'Standard', 2: 'Standard', 2.5: 'Basic' }[voiceQuality(v)] ?? '',
     REGIONS[region] ?? v.lang,
     v.localService ? 'works offline' : 'needs the internet',
   ].filter(Boolean).join(' · ');
@@ -91,7 +91,8 @@ export function settingsScreen(ctx) {
     voiceNote.classList.toggle('notice', player.settings.voice && ctx.voiceState === 'none');
     if (!ready) return;
 
-    const ranked = rankVoices(ctx.voices);
+    // Each voice once, in its best version (the iPad can list a name two or three times).
+    const ranked = bestVersions(ctx.voices);
     const best = chooseVoice(ctx.voices);
     const natural = ranked.filter((v) => !isFunVoice(v));
     const fun = ranked.filter((v) => isFunVoice(v));

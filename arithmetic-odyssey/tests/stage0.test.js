@@ -44,6 +44,7 @@ test('the folder structure from the Game Plan (1.4) is in place', () => {
     'themes/dino/jurassic.md',
     'themes/dino/cretaceous.md',
     'themes/dino/CREDITS.md',
+    'images/avatars/README.md',
     'themes/dino/pictures',
     'themes/national-parks/README.md',
     'themes/national-parks/CREDITS.md',

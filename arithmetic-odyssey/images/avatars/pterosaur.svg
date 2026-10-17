@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="256" height="256">
+  <title>Pterosaur</title>
+  <path d="M4 16 L36 31 L22 46Z" fill="#a77c9f"/>
+  <path d="M30 30 L42 6 L46 32Z" fill="#8e6c88"/>
+  <ellipse cx="36" cy="32" rx="9" ry="4.5" fill="#7d5c77"/>
+  <path d="M41 28 L63 31 L43 35Z" fill="#e0b04a"/>
+  <path d="M42 29 L33 19 L46 27Z" fill="#c0392b"/>
+  <circle cx="46" cy="30" r="1.5" fill="#1d1d1d"/>
+  <path d="M30 36 L28 42 M34 36 L33 42" stroke="#7d5c77" stroke-width="2" stroke-linecap="round"/>
+</svg>

@@ -1,0 +1,13 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="256" height="256">
+  <title>Triceratops</title>
+  <path d="M4 40 Q12 35 20 37 L20 44 Q11 46 4 40Z" fill="#d86a2e"/>
+  <ellipse cx="29" cy="40" rx="14" ry="10" fill="#e17b3c"/>
+  <circle cx="43" cy="31" r="11" fill="#b8551f"/>
+  <path d="M41 30 Q52 26 59 35 Q57 43 45 43Z" fill="#e17b3c"/>
+  <path d="M45 29 L61 20 L49 32Z" fill="#f5efe0"/>
+  <path d="M49 30 L63 25 L52 33Z" fill="#f5efe0"/>
+  <path d="M56 34 L62 32 L58 37Z" fill="#f5efe0"/>
+  <rect x="19" y="45" width="6" height="12" rx="2" fill="#c9622b"/>
+  <rect x="33" y="45" width="6" height="12" rx="2" fill="#c9622b"/>
+  <circle cx="50" cy="35" r="1.5" fill="#1d1d1d"/>
+</svg>

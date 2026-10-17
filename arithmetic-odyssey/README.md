@@ -12,8 +12,9 @@ An offline math adventure game for the iPad, with two themes: **Dino Tour** and 
 | [themes/national-parks/](themes/national-parks/) | Off-Roading theme. All 63 US national parks, grouped by region, with location, size, 2025 visitors, key attractions and history. |
 | [tools/Get-DinoPictures.ps1](tools/Get-DinoPictures.ps1) | PowerShell script that downloads each dinosaur's pictures from dinosaurpictures.org. See below. |
 | [tools/Run-DinoPictures.cmd](tools/Run-DinoPictures.cmd) | Double-click launcher for the script. |
-| [js/](js/) | The game's code. `app.js` starts the game and switches screens; each screen is in `js/screens/`. `adventure.js` has the adventure rules (steps, flags, detours, going back to a flag, unlocking stickers). `avatars.js` has the 16 player pictures (drawn, all facing right), `detour-road.js` draws the detour loop on the trail map, `audio.js` makes the sound effects, `speech.js` reads aloud (and knows reliably when it has finished), and `timer.js` is the thinking timer. `math.js` is the math engine: it makes problems for each operation and difficulty and checks answers. `keypad.js` is the on-screen keypad, `hold.js` the grown-up "hold for 3 seconds" button, `profiles.js` and `settings.js` the players and their settings, `storyline.js` loads a theme's story file, and `art.js` draws a picture for stickers that don't have one. `debug.js` is the debug panel; `version.js` holds the version number. |
+| [js/](js/) | The game's code. `app.js` starts the game and switches screens; each screen is in `js/screens/`. `adventure.js` has the adventure rules (steps, flags, detours, going back to a flag, unlocking stickers). `avatars.js` lists the player pictures (the files are in `images/avatars/`), `detour-road.js` draws the detour loop on the trail map, `audio.js` makes the sound effects, `speech.js` reads aloud (and knows reliably when it has finished), and `timer.js` is the thinking timer. `math.js` is the math engine: it makes problems for each operation and difficulty and checks answers. `keypad.js` is the on-screen keypad, `hold.js` the grown-up "hold for 3 seconds" button, `profiles.js` and `settings.js` the players and their settings, `storyline.js` loads a theme's story file, and `art.js` draws a picture for stickers that don't have one. `debug.js` is the debug panel; `version.js` holds the version number. |
 | [css/style.css](css/style.css) | The game's styles. |
+| [images/avatars/](images/avatars/) | The 16 player pictures, one file each, so they can be edited or replaced. See its [README](images/avatars/README.md). |
 | [tools/Start-LocalServer.ps1](tools/Start-LocalServer.ps1) | Runs the game in a browser on your PC. See [Testing in a browser on your PC](#testing-in-a-browser-on-your-pc). |
 | [tools/set-version.mjs](tools/set-version.mjs) | Sets a new version number, and the matching `?v=` tag on every game file, so browsers never mix cached files from two versions. Run `node tools/set-version.mjs 1.2.3` for each release. |
 | [tools/build-storyline.mjs](tools/build-storyline.mjs) | Builds each theme's story file (`storyline.json`) from its fact files, `game-text.json` and pictures. Run automatically; see [Adding pictures](#adding-pictures). |
@@ -43,7 +44,7 @@ cd arithmetic-odyssey
 node --test
 ```
 
-You should see `# fail 0` (132 tests at the end of Stage 5). Each test name starts with its ID from the test plan in [GAME-PLAN.md](GAME-PLAN.md) where it has one, for example `T1.3`.
+You should see `# fail 0` (134 tests at the end of Stage 5). Each test name starts with its ID from the test plan in [GAME-PLAN.md](GAME-PLAN.md) where it has one, for example `T1.3`.
 
 ## Testing in a browser on your PC
 
@@ -73,6 +74,24 @@ Every push to the repository's `main` branch runs `.github/workflows/deploy.yml`
 **One-time setup:** in the repository on GitHub, open **Settings → Pages** and set **Build and deployment → Source** to **GitHub Actions**. Without this, the deploy step fails.
 
 The **Actions** tab shows each run; a green tick means it published. Tests, tools and `downloaded-pictures` are never published. To preview exactly what will be published, run `node .github/scripts/assemble-site.mjs` from the repository folder; it copies the site into `_site`.
+
+## Changing the game
+
+Most things can be changed without knowing much code. After a change, run the tests (see [Running the tests](#running-the-tests)) and try it with the local server.
+
+| To change | Edit |
+| --- | --- |
+| **Player pictures** | The files in [images/avatars/](images/avatars/); names and order in `js/avatars.js`. See [its README](images/avatars/README.md). |
+| **Story text**: flags, detours, getting back on the trail, going back to a flag | `themes/dino/game-text.json`: `milestones`, `detours` (`{count}` becomes the number of detour questions), `detourCleared` and `setback`. Each list can have any number of lines. |
+| **Kid-friendly dinosaur facts** | `themes/dino/game-text.json`, under `kidFacts` (2 or 3 per dinosaur). |
+| **What happens after a wrong answer** | The message on screen and the words read aloud ("Not quite. 7 times 8 is 56."): `js/screens/adventure.js`, in `submit()`. The **Got it ›** button is made just below it. The rules (a wrong answer starts a detour; all detour answers wrong goes back to the last flag): `js/adventure.js`, in `answerProblem()`. The number of detour questions is in the game's grown-up Settings. |
+| **Praise after a right answer** ("Great job!") | `PRAISE` at the top of `js/screens/adventure.js`. |
+| **How long the game waits** after a right answer | `NEXT_AFTER_RIGHT_MS` at the top of `js/screens/adventure.js` (in milliseconds). |
+| **Sound effects** | `js/audio.js`: `SOUNDS` lists the notes of each sound; `playRoar()` and `playEngine()` make the flag sounds. Hear them all in the voice and sound tester (`?debug=1`). |
+| **Which sound plays at a flag** | `flagSound` for each theme in `js/settings.js`. |
+| **The detour road** on the trail map | Its shape in `js/detour-road.js` (`LOOP`); its colours in `css/style.css` under `.detour-road`. |
+
+After changing any `.js` file, give the game a new version number so iPads load the new files: `node tools/set-version.mjs 1.2.3`.
 
 ## Adding pictures
 

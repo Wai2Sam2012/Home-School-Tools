@@ -7,11 +7,11 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 
 import {
-  MAX_WAIT_MS, MIN_WAIT_MS, POLL_MS, START_GRACE_MS, chooseVoice, createSpeaker, estimateSpeechMs, isFunVoice, loadVoices,
-  rankVoices, voiceId, voiceQuality,
+  MAX_WAIT_MS, MIN_WAIT_MS, POLL_MS, START_GRACE_MS, bestVersions, chooseVoice, createSpeaker, estimateSpeechMs, isFunVoice,
+  loadVoices, rankVoices, voiceId, voiceQuality,
 } from '../js/speech.js';
 import { createThinkingTimer, formatDuration } from '../js/timer.js';
-import { SOUNDS, SYNTHS, SYNTH_LENGTHS, playSound } from '../js/audio.js';
+import { SOUNDS, SYNTHS, SYNTH_LENGTHS, playSound, soundLength } from '../js/audio.js';
 import { THEMES } from '../js/settings.js';
 import { answerProblem, startAdventure, withNextProblem } from '../js/adventure.js';
 
@@ -409,4 +409,28 @@ test('each theme has its own flag sound: a roar for dinosaurs, an engine for tru
     assert.ok(SYNTH_LENGTHS[theme.flagSound] <= 2, `${theme.flagSound} is short`);
   }
   assert.equal(playSound('roar'), false, 'not before Tap to Start');
+});
+
+test('each voice is listed once, in its best version (an iPad lists some two or three times)', () => {
+  const daniels = [
+    { name: 'Daniel', lang: 'en-US', localService: true, voiceURI: 'com.apple.voice.super-compact.en-US.Daniel' },
+    { name: 'Daniel', lang: 'en-GB', localService: true, voiceURI: 'com.apple.voice.compact.en-GB.Daniel' },
+    { name: 'Daniel (Enhanced)', lang: 'en-GB', localService: true, voiceURI: 'com.apple.voice.enhanced.en-GB.Daniel' },
+  ];
+  assert.equal(voiceQuality(daniels[0]), 2.5, 'super-compact is the lowest quality');
+  const one = bestVersions([...daniels, ...IPAD_VOICES]);
+  const names = one.map((v) => v.name.replace(/ \(.*\)$/, ''));
+  assert.equal(names.length, new Set(names).size, 'no name twice');
+  assert.equal(voiceId(one.find((v) => v.name.startsWith('Daniel'))), 'com.apple.voice.enhanced.en-GB.Daniel', 'the best Daniel is kept');
+  assert.equal(voiceId(one.find((v) => v.name === 'Samantha')), 'com.apple.voice.enhanced.en-US.Samantha', 'the Enhanced Samantha is kept');
+  assert.equal(rankVoices([...daniels, ...IPAD_VOICES]).length, 11, 'every copy is still available when asked for');
+});
+
+test('every sound knows how long it lasts, so the voice can wait for it', () => {
+  assert.equal(soundLength('roar'), 1500);
+  assert.equal(soundLength('engine'), 1800);
+  assert.equal(soundLength('right'), 1100);
+  assert.ok(soundLength('wrong') > 300 && soundLength('wrong') < 1000);
+  assert.equal(soundLength('nothing'), 0);
+  for (const name of [...Object.keys(SOUNDS), ...Object.keys(SYNTHS)]) assert.ok(soundLength(name) > 0, name);
 });

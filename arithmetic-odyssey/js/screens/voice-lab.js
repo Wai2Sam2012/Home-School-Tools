@@ -2,10 +2,10 @@
 // voice on this device with a choice of sample line, speed and pitch, and
 // every sound effect, so a grown-up can compare them and pick the best.
 
-import { describeVoice } from './settings.js?v=0.5.2';
-import { chooseVoice, isFunVoice, loadVoices, rankVoices, voiceId } from '../speech.js?v=0.5.2';
-import { SOUNDS, SYNTHS, playSound } from '../audio.js?v=0.5.2';
-import { choiceRow, h, topBar } from '../ui.js?v=0.5.2';
+import { describeVoice } from './settings.js?v=0.5.3';
+import { bestVersions, chooseVoice, isFunVoice, loadVoices, rankVoices, voiceId } from '../speech.js?v=0.5.3';
+import { SOUNDS, SYNTHS, playSound } from '../audio.js?v=0.5.3';
+import { choiceRow, h, topBar } from '../ui.js?v=0.5.3';
 
 const SOUND_NAMES = {
   right: 'Right answer (ding)',
@@ -80,18 +80,25 @@ export function voiceLabScreen(ctx) {
     playingAll = false;
   }
 
-  loadVoices(globalThis.speechSynthesis, { waitMs: 2500 }).then((voices) => {
-    const ranked = rankVoices(voices);
+  /** Lists the voices: each name once in its best version, or every copy the device has. */
+  function showList(voices, showAll) {
+    const every = rankVoices(voices);
+    const ranked = showAll ? every : bestVersions(voices);
     if (!ranked.length) {
       list.replaceChildren(h('p', { class: 'form-error' }, 'This device offers no English voices to web pages.'));
       return;
     }
+    const hidden = every.length - bestVersions(voices).length;
     const natural = ranked.filter((v) => !isFunVoice(v));
     const fun = ranked.filter((v) => isFunVoice(v));
     const best = chooseVoice(voices);
     // replaceChildren() doesn't flatten lists or skip nulls the way h() does.
     list.replaceChildren(...[
-      h('p', { class: 'note' }, `${ranked.length} English voices. The game picks automatically: ${best ? best.name : 'none'}. Natural voices are listed best first.`),
+      h('p', { class: 'note' }, `${bestVersions(voices).length} English voices. The game picks automatically: ${best ? best.name : 'none'}. Natural voices are listed best first.`),
+      hidden
+        ? h('button', { type: 'button', class: 'big-button quiet show-all', onclick: () => showList(voices, !showAll) },
+          showAll ? 'Show each voice once' : `Show every version (${hidden} lower-quality copies)`)
+        : null,
       h('div', { class: 'button-row' },
         h('button', { type: 'button', class: 'big-button primary', onclick: () => playAll(natural) }, '▶ Play all natural voices'),
         fun.length ? h('button', { type: 'button', class: 'big-button', onclick: () => playAll(fun) }, '▶ Play all robot and fun voices') : null,
@@ -109,7 +116,9 @@ export function voiceLabScreen(ctx) {
       fun.length ? h('h2', {}, 'Robot and fun voices') : null,
       fun.map(row),
     ].flat().filter(Boolean));
-  });
+  }
+
+  loadVoices(globalThis.speechSynthesis, { waitMs: 2500 }).then((voices) => showList(voices, false));
 
   return h('main', { class: 'screen voice-lab-screen' },
     topBar('Voice and sound tester', () => ctx.show(player ? 'settings' : 'profiles')),
