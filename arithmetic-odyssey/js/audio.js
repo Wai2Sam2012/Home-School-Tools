@@ -22,7 +22,7 @@ export const VOLUME = 0.25;
 
 /** Sounds built from noise and growling tones: the Dino roar and the truck engine (played at flags). */
 export const SYNTHS = Object.freeze({ roar: playRoar, engine: playEngine });
-export const SYNTH_LENGTHS = Object.freeze({ roar: 1.5, engine: 1.8 });
+export const SYNTH_LENGTHS = Object.freeze({ roar: 2.6, engine: 1.8 });
 
 /** How long a sound lasts, in milliseconds (0 for an unknown sound), so speech can wait for it. */
 export function soundLength(name) {
@@ -152,57 +152,106 @@ function envelope(ctx, t0, { attack, hold, release, level, to = ctx.destination 
 }
 
 /**
- * Dinosaur roar: a growl that rises then falls, with a rough throat flutter
- * and breath. iPad speakers hardly play deep sounds, so most of the roar is
- * kept above about 300 Hz (an octave-up growl and a brighter filter); it is
- * about as loud as the voice.
+ * T. rex roar, in the style of the big movie roars: a high trumpeting scream
+ * that bends up and down, then a deep raspy growl that rumbles away. Made from
+ * scratch (no recording). iPad speakers hardly play deep sounds, so even the
+ * growl keeps a bright, rough edge; it is about as loud as the voice.
  */
 function playRoar(ctx, t0) {
   const length = SYNTH_LENGTHS.roar;
-  const out = envelope(ctx, t0, { attack: 0.1, hold: 0.6, release: 0.75, level: VOLUME * 4, to: loudOutput(ctx) });
-  const lowpass = ctx.createBiquadFilter();
-  lowpass.type = 'lowpass';
-  lowpass.frequency.setValueAtTime(1500, t0);
-  lowpass.frequency.linearRampToValueAtTime(2600, t0 + 0.3);
-  lowpass.frequency.exponentialRampToValueAtTime(700, t0 + length);
-  lowpass.connect(out);
+  const out = loudOutput(ctx);
+  const end = t0 + length;
 
-  // The growl: saw waves swept up then down, two a fifth apart for roughness
-  // and one an octave up so small speakers can play it.
-  for (const [detune, level] of [[0, 0.5], [700, 0.5], [1200, 0.45]]) {
-    const growl = ctx.createOscillator();
-    growl.type = 'sawtooth';
-    growl.detune.value = detune; // in cents: 700 is a fifth up, 1200 an octave up
-    growl.frequency.setValueAtTime(110, t0);
-    growl.frequency.linearRampToValueAtTime(180, t0 + 0.3);
-    growl.frequency.exponentialRampToValueAtTime(70, t0 + length);
-    // Throat flutter: the loudness wobbles about 30 times a second.
-    const flutter = ctx.createGain();
-    flutter.gain.value = level;
-    const lfo = ctx.createOscillator();
-    lfo.frequency.value = 31;
+  // A fast wobble (about 28 times a second) gives both parts their rasp.
+  const rasp = ctx.createOscillator();
+  rasp.frequency.setValueAtTime(34, t0);
+  rasp.frequency.linearRampToValueAtTime(24, end);
+  rasp.start(t0);
+  rasp.stop(end);
+  const raspy = (amount) => {
+    const gain = ctx.createGain();
+    gain.gain.value = 1 - amount;
     const depth = ctx.createGain();
-    depth.gain.value = level * 0.65;
-    lfo.connect(depth).connect(flutter.gain);
-    growl.connect(flutter).connect(lowpass);
-    growl.start(t0);
-    lfo.start(t0);
-    growl.stop(t0 + length);
-    lfo.stop(t0 + length);
-  }
+    depth.gain.value = amount;
+    rasp.connect(depth).connect(gain.gain);
+    return gain;
+  };
 
-  // Breath: filtered noise.
-  const breath = noise(ctx, length);
-  const band = ctx.createBiquadFilter();
-  band.type = 'bandpass';
-  band.frequency.setValueAtTime(900, t0);
-  band.frequency.exponentialRampToValueAtTime(450, t0 + length);
-  band.Q.value = 0.7;
+  // 1. The scream (0 to 1.1 s): sharp saw waves bent up then down, with a
+  //    shaky vibrato, shaped by two "throat" filters like a trumpeting call.
+  const scream = envelope(ctx, t0, { attack: 0.06, hold: 0.45, release: 0.6, level: VOLUME * 3.2, to: out });
+  const screamRasp = raspy(0.35);
+  for (const [freq, filterQ] of [[1150, 3], [2400, 4]]) {
+    const throat = ctx.createBiquadFilter();
+    throat.type = 'bandpass';
+    throat.frequency.value = freq;
+    throat.Q.value = filterQ;
+    screamRasp.connect(throat).connect(scream);
+  }
+  const vibrato = ctx.createOscillator();
+  vibrato.frequency.value = 7;
+  const vibratoDepth = ctx.createGain();
+  vibratoDepth.gain.value = 14;
+  vibrato.connect(vibratoDepth);
+  for (const detune of [-12, 12]) {
+    const voice = ctx.createOscillator();
+    voice.type = 'sawtooth';
+    voice.detune.value = detune;
+    voice.frequency.setValueAtTime(360, t0);
+    voice.frequency.exponentialRampToValueAtTime(580, t0 + 0.22);
+    voice.frequency.exponentialRampToValueAtTime(470, t0 + 0.65);
+    voice.frequency.exponentialRampToValueAtTime(260, t0 + 1.1);
+    vibratoDepth.connect(voice.frequency);
+    voice.connect(screamRasp);
+    voice.start(t0);
+    voice.stop(t0 + 1.15);
+  }
+  vibrato.start(t0);
+  vibrato.stop(t0 + 1.15);
+  const hiss = noise(ctx, 1.15);
+  const hissBand = ctx.createBiquadFilter();
+  hissBand.type = 'bandpass';
+  hissBand.frequency.value = 1900;
+  hissBand.Q.value = 1;
+  const hissLevel = ctx.createGain();
+  hissLevel.gain.value = 0.35;
+  hiss.connect(hissBand).connect(hissLevel).connect(scream);
+  hiss.start(t0);
+  hiss.stop(t0 + 1.15);
+
+  // 2. The growl (0.5 s to the end): low saw waves sliding down, an octave
+  //    above them so small speakers can play it, and a rough breath.
+  const g0 = t0 + 0.5;
+  const growl = envelope(ctx, g0, { attack: 0.25, hold: 0.8, release: length - 1.55, level: VOLUME * 4, to: out });
+  const growlFilter = ctx.createBiquadFilter();
+  growlFilter.type = 'lowpass';
+  growlFilter.frequency.setValueAtTime(2200, g0);
+  growlFilter.frequency.exponentialRampToValueAtTime(700, end);
+  const growlRasp = raspy(0.6);
+  growlRasp.connect(growlFilter).connect(growl);
+  for (const [scale, level] of [[1, 0.55], [2, 0.45], [1.5, 0.25]]) {
+    const voice = ctx.createOscillator();
+    voice.type = 'sawtooth';
+    voice.frequency.setValueAtTime(150 * scale, g0);
+    voice.frequency.exponentialRampToValueAtTime(115 * scale, g0 + 0.8);
+    voice.frequency.exponentialRampToValueAtTime(60 * scale, end);
+    const gain = ctx.createGain();
+    gain.gain.value = level;
+    voice.connect(gain).connect(growlRasp);
+    voice.start(g0);
+    voice.stop(end);
+  }
+  const breath = noise(ctx, length - 0.5);
+  const breathBand = ctx.createBiquadFilter();
+  breathBand.type = 'bandpass';
+  breathBand.frequency.setValueAtTime(900, g0);
+  breathBand.frequency.exponentialRampToValueAtTime(380, end);
+  breathBand.Q.value = 0.8;
   const breathLevel = ctx.createGain();
-  breathLevel.gain.value = 0.9;
-  breath.connect(band).connect(breathLevel).connect(lowpass);
-  breath.start(t0);
-  breath.stop(t0 + length);
+  breathLevel.gain.value = 0.8;
+  breath.connect(breathBand).connect(breathLevel).connect(growlRasp);
+  breath.start(g0);
+  breath.stop(end);
 }
 
 /**
