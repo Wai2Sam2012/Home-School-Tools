@@ -145,9 +145,9 @@ test('players can be added, chosen and deleted', () => {
   let n = 0;
   const store = createProfileStore({ makeId: () => `id${++n}` });
   assert.equal(store.active(), null);
-  const ana = store.add(' Ana ', '🦊');
+  const ana = store.add(' Ana ', 'dog');
   assert.equal(ana.name, 'Ana');
-  assert.equal(ana.avatar, '🦊');
+  assert.equal(ana.avatar, 'dog');
   assert.deepEqual(ana.settings, DEFAULT_SETTINGS);
   assert.deepEqual(ana.setup, normalizeSetup(DEFAULT_SETUP));
   assert.deepEqual(ana.collected, { dino: [], parks: [] });
@@ -155,7 +155,7 @@ test('players can be added, chosen and deleted', () => {
   assert.equal(ben.avatar, AVATARS[0], 'an unknown avatar falls back to the first');
   store.select(ben.id);
   assert.equal(store.active().name, 'Ben');
-  assert.throws(() => store.add('ben', '🦊'), /already a player/);
+  assert.throws(() => store.add('ben', 'dog'), /already a player/);
   assert.throws(() => store.select('missing'), /no longer exists/);
   assert.equal(store.remove(ben.id), true);
   assert.equal(store.active(), null, 'deleting the active player leaves no one chosen');
@@ -277,4 +277,21 @@ test('placeholder colours stay the same for each sticker', () => {
   assert.match(colorFor('eoraptor'), /^#[0-9a-f]{6}$/);
   const colours = new Set(storyline.stickers.map((s) => colorFor(s.id)));
   assert.ok(colours.size >= 4, 'stickers get a mix of colours');
+});
+
+// ---------------------------------------------------------------- player pictures
+test('there are 16 player pictures, the ones asked for, each a drawing (no emoji, no scripts)', async () => {
+  const { AVATARS: PICTURES, avatarInfo } = await import('../js/avatars.js');
+  assert.deepEqual(PICTURES.map((a) => a.label), [
+    'Long-neck dinosaur', 'Triceratops', 'T. rex', 'Mosasaur', 'Pterosaur', 'Blue pickup truck', 'Monster truck', 'Dirt bike',
+    'Blue SUV', 'Blue ATV', 'Robot', 'Rocket', 'Butterfly', 'Unicorn', 'Dog', 'Cat',
+  ]);
+  assert.deepEqual(AVATARS, PICTURES.map((a) => a.id), 'players choose from the same list');
+  assert.equal(new Set(AVATARS).size, 16);
+  for (const a of PICTURES) {
+    assert.match(a.svg, /<(path|ellipse|circle|rect)\b/, a.id);
+    assert.doesNotMatch(a.svg, /<script|on\w+=|href/i, `${a.id} is only shapes`);
+    assert.doesNotMatch(a.svg, /[\u{1F300}-\u{1FAFF}]/u, `${a.id} has no emoji`);
+  }
+  assert.equal(avatarInfo('not-a-picture').id, 'longneck', 'an unknown picture falls back to the first');
 });

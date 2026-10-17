@@ -27,12 +27,19 @@
 }
 
 html {
+  height: 100%;
+  overflow: hidden;
   -webkit-text-size-adjust: 100%;
 }
 
+/* The page never scrolls or bounces: it is fixed to the window. Each game
+   screen fits the iPad; only a screen longer than the window (the Sticker
+   Album, Settings) scrolls, inside #app. */
 body {
+  position: fixed;
+  inset: 0;
+  overflow: hidden;
   margin: 0;
-  min-height: 100vh;
   background: var(--bg);
   color: var(--text);
   font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
@@ -46,6 +53,14 @@ body {
   overscroll-behavior: none;
   /* Keep content clear of the iPad's rounded corners and Home indicator. */
   padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+
+#app {
+  height: 100%;
+  overflow-x: hidden;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  -webkit-overflow-scrolling: touch;
 }
 
 button {
@@ -75,9 +90,9 @@ h1:focus {
   flex-direction: column;
   gap: 16px;
   max-width: 1120px;
-  min-height: 100vh;
+  min-height: 100%;
   margin: 0 auto;
-  padding: 16px 24px 32px;
+  padding: 16px 24px 20px;
 }
 
 .screen h1 {
@@ -260,7 +275,7 @@ h1:focus {
 
 .choice[aria-pressed="true"] .choice-label::before,
 .choice[aria-checked="true"] .op-symbol::before {
-  content: "✔ ";
+  content: "✓ ";
   color: var(--accent);
 }
 
@@ -414,8 +429,26 @@ h1:focus {
   line-height: 1.1;
 }
 
-.player-avatar.large {
-  font-size: 96px;
+.avatar-icon {
+  display: inline-block;
+  width: 1em;
+  height: 1em;
+  vertical-align: middle;
+}
+
+.player-avatar .avatar-icon {
+  width: 88px;
+  height: 88px;
+}
+
+.player-avatar.large .avatar-icon {
+  width: 112px;
+  height: 112px;
+}
+
+.avatar-icon.inline {
+  width: 40px;
+  height: 40px;
 }
 
 .player-name {
@@ -426,16 +459,32 @@ h1:focus {
 
 .avatar-grid {
   display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+  grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
   gap: 10px;
 }
 
 .avatar-choice {
-  height: 84px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-height: 104px;
+  padding: 6px 4px;
   border: 3px solid var(--line);
   border-radius: 16px;
   background: var(--surface);
-  font-size: 48px;
+}
+
+.avatar-choice .avatar-icon {
+  width: 60px;
+  height: 60px;
+}
+
+.avatar-name {
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.15;
 }
 
 .avatar-choice[aria-pressed="true"] {
@@ -657,6 +706,13 @@ h1:focus {
   background: #f3eee5;
 }
 
+.key-icon {
+  display: block;
+  width: 46px;
+  height: 46px;
+  margin: 0 auto;
+}
+
 .key-submit {
   border-color: #17594a;
   background: var(--accent);
@@ -695,14 +751,22 @@ h1:focus {
 .trail-map {
   display: flex;
   align-items: center;
-  gap: 18px;
+  gap: 12px;
+}
+
+/* The lane holds the track, the flags above it and room below it for the detour road. */
+.trail-lane {
+  position: relative;
+  flex: 1;
+  height: 112px;
 }
 
 .trail-track {
-  position: relative;
-  flex: 1;
+  position: absolute;
+  top: 38px;
+  right: 24px;
+  left: 24px;
   height: 18px;
-  margin: 34px 22px 18px;
   border-radius: 999px;
   background: repeating-linear-gradient(90deg, #cdbf9f 0 14px, #e3d8bf 14px 24px);
 }
@@ -735,19 +799,62 @@ h1:focus {
   position: absolute;
   top: 50%;
   left: 0;
-  z-index: 1;
-  font-size: 44px;
-  line-height: 1;
-  transform: translate(-50%, -62%);
+  z-index: 2;
+  width: 52px;
+  height: 52px;
+  transform: translate(-50%, -88%);
   transition: left 0.6s ease;
 }
 
-.trail-traveler.on-detour {
-  transform: translate(-50%, -18%) rotate(-12deg);
+.trail-traveler[hidden] {
+  display: none;
+}
+
+.trail-traveler .avatar-icon {
+  width: 100%;
+  height: 100%;
+}
+
+.detour-road {
+  position: absolute;
+  top: 9px;
+  z-index: 1;
+  width: 150px;
+  height: 60px;
+  pointer-events: none;
+}
+
+.detour-road[hidden] {
+  display: none;
+}
+
+.detour-road-svg {
+  display: block;
+  overflow: visible;
+}
+
+.detour-road.loops-left .detour-road-svg {
+  transform: scaleX(-1);
+}
+
+.detour-road .detour-traveler {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 42px;
+  height: 42px;
+}
+
+.trail-finish {
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  min-width: 96px;
 }
 
 .trail-goal {
-  flex: 0 0 auto;
   width: 84px;
   height: 64px;
   font-size: 44px;
@@ -771,8 +878,10 @@ h1:focus {
 .trail-count {
   margin: 0;
   color: var(--muted);
+  font-size: 15px;
   font-weight: 600;
   text-align: center;
+  white-space: nowrap;
 }
 
 .adventure-layout {
@@ -849,6 +958,16 @@ h1:focus {
   color: var(--muted);
 }
 
+.sound-buttons {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  gap: 10px;
+}
+
+.sound-buttons .choice {
+  font-size: 18px;
+}
+
 .voice-lab-row {
   display: flex;
   align-items: center;
@@ -916,7 +1035,7 @@ h1:focus {
 }
 
 .slideshow {
-  height: min(42vh, 420px);
+  height: min(30vh, 340px);
 }
 
 .slide {
@@ -937,7 +1056,12 @@ h1:focus {
 }
 
 .trail-end-sticker h2 {
-  margin-top: 12px;
+  margin-top: 10px;
+}
+
+.trail-end-sticker .fact-list li {
+  margin: 4px 0;
+  font-size: 20px;
 }
 
 .summary {
@@ -947,9 +1071,9 @@ h1:focus {
 .summary-row {
   display: flex;
   justify-content: space-between;
-  padding: 10px 0;
+  padding: 6px 0;
   border-bottom: 2px solid var(--line);
-  font-size: 24px;
+  font-size: 22px;
 }
 
 .summary-row dd {
@@ -959,7 +1083,13 @@ h1:focus {
 
 .trail-end-buttons {
   display: grid;
+  grid-template-columns: repeat(3, 1fr);
   gap: 12px;
+}
+
+.trail-end-buttons .big-button {
+  padding: 8px 10px;
+  font-size: 22px;
 }
 
 /* ------------------------------------------------------------ sticker album */
@@ -1176,6 +1306,32 @@ h1:focus {
     align-items: start;
   }
 
+  .slideshow {
+    height: min(42vh, 420px);
+  }
+
+  .trail-end-buttons {
+    grid-template-columns: 1fr;
+  }
+
+  /* All 16 player pictures in two rows. */
+  .new-player-screen .panel {
+    max-width: 1000px;
+  }
+
+  .avatar-grid {
+    grid-template-columns: repeat(8, 1fr);
+  }
+
+  .avatar-choice {
+    min-height: 92px;
+  }
+
+  .avatar-choice .avatar-icon {
+    width: 50px;
+    height: 50px;
+  }
+
   .home-grid.has-trip {
     grid-template-columns: 1.4fr 1fr 1fr 1fr;
   }
@@ -1216,8 +1372,13 @@ h1:focus {
     grid-template-columns: 1fr;
   }
 
+  .trail-lane {
+    height: 104px;
+  }
+
   .trail-track {
-    margin: 30px 12px 14px;
+    right: 14px;
+    left: 14px;
   }
 
   .adventure-screen .key {

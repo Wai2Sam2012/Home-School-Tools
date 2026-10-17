@@ -448,7 +448,15 @@ Every stage ends with its tests passing, the site republished, and a short repor
 - Settings has **Sound effects: On/Off** as the mute control, and says which voice is used, or that none was found and the game is text only.
 - An English voice that works offline is preferred. If the device only has voices that need the internet, one of those is used and Settings says so.
 - The automatic voice is the most natural one: Premium, then Enhanced, then known natural voices (Ava, Samantha, Daniel …). The novelty and older robotic voices Apple lists among the English voices (Albert, Bad News, Zarvox, Eddy, Flo …) are never picked automatically, but a grown-up can choose any voice in Settings, where tapping a voice plays a sample, and set the speed to Slower or Normal.
-- To get a more natural voice on iPad: Settings app › Accessibility › Spoken Content › Voices › English, download an Enhanced or Premium voice, then restart the game. Not every downloaded voice is offered to web pages.
+- To get a more natural voice on iPad: Settings app › Accessibility › Spoken Content › Voices › English, download an Enhanced or Premium voice, then restart the game. Not every downloaded voice is offered to web pages. Siri voices are not offered to web pages at all.
+
+**Changes after trying it on the iPad (0.5.2):**
+
+- Players choose from 16 pictures: long-neck dinosaur, triceratops, T. rex, mosasaur, pterosaur, blue pickup truck, monster truck, dirt bike, blue SUV, blue ATV, robot, rocket, butterfly, unicorn, dog and cat. They are drawn in `js/avatars.js` (there are no emoji for several of them, and iPad emoji face left); all face right.
+- The player's picture travels the trail map. On a detour it leaves the trail onto a road that loops below it, moves round the loop with each detour question, and rejoins the trail where it left.
+- A right answer plays a bell "ding". Reaching a flag plays the theme's sound: a dinosaur roar in Dino Tour, an engine revving in Off-Roading. Both are made in code and can be replaced with recorded sounds in the theme's `sounds/` folder later.
+- The keypad's ✔ and ⌫ are drawn icons (a white check on green), because the iPad can show those characters as small grey emoji.
+- The page never scrolls or bounces. Every game screen fits the iPad in both orientations; only the Sticker Album and Settings, which are long lists, scroll inside the screen.
 - `?debug=1` can make speech "never finish", to check the safety timeout (T5.3). Automated browser checks use a fake speech engine; the real voices are checked on the iPad (T5.2, T5.6).
 
 ### Stage 6: Saving, stats, high scores and backup

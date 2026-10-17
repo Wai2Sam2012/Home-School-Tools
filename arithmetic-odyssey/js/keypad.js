@@ -1,8 +1,8 @@
 // The on-screen number keypad. Answers are only ever typed here (or on a PC
 // keyboard), never in a text box, so the iPad's keyboard never opens.
 
-import { MAX_ANSWER_DIGITS } from './math.js?v=0.5.1';
-import { h } from './ui.js?v=0.5.1';
+import { MAX_ANSWER_DIGITS } from './math.js?v=0.5.2';
+import { h } from './ui.js?v=0.5.2';
 
 export const BACK = 'back';
 export const SUBMIT = 'submit';
@@ -34,7 +34,19 @@ export function keyFromKeyboard(eventKey) {
   return null;
 }
 
-const LABELS = { [BACK]: '⌫', [SUBMIT]: '✔' };
+// Drawn icons for Backspace and Submit: the characters ⌫ and ✔ can show as
+// small grey emoji on the iPad, which are hard to see.
+const ICONS = {
+  [BACK]: '<path d="M9 5 H20 A1 1 0 0 1 21 6 V18 A1 1 0 0 1 20 19 H9 L3 12 Z" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linejoin="round"/><path d="M12 9 L17 15 M17 9 L12 15" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/>',
+  [SUBMIT]: '<path d="M4 12.5 L9.5 18 L20 6.5" fill="none" stroke="currentColor" stroke-width="3.8" stroke-linecap="round" stroke-linejoin="round"/>',
+};
+
+function keyLabel(key) {
+  if (!ICONS[key]) return key;
+  const holder = document.createElement('span');
+  holder.innerHTML = `<svg class="key-icon" viewBox="0 0 24 24" aria-hidden="true">${ICONS[key]}</svg>`;
+  return holder.firstElementChild;
+}
 const NAMES = { [BACK]: 'Backspace', [SUBMIT]: 'Submit' };
 
 /**
@@ -83,7 +95,7 @@ export function createKeypad({ maxDigits = MAX_ANSWER_DIGITS, onSubmit = () => {
       'aria-label': NAMES[key] ?? key,
       dataset: { key },
       onclick: () => press(key),
-    }, LABELS[key] ?? key),
+    }, keyLabel(key)),
   );
   const pad = h('div', { class: 'keypad', role: 'group', 'aria-label': 'Number keypad' }, buttons);
 

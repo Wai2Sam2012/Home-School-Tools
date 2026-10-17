@@ -1,9 +1,10 @@
 // 8. Settings (grown-ups, behind the 3-second hold): voice, adventure and
 // detour length, backup and restore (Stage 6), and deleting the player.
 
-import { ADVENTURE_LENGTHS, DETOUR_MAX, DETOUR_MIN, stepDetourLength } from '../settings.js?v=0.5.1';
-import { chooseVoice, isFunVoice, rankVoices, voiceId, voiceQuality } from '../speech.js?v=0.5.1';
-import { choiceRow, confirmDialog, h, topBar } from '../ui.js?v=0.5.1';
+import { ADVENTURE_LENGTHS, DETOUR_MAX, DETOUR_MIN, stepDetourLength } from '../settings.js?v=0.5.2';
+import { chooseVoice, isFunVoice, rankVoices, voiceId, voiceQuality } from '../speech.js?v=0.5.2';
+import { avatarIcon } from '../avatars.js?v=0.5.2';
+import { choiceRow, confirmDialog, h, topBar } from '../ui.js?v=0.5.2';
 
 const REGIONS = { US: 'US', GB: 'UK', AU: 'Australia', IE: 'Ireland', IN: 'India', ZA: 'South Africa', NZ: 'New Zealand', CA: 'Canada', SG: 'Singapore' };
 const SAMPLE = 'Hi! What is 7 times 8?';
@@ -124,7 +125,7 @@ export function settingsScreen(ctx) {
 
   return h('main', { class: 'screen settings-screen' },
     topBar('Grown-up Settings', () => ctx.show('home')),
-    h('p', { class: 'lead' }, `Settings for ${player.avatar} ${player.name}`),
+    h('p', { class: 'lead settings-for' }, 'Settings for ', avatarIcon(player.avatar, { className: 'avatar-icon inline' }), ` ${player.name}`),
     h('div', { class: 'settings-layout' },
       h('section', { class: 'panel' },
         h('h2', {}, 'Questions'),

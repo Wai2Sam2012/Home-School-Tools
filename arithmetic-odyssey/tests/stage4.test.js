@@ -289,3 +289,16 @@ test('the debug jump moves to a step with the checkpoint at the flag before it',
   const inDetour = play(start(), false).state;
   assert.equal(jumpTo(inDetour, 5).mode, 'trail', 'a jump leaves any detour');
 });
+
+// ---------------------------------------------------------------- detour road (trail map)
+test('the detour road: the icon goes round the loop as detour questions are answered', async () => {
+  const { loopProgress, loopsLeft } = await import('../js/detour-road.js');
+  const steps = [0, 1, 2, 3].map((asked) => loopProgress(asked, 3));
+  for (let i = 1; i < steps.length; i++) assert.ok(steps[i] > steps[i - 1], 'moves forward with each answer');
+  assert.ok(steps[0] > 0 && steps[0] < 0.2, 'just off the trail at the start');
+  assert.ok(steps[3] < 1 && steps[3] > 0.85, 'nearly back at the trail after the last question');
+  assert.equal(loopProgress(10, 3), steps[3], 'never past the end');
+  assert.equal(loopProgress(-1, 3), steps[0]);
+  assert.equal(loopsLeft(30), false);
+  assert.equal(loopsLeft(80), true, 'near the finish the loop turns back so it stays on the map');
+});

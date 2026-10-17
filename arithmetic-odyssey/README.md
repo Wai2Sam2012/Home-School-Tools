@@ -12,7 +12,7 @@ An offline math adventure game for the iPad, with two themes: **Dino Tour** and 
 | [themes/national-parks/](themes/national-parks/) | Off-Roading theme. All 63 US national parks, grouped by region, with location, size, 2025 visitors, key attractions and history. |
 | [tools/Get-DinoPictures.ps1](tools/Get-DinoPictures.ps1) | PowerShell script that downloads each dinosaur's pictures from dinosaurpictures.org. See below. |
 | [tools/Run-DinoPictures.cmd](tools/Run-DinoPictures.cmd) | Double-click launcher for the script. |
-| [js/](js/) | The game's code. `app.js` starts the game and switches screens; each screen is in `js/screens/`. `adventure.js` has the adventure rules (steps, flags, detours, going back to a flag, unlocking stickers). `audio.js` makes the sound effects, `speech.js` reads aloud (and knows reliably when it has finished), and `timer.js` is the thinking timer. `math.js` is the math engine: it makes problems for each operation and difficulty and checks answers. `keypad.js` is the on-screen keypad, `hold.js` the grown-up "hold for 3 seconds" button, `profiles.js` and `settings.js` the players and their settings, `storyline.js` loads a theme's story file, and `art.js` draws a picture for stickers that don't have one. `debug.js` is the debug panel; `version.js` holds the version number. |
+| [js/](js/) | The game's code. `app.js` starts the game and switches screens; each screen is in `js/screens/`. `adventure.js` has the adventure rules (steps, flags, detours, going back to a flag, unlocking stickers). `avatars.js` has the 16 player pictures (drawn, all facing right), `detour-road.js` draws the detour loop on the trail map, `audio.js` makes the sound effects, `speech.js` reads aloud (and knows reliably when it has finished), and `timer.js` is the thinking timer. `math.js` is the math engine: it makes problems for each operation and difficulty and checks answers. `keypad.js` is the on-screen keypad, `hold.js` the grown-up "hold for 3 seconds" button, `profiles.js` and `settings.js` the players and their settings, `storyline.js` loads a theme's story file, and `art.js` draws a picture for stickers that don't have one. `debug.js` is the debug panel; `version.js` holds the version number. |
 | [css/style.css](css/style.css) | The game's styles. |
 | [tools/Start-LocalServer.ps1](tools/Start-LocalServer.ps1) | Runs the game in a browser on your PC. See [Testing in a browser on your PC](#testing-in-a-browser-on-your-pc). |
 | [tools/set-version.mjs](tools/set-version.mjs) | Sets a new version number, and the matching `?v=` tag on every game file, so browsers never mix cached files from two versions. Run `node tools/set-version.mjs 1.2.3` for each release. |
@@ -43,7 +43,7 @@ cd arithmetic-odyssey
 node --test
 ```
 
-You should see `# fail 0` (129 tests at the end of Stage 5). Each test name starts with its ID from the test plan in [GAME-PLAN.md](GAME-PLAN.md) where it has one, for example `T1.3`.
+You should see `# fail 0` (132 tests at the end of Stage 5). Each test name starts with its ID from the test plan in [GAME-PLAN.md](GAME-PLAN.md) where it has one, for example `T1.3`.
 
 ## Testing in a browser on your PC
 
@@ -59,7 +59,7 @@ It first rebuilds the story files if Node.js is installed (otherwise it warns an
 
 To see the game at iPad size, press **F12** in Chrome or Edge, then **Ctrl+Shift+M**, and choose an iPad from the device list.
 
-The debug panel sits in the top-right corner; **Hide** folds it away. Besides the device facts, it has buttons to **add a test player**, **collect the next 5 Dino stickers** (to try the Sticker Album) and **remove the player's stickers**. It can also open the **voice tester**, which plays every English voice on the device with a choice of sample line, speed and pitch (or all of them in turn, saying each name), and make speech **pretend the end event never comes**, to check the game never waits on speech. During an adventure, it can also **answer right** or **answer wrong** (to force a detour or a trip back to the flag) and **jump to just before the next flag** or **to the last step**. Players only last until the page reloads in this version.
+The debug panel sits in the top-right corner; **Hide** folds it away. Besides the device facts, it has buttons to **add a test player**, **collect the next 5 Dino stickers** (to try the Sticker Album) and **remove the player's stickers**. It can also open the **voice and sound tester**, which plays every English voice on the device with a choice of sample line, speed and pitch (or all of them in turn, saying each name) and every sound effect, and make speech **pretend the end event never comes**, to check the game never waits on speech. During an adventure, it can also **answer right** or **answer wrong** (to force a detour or a trip back to the flag) and **jump to just before the next flag** or **to the last step**. Players only last until the page reloads in this version.
 
 **Grown-up Settings** opens by holding the **Grown-ups** button on a player's home screen for 3 seconds. Deleting a player is there, so children can't do it by accident.
 
