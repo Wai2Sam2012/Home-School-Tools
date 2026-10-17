@@ -16,7 +16,7 @@ const SOUND_NAMES = {
   setback: 'Back to a flag',
   milestone: 'Flag (no theme sound)',
   finish: "Trail's End",
-  roar: 'Flag in Dino Tour (roar)',
+  roar: 'Flag in Dinosaur Adventure (roar)',
   engine: 'Flag in Off-Roading (engine)',
 };
 

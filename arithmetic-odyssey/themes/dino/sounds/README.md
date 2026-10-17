@@ -1,4 +1,4 @@
-# Dino Tour sounds
+# Dinosaur Adventure sounds
 
 Recorded sounds here named **`flag-1.mp3`**, **`flag-2.mp3`** and so on (or one **`flag.mp3`**; `.m4a` and `.wav` work too) play when a player reaches a flag, instead of the roar the game makes itself. With several, the game picks one at random at each flag, never the same one twice in a row. Without any, the made-up roar plays.
 

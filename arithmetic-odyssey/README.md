@@ -1,6 +1,6 @@
 # Arithmetic Odyssey
 
-An offline math adventure game for the iPad, with two themes: **Dino Tour** and **Off-Roading** (US national parks). The game is planned in [GAME-PLAN.md](GAME-PLAN.md) and will be built here in stages.
+An offline math adventure game for the iPad, with two themes: **Dinosaur Adventure** and **Off-Roading** (US national parks). The game is planned in [GAME-PLAN.md](GAME-PLAN.md) and will be built here in stages.
 
 ## Contents
 
@@ -8,7 +8,7 @@ An offline math adventure game for the iPad, with two themes: **Dino Tour** and 
 | --- | --- |
 | [index.html](index.html) | The game's page. The screens are drawn by `js/app.js`. |
 | [GAME-PLAN.md](GAME-PLAN.md) | Plan and AI-agent brief for the game, with build stages, a test plan and decisions. |
-| [themes/dino/](themes/dino/) | Dino Tour theme. The top 20 dinosaurs from each period, with a quick list and a detailed summary of each one: [Triassic](themes/dino/triassic.md), [Jurassic](themes/dino/jurassic.md), [Cretaceous](themes/dino/cretaceous.md). [game-text.json](themes/dino/game-text.json) has the kid-friendly facts and story text; `pictures/` has the pictures (see [Adding pictures](#adding-pictures)). |
+| [themes/dino/](themes/dino/) | Dinosaur Adventure theme. The top 20 dinosaurs from each period, with a quick list and a detailed summary of each one: [Triassic](themes/dino/triassic.md), [Jurassic](themes/dino/jurassic.md), [Cretaceous](themes/dino/cretaceous.md). [game-text.json](themes/dino/game-text.json) has the kid-friendly facts and story text; `pictures/` has the pictures (see [Adding pictures](#adding-pictures)). |
 | [themes/national-parks/](themes/national-parks/) | Off-Roading theme. All 63 US national parks, grouped by region, with location, size, 2025 visitors, key attractions and history. [PICTURES.md](themes/national-parks/PICTURES.md) says what pictures to collect, their size, and the folder for each park. |
 | [tools/Get-DinoPictures.ps1](tools/Get-DinoPictures.ps1) | PowerShell script that downloads each dinosaur's pictures from dinosaurpictures.org. See below. |
 | [tools/Run-DinoPictures.cmd](tools/Run-DinoPictures.cmd) | Double-click launcher for the script. |
@@ -32,7 +32,7 @@ Each theme keeps all of its resources (facts, story text, pictures, sounds and t
 | --- | --- |
 | 0. Project setup and first publish | Done: placeholder page, local server, debug panel and publishing workflow. The iPad check (T0.4) runs after the first publish. |
 | 1. Math engine | Done: `js/math.js` |
-| 2. Theme content | Both themes can be played. **Dino Tour:** Triassic pictures are in; Jurassic and Cretaceous show a drawing until their pictures are added. **Off-Roading (first version, 0.5.6):** all 63 parks with kid-friendly facts and truck story text; the 8 Alaska parks have pictures, the other parks show a drawing until theirs are added. |
+| 2. Theme content | Both themes can be played. **Dinosaur Adventure:** Triassic pictures are in; Jurassic and Cretaceous show a drawing until their pictures are added. **Off-Roading (first version, 0.5.6):** all 63 parks with kid-friendly facts and truck story text; the 8 Alaska parks have pictures, the other parks show a drawing until theirs are added. |
 | 3. Screens and keypad | Done: Tap to Start, players, home, Setup, Sticker Album, Stats and grown-up Settings, with the on-screen keypad, in portrait and landscape. |
 | 4. The adventure | Done: the trail map with a flag every 10 steps, detours after a wrong answer (called **wandering** in the game: "Wandering question 1 of 3"), going back to the last flag when a whole detour is missed, Resume Adventure, and Trail's End with the new sticker, a slideshow of its pictures and a trip summary. |
 | 5. Sound, voice and timer | Done: sound effects, questions and story moments read aloud with a Repeat button, the thinking timer (shown on Trail's End), and a "Tap to continue" screen when the iPad pauses sound. Grown-ups can turn the voice and the sound effects on or off in Settings, choose the voice and its speed (tap a voice to hear it), and see which voice is used. |
@@ -104,7 +104,7 @@ A wrong or damaged file is refused and nothing changes. Before a restore the gam
 
 ## Credits
 
-Picture and sound credits are in each theme's `CREDITS.md` ([Dino Tour](themes/dino/CREDITS.md), [Off-Roading](themes/national-parks/CREDITS.md)). The flag sounds are from [Freesound](https://freesound.org/); six are public domain (CC0), and one needs this credit:
+Picture and sound credits are in each theme's `CREDITS.md` ([Dinosaur Adventure](themes/dino/CREDITS.md), [Off-Roading](themes/national-parks/CREDITS.md)). The flag sounds are from [Freesound](https://freesound.org/); six are public domain (CC0), and one needs this credit:
 
 - "Truck-Uphill.wav" by moshwe — https://freesound.org/s/554426/
   Licensed under CC BY 3.0: https://creativecommons.org/licenses/by/3.0/
