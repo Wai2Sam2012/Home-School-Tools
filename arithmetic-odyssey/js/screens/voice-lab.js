@@ -2,10 +2,10 @@
 // voice on this device with a choice of sample line, speed and pitch, and
 // every sound effect, so a grown-up can compare them and pick the best.
 
-import { describeVoice } from './settings.js?v=0.5.6';
-import { bestVersions, chooseVoice, isFunVoice, loadVoices, rankVoices, voiceId } from '../speech.js?v=0.5.6';
-import { SOUNDS, SYNTHS, playSound } from '../audio.js?v=0.5.6';
-import { choiceRow, h, topBar } from '../ui.js?v=0.5.6';
+import { describeVoice } from './settings.js?v=0.6.0';
+import { bestVersions, chooseVoice, isFunVoice, loadVoices, rankVoices, voiceId } from '../speech.js?v=0.6.0';
+import { SOUNDS, SYNTHS, playSound } from '../audio.js?v=0.6.0';
+import { choiceRow, h, topBar } from '../ui.js?v=0.6.0';
 
 const SOUND_NAMES = {
   right: 'Right answer (ding)',

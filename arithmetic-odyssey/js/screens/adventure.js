@@ -8,15 +8,15 @@
 // Submit. It pauses while Repeat is reading and while the game is in the
 // background. The keypad works the whole time; nothing waits on speech.
 
-import { answerProblem, jumpTo, milestoneSteps, storyText, unlockSticker, withNextProblem } from '../adventure.js?v=0.5.6';
-import { stickerPicture } from '../art.js?v=0.5.6';
-import { avatarIcon } from '../avatars.js?v=0.5.6';
-import { createDetourRoad, loopProgress } from '../detour-road.js?v=0.5.6';
-import { createKeypad } from '../keypad.js?v=0.5.6';
-import { THEMES } from '../settings.js?v=0.5.6';
-import { createThinkingTimer } from '../timer.js?v=0.5.6';
-import { nextSticker } from '../storyline.js?v=0.5.6';
-import { h, topBar } from '../ui.js?v=0.5.6';
+import { answerProblem, jumpTo, milestoneSteps, storyText, unlockSticker, withNextProblem } from '../adventure.js?v=0.6.0';
+import { stickerPicture } from '../art.js?v=0.6.0';
+import { avatarIcon } from '../avatars.js?v=0.6.0';
+import { createDetourRoad, loopProgress } from '../detour-road.js?v=0.6.0';
+import { createKeypad } from '../keypad.js?v=0.6.0';
+import { THEMES } from '../settings.js?v=0.6.0';
+import { createThinkingTimer } from '../timer.js?v=0.6.0';
+import { nextSticker } from '../storyline.js?v=0.6.0';
+import { h, topBar } from '../ui.js?v=0.6.0';
 
 const PRAISE = ['Correct!', 'Great job!', 'You got it!', 'Awesome!', 'Nice work!'];
 // A right answer moves on by itself; after a wrong one the game waits for
@@ -135,9 +135,10 @@ export function adventureScreen(ctx) {
   }
   document.addEventListener('visibilitychange', onVisibility);
 
+  // Saved after every change, so closing the game never loses more than the current question.
   function save(next) {
     state = next;
-    player.adventure = next;
+    ctx.profiles.saveAdventure(player.id, next);
   }
 
   function showMap() {
@@ -188,10 +189,7 @@ export function adventureScreen(ctx) {
     }
     ctx.sound('finish');
     const { sticker, collected } = unlockSticker(storyline, player.collected[state.theme]);
-    player.collected[state.theme] = collected;
-    const result = { theme: state.theme, length: state.length, stats: state.stats, stickerId: sticker?.id ?? null };
-    player.lastResult = result;
-    player.adventure = null;
+    const result = ctx.profiles.finishAdventure(player.id, state, { collected, stickerId: sticker?.id ?? null });
     ctx.show('trailEnd', result);
   }
 

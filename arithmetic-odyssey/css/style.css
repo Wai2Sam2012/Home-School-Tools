@@ -1628,3 +1628,114 @@ h1:focus {
     transition: none !important;
   }
 }
+
+/* ------------------------------------------------------------ saving, stats and backup (Stage 6) */
+
+.toast {
+  position: fixed;
+  right: max(16px, env(safe-area-inset-right));
+  bottom: calc(16px + env(safe-area-inset-bottom));
+  left: max(16px, env(safe-area-inset-left));
+  z-index: 50;
+  max-width: 640px;
+  margin: 0 auto;
+  padding: 14px 18px;
+  border-radius: 14px;
+  background: #2b2b2b;
+  box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
+  color: #fff;
+  font-size: 18px;
+  text-align: center;
+}
+
+.file-input {
+  display: none;
+}
+
+.saving-info p {
+  margin: 0 0 8px;
+}
+
+.saving-info ul {
+  margin: 4px 0 0;
+  padding-left: 20px;
+}
+
+.dialog-choices {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.dialog-choices .button-detail {
+  margin-top: 4px;
+}
+
+.high-score-note {
+  margin: 0 0 12px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: #fff1c2;
+  font-size: 22px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.practice-list {
+  display: grid;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.practice-item {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  gap: 12px;
+  padding: 10px 14px;
+  border: 2px solid var(--line);
+  border-radius: 14px;
+  background: var(--surface);
+}
+
+.practice-problem {
+  font-size: 28px;
+  font-weight: 800;
+  font-variant-numeric: tabular-nums;
+}
+
+.practice-why {
+  color: var(--muted);
+  font-size: 18px;
+}
+
+.score-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 18px;
+  font-variant-numeric: tabular-nums;
+}
+
+.score-table th,
+.score-table td {
+  padding: 8px 6px;
+  border-bottom: 1px solid var(--line);
+  text-align: left;
+}
+
+.score-table th {
+  color: var(--muted);
+  font-size: 15px;
+  font-weight: 600;
+}
+
+.score-table tr.best td {
+  font-weight: 700;
+}
+
+.score-ops {
+  letter-spacing: 0.1em;
+}
+

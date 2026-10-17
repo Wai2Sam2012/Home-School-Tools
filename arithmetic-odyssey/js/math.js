@@ -125,6 +125,19 @@ function makeProblem(op, a, b, answer) {
 // Public API
 // ---------------------------------------------------------------------------
 
+/**
+ * A saved problem made whole again (its text, key and spoken words), or null
+ * if it is not a real problem (a damaged save).
+ */
+export function restoreProblem(saved) {
+  if (!saved || typeof saved !== 'object' || !MAKERS[saved.op]) return null;
+  const { op, a, b } = saved;
+  if (!Number.isInteger(a) || !Number.isInteger(b) || a < 0 || b < 0) return null;
+  const answer = { '+': a + b, '−': a - b, '×': a * b, '÷': b === 0 ? NaN : a / b }[op];
+  if (!Number.isInteger(answer) || answer < 0) return null;
+  return makeProblem(op, a, b, answer);
+}
+
 function checkSettings(operations, difficulty) {
   if (!Array.isArray(operations) || operations.length === 0) {
     throw new Error('Select at least one operation.');

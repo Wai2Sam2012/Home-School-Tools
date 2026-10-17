@@ -1,5 +1,5 @@
 // The adventure rules (GAME-PLAN.md 1.8), with no screen code so they can be
-// tested on their own. The state is plain data, so Stage 6 can save it.
+// tested on their own. The state is plain data, so it can be saved (js/profiles.js).
 //
 //   Main trail: a right answer moves one step; a wrong one starts a detour.
 //   Milestones: every 10 steps; each one reached becomes the checkpoint.
@@ -7,8 +7,8 @@
 //     clears it (back to the same step); all wrong goes back to the checkpoint.
 //   The trail ends at step `length`, and the next sticker is unlocked.
 
-import { checkAnswer, createProblemGenerator } from './math.js?v=0.5.6';
-import { collectNext, nextSticker } from './storyline.js?v=0.5.6';
+import { checkAnswer, createProblemGenerator } from './math.js?v=0.6.0';
+import { collectNext, nextSticker } from './storyline.js?v=0.6.0';
 
 export const ADVENTURE_SCHEMA = 1;
 export const MILESTONE_EVERY = 10;
@@ -44,7 +44,8 @@ export function startAdventure({ theme, length, detourLength, operations, diffic
     detour: null, // { number, asked, correct } while in a detour
     problem: null,
     lastKey: null,
-    stats: { answered: 0, correct: 0, detours: 0, setbacks: 0, thinkingMs: 0, missed: {} },
+    // missed: wrong answers per problem; times: the longest thinking time per problem (for Need More Practice).
+    stats: { answered: 0, correct: 0, detours: 0, setbacks: 0, thinkingMs: 0, missed: {}, times: {} },
   };
 }
 
@@ -82,11 +83,13 @@ export function answerProblem(state, input, { thinkingMs = 0 } = {}) {
   if (!check.ok) return { state, check, events: [] };
 
   const problem = state.problem;
+  const ms = Math.max(0, Math.round(Number(thinkingMs) || 0));
   const stats = {
     ...state.stats,
     answered: state.stats.answered + 1,
-    thinkingMs: (state.stats.thinkingMs ?? 0) + Math.max(0, Math.round(Number(thinkingMs) || 0)),
+    thinkingMs: (state.stats.thinkingMs ?? 0) + ms,
     missed: { ...state.stats.missed },
+    times: { ...state.stats.times, [problem.key]: Math.max(state.stats.times?.[problem.key] ?? 0, ms) },
   };
   const events = [];
   let next = { ...state, problem: null, stats };

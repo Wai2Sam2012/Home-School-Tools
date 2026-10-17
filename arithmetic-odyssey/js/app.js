@@ -1,23 +1,24 @@
 // Starts the game: keeps the players and story files, and switches between
 // screens. Each screen is a function in js/screens/ that builds its page.
 
-import { APP_VERSION } from './version.js?v=0.5.6';
-import { addDebugAction, addDebugInfo, isDebugOn, showDebugPanel } from './debug.js?v=0.5.6';
-import { audioSuspended, playSound, soundLength, unlockAudio } from './audio.js?v=0.5.6';
-import { AVATARS, createProfileStore } from './profiles.js?v=0.5.6';
-import { SPEECH_RATES, chooseVoice, createSpeaker, loadVoices } from './speech.js?v=0.5.6';
-import { collectNext, loadStoryline } from './storyline.js?v=0.5.6';
-import { h } from './ui.js?v=0.5.6';
-import { startScreen } from './screens/start.js?v=0.5.6';
-import { newPlayerScreen, profilesScreen } from './screens/profiles.js?v=0.5.6';
-import { homeScreen } from './screens/home.js?v=0.5.6';
-import { setupScreen } from './screens/setup.js?v=0.5.6';
-import { adventureScreen } from './screens/adventure.js?v=0.5.6';
-import { trailEndScreen } from './screens/trail-end.js?v=0.5.6';
-import { albumScreen } from './screens/album.js?v=0.5.6';
-import { statsScreen } from './screens/stats.js?v=0.5.6';
-import { settingsScreen } from './screens/settings.js?v=0.5.6';
-import { voiceLabScreen } from './screens/voice-lab.js?v=0.5.6';
+import { APP_VERSION } from './version.js?v=0.6.0';
+import { addDebugAction, addDebugInfo, isDebugOn, showDebugPanel } from './debug.js?v=0.6.0';
+import { audioSuspended, playSound, soundLength, unlockAudio } from './audio.js?v=0.6.0';
+import { AVATARS, createProfileStore } from './profiles.js?v=0.6.0';
+import { askToKeepData, createStorage, deviceStorage } from './storage.js?v=0.6.0';
+import { SPEECH_RATES, chooseVoice, createSpeaker, loadVoices } from './speech.js?v=0.6.0';
+import { collectNext, loadStoryline } from './storyline.js?v=0.6.0';
+import { h } from './ui.js?v=0.6.0';
+import { startScreen } from './screens/start.js?v=0.6.0';
+import { newPlayerScreen, profilesScreen } from './screens/profiles.js?v=0.6.0';
+import { homeScreen } from './screens/home.js?v=0.6.0';
+import { setupScreen } from './screens/setup.js?v=0.6.0';
+import { adventureScreen } from './screens/adventure.js?v=0.6.0';
+import { trailEndScreen } from './screens/trail-end.js?v=0.6.0';
+import { albumScreen } from './screens/album.js?v=0.6.0';
+import { statsScreen } from './screens/stats.js?v=0.6.0';
+import { settingsScreen } from './screens/settings.js?v=0.6.0';
+import { voiceLabScreen } from './screens/voice-lab.js?v=0.6.0';
 
 const SCREENS = {
   start: { build: startScreen },
@@ -40,11 +41,32 @@ for (const leftover of document.body.querySelectorAll(':scope > main')) leftover
 const storylines = new Map();
 let current = { name: null, params: {}, leave: [] };
 
+// Saving problems (damaged data set aside, storage full or unavailable) are
+// listed in Settings and shown once in a short message.
+const problems = [];
+const lastShown = new Map();
+function notify(message, ms = 6000) {
+  const toast = h('div', { class: 'toast', role: 'alert' }, message);
+  document.body.append(toast);
+  setTimeout(() => toast.remove(), ms);
+}
+function reportProblem(problem) {
+  problems.push({ ...problem, at: new Date().toISOString() });
+  // The same kind of problem is shown at most once a minute (a full storage fails on every question).
+  const now = Date.now();
+  if (now - (lastShown.get(problem.type) ?? -Infinity) < 60000) return;
+  lastShown.set(problem.type, now);
+  notify(problem.message);
+}
+
 const ctx = {
   version: APP_VERSION,
   audio: null,
   debugAdventure: null, // set by the adventure screen while it is shown
-  profiles: createProfileStore(),
+  profiles: createProfileStore({ storage: createStorage(deviceStorage(), { onProblem: reportProblem }) }),
+  /** Saving problems so far: [{ type, key, message, at }] (shown in Settings). */
+  problems,
+  notify,
   speaker: createSpeaker(),
   /** 'locked' until Tap to Start, then 'loading', 'ready' (a voice was found) or 'none'. */
   voiceState: 'locked',
@@ -54,6 +76,8 @@ const ctx = {
   /** Tap to Start: unlocks sound and speech and finds a voice (GAME-PLAN.md 1.9). */
   unlock() {
     ctx.audio = unlockAudio();
+    // Asks the browser to keep the saved players even when the iPad is short of space.
+    askToKeepData();
     if (ctx.voiceState !== 'locked') return;
     ctx.speaker.unlock();
     ctx.voiceState = 'loading';
@@ -176,7 +200,7 @@ function addDebugTools() {
     const player = ctx.profiles.active();
     if (!player) return 'Choose a player first.';
     const storyline = await ctx.getStoryline('dino');
-    player.collected.dino = collectNext(storyline, player.collected.dino, 5);
+    ctx.profiles.setCollected(player.id, 'dino', collectNext(storyline, player.collected.dino, 5));
     ctx.refresh();
     return `${player.name} has ${player.collected.dino.length} Dino stickers.`;
   });
@@ -188,7 +212,7 @@ function addDebugTools() {
   addDebugAction("Remove the player's stickers", () => {
     const player = ctx.profiles.active();
     if (!player) return 'Choose a player first.';
-    for (const theme of Object.keys(player.collected)) player.collected[theme] = [];
+    for (const theme of Object.keys(player.collected)) ctx.profiles.setCollected(player.id, theme, []);
     ctx.refresh();
     return `Removed ${player.name}'s stickers.`;
   });

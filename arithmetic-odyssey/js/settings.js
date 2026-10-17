@@ -2,7 +2,7 @@
 // (chosen by the player on the Setup screen), with their allowed values.
 // normalize...() turns anything, including damaged saved data, into valid values.
 
-import { DIFFICULTIES, OPERATIONS } from './math.js?v=0.5.6';
+import { DIFFICULTIES, OPERATIONS } from './math.js?v=0.6.0';
 
 export const ADVENTURE_LENGTHS = Object.freeze([20, 40, 60, 80, 100]);
 export const DETOUR_MIN = 3;

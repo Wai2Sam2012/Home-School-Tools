@@ -257,12 +257,12 @@ All data is small (well under 1 MB), so use `localStorage`, wrapped in `storage.
 
 **Need More Practice**
 
-For each profile, list the problems answered wrong most often over the last 10 games, with how many times each was missed.
+For each profile, list the problems answered wrong most often over the last 10 games, with how many times each was missed; then, if there is room, the slowest problems (5 seconds or more).
 
 **High scores**
 
 - There is a separate board for each **adventure length** (20, 40, 60, 80 and 100 questions), and within each length a board for each difficulty.
-- The score is the total thinking time for a completed adventure; lower is better.
+- Fewer milestone setbacks rank higher; between equal setbacks, less total thinking time is better (decided after the 0.5.5 iPad checklist; the first plan ranked by thinking time only).
 - Each entry also shows the date, accuracy, milestone setbacks and the operations used.
 - Only completed adventures count. A run that went back to a milestone still counts when it is completed: the extra questions simply add thinking time.
 
@@ -500,6 +500,18 @@ Every stage ends with its tests passing, the site republished, and a short repor
 | T6.7 | Restoring a wrong or damaged file is refused with a clear message and changes nothing | Automated |
 | T6.8 | Back Up saves a file through the share sheet (Save to Files) | iPad |
 | T6.9 | Older saves are migrated to the current schema version | Automated |
+
+**Notes from building Stage 6 (0.6.0):**
+
+- `js/storage.js` wraps localStorage: safe writes (temporary key, real key, remove the temporary key; a read uses whichever copy is valid), quarantine of damaged data, and friendly messages for a full or blocked storage (a toast, and a list in Settings). With no storage at all the game runs in memory for that visit and says so.
+- `js/records.js` checks every saved record and migrates older ones, one schema step at a time. Schema 0 is the shape players had in memory in 0.3 to 0.5 (no schema number; the player list as a plain array; stickers as one Dino list).
+- `js/profiles.js` saves only what changed: `ao.v1.active.<id>` after every question, the player's record when settings change or an adventure ends. If the player list is damaged it is rebuilt from the players' own records.
+- **High scores** (decided after the 0.5.5 iPad checklist): fewer milestone setbacks rank higher, then the shortest total thinking time, then the earlier game. Trail's End says when a trip makes the board ("New best score for 20 questions (Beginner)!").
+- **Need More Practice** (decided with it): the problems missed most often in the last 10 games, then the slowest of those, then, if there is room, problems that took 5 seconds or more. Each game keeps only its 10 slowest problems.
+- `js/backup.js`: the backup file (format `arithmetic-odyssey-backup`, schema 1) holds every player's record, history and adventure in progress. Restore checks the whole file before changing anything, keeps an undo copy (`ao.v1.undo`), and keeps the current player chosen if they come back.
+- `navigator.storage.persist()` is asked for at Tap to Start.
+- The Restore file picker is the only `<input>` besides the player name; it opens Files, never the keyboard (T3.3 still holds).
+- The Dino flag roar was rebuilt in the style of the big movie T. rex roars (a trumpeting scream, then a raspy growl; 2.6 s, made with Web Audio, not a recording).
 
 ### Stage 7: Offline app (PWA)
 

@@ -89,7 +89,8 @@ test('T3.2 a PC keyboard works too: digits, Backspace/Delete and Enter', () => {
 test('T3.3 answers are never typed into a text box (no <input> outside the new-player screen)', () => {
   const files = readdirSync(join(GAME, 'js'), { recursive: true }).filter((f) => f.endsWith('.js'));
   for (const file of files) {
-    const source = read(join('js', file));
+    // The Restore button's file picker (type "file") opens Files, never the keyboard.
+    const source = read(join('js', file)).replace(/h\('input', \{ type: 'file'/g, '');
     const hasInput = /h\('(input|textarea)'|createElement\('(input|textarea)'|contentEditable =|contenteditable:/.test(source);
     assert.equal(hasInput, file.replace(/\\/g, '/') === 'screens/profiles.js', `js/${file}`);
   }
