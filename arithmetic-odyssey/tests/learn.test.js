@@ -14,6 +14,7 @@ import { SLOW_MS, needMorePractice } from '../js/scores.js';
 import { KEYS, createStorage, memoryStorage } from '../js/storage.js';
 import { makeBackup, parseBackup } from '../js/backup.js';
 import { GAME_DIR, buildDinoStoryline, buildParksStoryline, findSounds, isCredited, parseCredits } from '../tools/build-storyline.mjs';
+import { pickDifferent } from '../js/audio.js';
 
 const missed = (key, n = 1) => ({ key, missed: n, slowMs: 0 });
 const slow = (key, ms = 8000) => ({ key, missed: 0, slowMs: ms });
@@ -158,9 +159,12 @@ test('a theme\'s recorded flag sound is found in its sounds folder', () => {
     mkdirSync(join(theme, 'sounds'));
     writeFileSync(join(theme, 'sounds', 'README.md'), 'x');
     writeFileSync(join(theme, 'sounds', 'roar.ogg'), 'x');
-    assert.deepEqual(findSounds(theme), {}, 'only flag.mp3, .m4a or .wav count');
+    assert.deepEqual(findSounds(theme), {}, 'only flag sounds in .mp3, .m4a or .wav count');
     writeFileSync(join(theme, 'sounds', 'Flag.MP3'), 'x');
-    assert.deepEqual(findSounds(theme), { flag: 'sounds/Flag.MP3' });
+    assert.deepEqual(findSounds(theme), { flag: ['sounds/Flag.MP3'] });
+    for (const f of ['flag-10.mp3', 'flag-2.wav', 'flag_3.m4a', 'flagpole.mp3', 'flag-4.ogg']) writeFileSync(join(theme, 'sounds', f), 'x');
+    assert.deepEqual(findSounds(theme).flag, ['sounds/Flag.MP3', 'sounds/flag_3.m4a', 'sounds/flag-2.wav', 'sounds/flag-10.mp3'].sort((a, b) => a.localeCompare(b, 'en', { numeric: true })),
+      'every flag sound, in number order');
   } finally {
     rmSync(theme, { recursive: true, force: true });
   }
@@ -169,14 +173,38 @@ test('a theme\'s recorded flag sound is found in its sounds folder', () => {
   assert.ok(isCredited('sounds/flag.mp3', credits));
 });
 
-test('a recorded flag sound in the game is small and credited', () => {
+test('the recorded flag sounds in the game are small and credited', () => {
   for (const [dir, build] of [['dino', buildDinoStoryline], ['national-parks', buildParksStoryline]]) {
     const themeDir = join(GAME_DIR, 'themes', dir);
     const { storyline, report } = build(themeDir);
     assert.ok(storyline.sounds && typeof storyline.sounds === 'object', dir);
-    for (const path of Object.values(storyline.sounds)) {
+    for (const path of Object.values(storyline.sounds).flat()) {
       assert.ok(statSync(join(themeDir, path)).size <= 600 * 1024, `${dir}/${path} is over 600 KB`);
       assert.ok(!report.uncredited.includes(path), `${dir}/${path} needs a line in CREDITS.md`);
     }
   }
 });
+
+test('the dinosaur and truck themes each have their recorded flag sounds', () => {
+  assert.deepEqual(buildDinoStoryline(join(GAME_DIR, 'themes', 'dino')).storyline.sounds.flag, ['sounds/flag-1.mp3', 'sounds/flag-2.mp3', 'sounds/flag-3.mp3']);
+  assert.deepEqual(buildParksStoryline(join(GAME_DIR, 'themes', 'national-parks')).storyline.sounds.flag, ['sounds/flag-1.mp3', 'sounds/flag-2.mp3']);
+});
+
+test('a flag sound is picked at random, never the same one twice in a row', () => {
+  assert.equal(pickDifferent(0), -1, 'none: the game makes its own sound');
+  assert.equal(pickDifferent(1, 0), 0, 'only one: always that one');
+  let seed = 7;
+  const random = () => ((seed = (seed * 16807) % 2147483647) / 2147483647);
+  const counts = [0, 0, 0];
+  let last = -1;
+  for (let i = 0; i < 3000; i++) {
+    const pick = pickDifferent(3, last, random);
+    assert.notEqual(pick, last);
+    counts[pick] += 1;
+    last = pick;
+  }
+  for (const n of counts) assert.ok(n > 800, `each sound is picked about as often (${counts})`);
+  const first = new Set(Array.from({ length: 200 }, () => pickDifferent(3, -1, random)));
+  assert.equal(first.size, 3, 'any of them can come first');
+});
+

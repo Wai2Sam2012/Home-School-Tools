@@ -35,7 +35,7 @@ Each theme keeps all of its resources (facts, story text, pictures, sounds and t
 | 3. Screens and keypad | Done: Tap to Start, players, home, Setup, Sticker Album, Stats and grown-up Settings, with the on-screen keypad, in portrait and landscape. |
 | 4. The adventure | Done: the trail map with a flag every 10 steps, detours after a wrong answer, going back to the last flag when a whole detour is missed, Resume Adventure, and Trail's End with the new sticker, a slideshow of its pictures and a trip summary. |
 | 5. Sound, voice and timer | Done: sound effects, questions and story moments read aloud with a Repeat button, the thinking timer (shown on Trail's End), and a "Tap to continue" screen when the iPad pauses sound. Grown-ups can turn the voice and the sound effects on or off in Settings, choose the voice and its speed (tap a voice to hear it), and see which voice is used. |
-| 6. Saving, stats, high scores and backup | Done (0.6.0): players, settings, stickers and the adventure in progress are saved on the iPad and survive closing the game; Need More Practice and high scores in My Stats; Back up and Restore (with undo) in Grown-up Settings. See [Saving and backup](#saving-and-backup). **0.6.1:** Learn from Incorrect, and recorded flag sounds. |
+| 6. Saving, stats, high scores and backup | Done (0.6.0): players, settings, stickers and the adventure in progress are saved on the iPad and survive closing the game; Need More Practice and high scores in My Stats; Back up and Restore (with undo) in Grown-up Settings. See [Saving and backup](#saving-and-backup). **0.6.1:** Learn from Incorrect, and recorded flag sounds. **0.6.2:** three dinosaur roars and two truck engines, picked at random at each flag. |
 | 7–8 | Not started |
 
 ## Running the tests
@@ -47,7 +47,7 @@ cd arithmetic-odyssey
 node --test
 ```
 
-You should see `# fail 0` (186 tests in version 0.6.1). Each test name starts with its ID from the test plan in [GAME-PLAN.md](GAME-PLAN.md) where it has one, for example `T1.3`.
+You should see `# fail 0` (188 tests in version 0.6.2). Each test name starts with its ID from the test plan in [GAME-PLAN.md](GAME-PLAN.md) where it has one, for example `T1.3`.
 
 ## Testing in a browser on your PC
 
@@ -112,7 +112,7 @@ Most things can be changed without knowing much code. After a change, run the te
 | **Praise after a right answer** ("Great job!") | `PRAISE` at the top of `js/screens/adventure.js`. |
 | **How long the game waits** after a right answer | `NEXT_AFTER_RIGHT_MS` at the top of `js/screens/adventure.js` (in milliseconds). |
 | **Sound effects** | `js/audio.js`: `SOUNDS` lists the notes of each sound; `playRoar()` and `playEngine()` make the flag sounds. Hear them all in the voice and sound tester (`?debug=1`). |
-| **Which sound plays at a flag** | A recording: put `flag.mp3` in the theme's `sounds/` folder (see [themes/dino/sounds/README.md](themes/dino/sounds/README.md)). Otherwise `flagSound` for each theme in `js/settings.js`. |
+| **Which sound plays at a flag** | The recordings in the theme's `sounds/` folder, `flag-1.mp3`, `flag-2.mp3` and so on: one is picked at random at each flag, never the same twice in a row (see [themes/dino/sounds/README.md](themes/dino/sounds/README.md)). Without any, `flagSound` for each theme in `js/settings.js`. |
 | **Learn from Incorrect** | `LEARN_NEEDS` (right answers to learn a problem), `LEARN_SPACING` and `LEARN_MAX_PROBLEMS` at the top of `js/learn.js`. |
 | **How high scores are ranked** | `compareScores()` in `js/scores.js`; the board size and history length (10) at the top of the same file. |
 | **When a problem counts as slow** in Need More Practice | `SLOW_MS` at the top of `js/scores.js` (5000 milliseconds). |

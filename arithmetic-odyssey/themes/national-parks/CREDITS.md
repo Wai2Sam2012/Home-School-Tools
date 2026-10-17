@@ -9,3 +9,5 @@ A line below can name one picture (`pictures/Alaska/Denali/denali-1.jpg`) or a w
 | Picture file | National park | Source (website or photographer) | License or permission |
 | --- | --- | --- | --- |
 | `pictures/Alaska/**` | Alaska parks | Wikimedia Commons, downloaded with `tools/Get-ParkPictures.ps1`. The author of each picture is not recorded yet. | Unknown. |
+| `sounds/flag-1.mp3` | Flag engine 1 | "Truck-diesel 07dodge rev" by canucklovingbrit on [Freesound](https://freesound.org/s/478125/), trimmed to 4.7 s and evened out | Not checked yet: see the Freesound page |
+| `sounds/flag-2.mp3` | Flag engine 2 | "Truck uphill" by moshwe on [Freesound](https://freesound.org/s/554426/), trimmed to 4.8 s and evened out | Not checked yet: see the Freesound page |

@@ -1,8 +1,8 @@
 // Drawn pictures used when a sticker has no picture yet, or a picture fails
 // to load, so the game never shows a broken image (test T2.6).
 
-import { h } from './ui.js?v=0.6.1';
-import { pictureUrl } from './storyline.js?v=0.6.1';
+import { h } from './ui.js?v=0.6.2';
+import { pictureUrl } from './storyline.js?v=0.6.2';
 
 const COLORS = ['#7fb069', '#e08e45', '#5b8e7d', '#c8553d', '#6c8ead', '#d4a017', '#8e6c88', '#4f9d69'];
 

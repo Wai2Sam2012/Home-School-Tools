@@ -8,11 +8,11 @@
 //   ao.v1.history.<id>   the last 10 finished games
 //   ao.v1.active.<id>    the adventure in progress
 
-import { ADVENTURE_SCHEMA } from './adventure.js?v=0.6.1';
-import { AVATAR_IDS } from './avatars.js?v=0.6.1';
-import { createProblemGenerator, restoreProblem } from './math.js?v=0.6.1';
-import { HISTORY_SIZE, BOARD_SIZE } from './scores.js?v=0.6.1';
-import { DEFAULT_SETTINGS, DEFAULT_SETUP, THEMES, normalizeSettings, normalizeSetup } from './settings.js?v=0.6.1';
+import { ADVENTURE_SCHEMA } from './adventure.js?v=0.6.2';
+import { AVATAR_IDS } from './avatars.js?v=0.6.2';
+import { createProblemGenerator, restoreProblem } from './math.js?v=0.6.2';
+import { HISTORY_SIZE, BOARD_SIZE } from './scores.js?v=0.6.2';
+import { DEFAULT_SETTINGS, DEFAULT_SETUP, THEMES, normalizeSettings, normalizeSetup } from './settings.js?v=0.6.2';
 
 export const RECORD_SCHEMA = 1;
 export const MAX_PROFILES = 8;
