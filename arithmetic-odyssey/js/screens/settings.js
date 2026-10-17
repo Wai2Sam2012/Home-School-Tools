@@ -1,12 +1,13 @@
 // 8. Settings (grown-ups, behind the 3-second hold): voice, adventure and
-// detour length, saving, backup and restore, and deleting the player.
+// detour length, saving, offline play, backup and restore, and deleting the
+// player.
 
-import { ADVENTURE_LENGTHS, DETOUR_MAX, DETOUR_MIN, stepDetourLength } from '../settings.js?v=0.6.5';
-import { bestVersions, chooseVoice, isFunVoice, voiceId, voiceQuality } from '../speech.js?v=0.6.5';
-import { playerIcon } from '../avatars.js?v=0.6.5';
-import { canUndoRestore, makeBackup, parseBackup, restoreBackup, saveBackupFile, undoRestore } from '../backup.js?v=0.6.5';
-import { formatBytes } from '../storage.js?v=0.6.5';
-import { choiceDialog, choiceRow, confirmDialog, h, topBar } from '../ui.js?v=0.6.5';
+import { ADVENTURE_LENGTHS, DETOUR_MAX, DETOUR_MIN, stepDetourLength } from '../settings.js?v=0.7.0';
+import { bestVersions, chooseVoice, isFunVoice, voiceId, voiceQuality } from '../speech.js?v=0.7.0';
+import { playerIcon } from '../avatars.js?v=0.7.0';
+import { canUndoRestore, makeBackup, parseBackup, restoreBackup, saveBackupFile, undoRestore } from '../backup.js?v=0.7.0';
+import { formatBytes } from '../storage.js?v=0.7.0';
+import { choiceDialog, choiceRow, confirmDialog, h, topBar } from '../ui.js?v=0.7.0';
 
 const REGIONS = { US: 'US', GB: 'UK', AU: 'Australia', IE: 'Ireland', IN: 'India', ZA: 'South Africa', NZ: 'New Zealand', CA: 'Canada', SG: 'Singapore' };
 const SAMPLE = 'Hi! What is 7 times 8?';
@@ -140,6 +141,23 @@ export function settingsScreen(ctx) {
   }
   showSaving();
 
+  // Offline play (js/offline.js): how saving the game on this iPad is going.
+  const offlineText = h('p', { class: 'note offline-status', role: 'status' });
+  const offlineDetail = h('p', { class: 'note' });
+  const offlineUpdate = h('button', { type: 'button', class: 'big-button quiet', hidden: true, onclick: () => ctx.offline.applyUpdate() }, 'Update now');
+  function showOffline(state) {
+    offlineText.textContent = ctx.offline.message();
+    offlineText.dataset.status = state.status;
+    offlineDetail.textContent = state.status === 'unsupported'
+      ? 'Open the game from its https:// address in Safari, then tap Share › Add to Home Screen.'
+      : state.bytes
+        ? `${state.total} files, ${formatBytes(state.bytes)}, saved on this iPad (version ${String(state.version).split('-')[0]}). The game checks for updates when it opens with internet.`
+        : 'The game saves itself on this iPad the first time it opens with internet.';
+    offlineUpdate.hidden = state.status !== 'update-ready';
+  }
+  showOffline(ctx.offline.state());
+  ctx.onLeave(ctx.offline.onChange(showOffline));
+
   async function backUp() {
     try {
       const outcome = await saveBackupFile(makeBackup(store, { appVersion: ctx.version }));
@@ -268,6 +286,11 @@ export function settingsScreen(ctx) {
       h('section', { class: 'panel' },
         h('h2', {}, 'Saving and backup'),
         savingInfo,
+        h('h2', {}, 'Offline play'),
+        offlineText,
+        offlineDetail,
+        offlineUpdate,
+        h('h2', {}, 'Backup'),
         h('div', { class: 'button-row' },
           h('button', { type: 'button', class: 'big-button primary backup-button', onclick: backUp }, 'Back up'),
           h('button', { type: 'button', class: 'big-button restore-button', onclick: () => fileInput.click() }, 'Restore'),

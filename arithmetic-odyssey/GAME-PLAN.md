@@ -553,6 +553,15 @@ Every stage ends with its tests passing, the site republished, and a short repor
 | T7.4 | A new version installs without interrupting an adventure and applies on the next launch | PC |
 | T7.5 | It works from a subpath (`http://localhost:8080/arithmetic-odyssey/`), and the service worker does not control pages outside `arithmetic-odyssey/` | PC |
 
+**Built (0.7.0):**
+- **What is saved:** everything, both themes (about 22 MB today: 282 files). The size budget is 150 MB (`OFFLINE_BUDGET_BYTES` in `tools/build-offline.mjs`): the build fails above it, and then it is time to save only the theme being played (1.5). Newer iPads allow a Home Screen app far more than that.
+- **The file list** is built from the game itself by `tools/build-offline.mjs`: the page, `offline.html`, the manifest and icons, the stylesheet and every JavaScript file at its `?v=` address, all 80 player pictures and their stand-in drawings, and each theme's `storyline.json` with every picture and sound it names. Like `storyline.json`, `sw.js` is built when the site is published (and by the local server), not kept in git, so uploaded pictures are always in the list. Each file is listed with its size and a fingerprint (the start of its SHA-256).
+- **Saving** (`tools/sw-template.js`): four files at a time, each checked against its size and fingerprint, three tries each. Unchanged files are copied from the previous saved copy, so an update downloads only what changed. If any file fails, the install fails, "Ready to play offline" doesn't appear, and the files saved so far are kept, so the next visit saves only the rest. If the iPad later clears part of the saved copy, the game saves it again.
+- **Updates** (`js/offline.js`): checked when the game opens, and at most every 30 minutes when it comes back to the screen. A new version downloads in the background and waits; it takes over only on the start screen (the next time the game opens), or when a grown-up taps **Update now**. Old saved copies of this game are then deleted; other tools' saved files on the same address are never touched.
+- **The app:** `manifest.json` (full screen, `start_url` and `scope` `./`), the iPad tags in `index.html`, icons of 180, 192 and 512 pixels (`images/icons/`), and the Home Screen name **Math Odyssey** (12 letters fit under an icon).
+- **The debug panel** (`?debug=1`) shows storage and memory (`js/storage-report.js`): saved game data in total and per player against the ~5 MB localStorage limit, other tools' data on the same address, the offline copy, the browser's estimate of storage used and allowed and whether it is kept when space is short, and memory (the JavaScript heap where the browser reports it, which Safari never does; otherwise the page's elements, pictures and loaded sounds). It also checks for, applies or deletes the offline copy.
+- **Tests:** `tests/stage7.test.js` (T7.1 and the page side with a pretend service worker: first save, a failed file, an update that waits, an update that fails, a cleared copy saved again, update checks, and the storage report). T7.2 to T7.5 were checked in Chromium with the web server really stopped for offline.
+
 **Five colors of each player picture (done early, in 0.6.4 and 0.6.5).** Players pick one of the 16 pictures, then one of its 5 colors (80 in all), from the author's picture set:
 
 | Picture (id) | Colors 1–5 |
@@ -581,7 +590,7 @@ Every stage ends with its tests passing, the site republished, and a short repor
 
 | ID | Test | Kind |
 |---|---|---|
-| T7.6 | Every picture has 5 color files; each is a 256 × 256 PNG with a see-through background, under 100 KB (done in 0.6.4, `tests/avatars.test.js`), and in the offline file list | Automated |
+| T7.6 | Every picture has 5 color files; each is a 256 × 256 PNG with a see-through background, under 100 KB (done in 0.6.4, `tests/avatars.test.js`), and in the offline file list (done in 0.7.0, `tests/stage7.test.js`) | Automated |
 | T7.7 | A player's color is saved, survives a reload, is kept in a backup, and an old save or backup without one reads as color 1; a damaged color reads as 1 (done in 0.6.5, `tests/avatars.test.js`) | Automated |
 | T7.8 | Choosing a picture and a color on the New player screen and from Home shows that color in the player list, on Home, in Settings and on the trail map (done in 0.6.5) | PC |
 | T7.9 | Every picture faces right on the trail map, and the colors are easy to tap on the iPad | iPad |

@@ -164,6 +164,11 @@ function render(message = '') {
   );
 }
 
+/** Draws the panel again (after values measured in the background change). */
+export function refreshDebugPanel() {
+  if (panel) render();
+}
+
 /** Creates the panel (once) and shows it. */
 export function showDebugPanel(version) {
   if (panel) return panel;

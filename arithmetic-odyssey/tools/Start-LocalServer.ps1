@@ -17,9 +17,15 @@
     on the next reload. Press Ctrl+C to stop it.
 
     Before starting, it rebuilds the game's story files
-    (themes\<theme>\storyline.json) so newly added pictures show up. This
-    needs Node.js; without it the server still runs, using the story files
-    from the last build.
+    (themes\<theme>\storyline.json) so newly added pictures show up, and the
+    offline app (sw.js) with the list of files to save. This needs Node.js;
+    without it the server still runs, using the files from the last build.
+
+    The offline app keeps a saved copy of the game in the browser. After
+    changing the game's files, restart this server (it rebuilds sw.js), then
+    open the game and reload once: the new version takes over on the start
+    screen. Or use "Offline: delete the saved copy" in the debug panel
+    (?debug=1).
 
     Works in Windows PowerShell 5.1 and PowerShell 7.
 
@@ -179,6 +185,18 @@ function Invoke-StorylineBuild {
     & $node.Path $buildScript | Out-Host
     if ($LASTEXITCODE -ne 0) {
         Write-Warning 'The story files have problems (listed above). Fix them, then start the server again.'
+        Write-Host ''
+        return
+    }
+    # The offline app (sw.js) lists every file the game needs, so build it
+    # after the story files. Without it the game still runs, but not offline.
+    $offlineScript = [System.IO.Path]::Combine($RootPath, 'arithmetic-odyssey', 'tools', 'build-offline.mjs')
+    if ([System.IO.File]::Exists($offlineScript)) {
+        Write-Host 'Building the offline app (sw.js)...'
+        & $node.Path $offlineScript | Out-Host
+        if ($LASTEXITCODE -ne 0) {
+            Write-Warning 'The offline app could not be built (see above). The game runs, but not offline.'
+        }
     }
     Write-Host ''
 }

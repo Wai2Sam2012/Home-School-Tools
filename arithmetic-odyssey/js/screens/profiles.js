@@ -2,10 +2,10 @@
 // picture. Deleting a player is in the grown-up Settings, so it can't happen by
 // accident.
 
-import { AVATARS, MAX_PROFILES, NAME_MAX_LENGTH, checkProfileName } from '../profiles.js?v=0.6.5';
-import { createAvatarPicker } from '../avatar-picker.js?v=0.6.5';
-import { playerIcon } from '../avatars.js?v=0.6.5';
-import { h, topBar } from '../ui.js?v=0.6.5';
+import { AVATARS, MAX_PROFILES, NAME_MAX_LENGTH, checkProfileName } from '../profiles.js?v=0.7.0';
+import { createAvatarPicker } from '../avatar-picker.js?v=0.7.0';
+import { playerIcon } from '../avatars.js?v=0.7.0';
+import { h, topBar } from '../ui.js?v=0.7.0';
 
 
 export function profilesScreen(ctx) {

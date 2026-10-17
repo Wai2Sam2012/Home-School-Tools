@@ -429,6 +429,39 @@ h1:focus {
   color: var(--muted);
 }
 
+/* Offline play: "Ready to play offline", saving progress, or an update to apply. */
+.offline-status {
+  margin: 6px 0 0;
+  font-size: 17px;
+  font-weight: 600;
+  color: var(--muted);
+}
+
+.offline-status[data-status="ready"],
+.offline-status[data-status="update-saving"] {
+  color: var(--ok);
+}
+
+.offline-status[data-status="failed"] {
+  color: var(--error);
+}
+
+.offline-status[hidden] {
+  display: none;
+}
+
+.start-screen .update-button {
+  display: block;
+  margin: 10px auto 0;
+  min-height: 52px;
+  padding: 6px 28px;
+  font-size: 20px;
+}
+
+.update-button[hidden] {
+  display: none;
+}
+
 /* ------------------------------------------------------------ players */
 
 .player-grid {

@@ -20,6 +20,8 @@ An offline math adventure game for the iPad, with two themes: **Dinosaur Adventu
 | [images/avatars/](images/avatars/) | The 16 player pictures, each in 5 colors (`<picture>/<color>.png`), so they can be replaced. See its [README](images/avatars/README.md). |
 | [tools/Start-LocalServer.ps1](tools/Start-LocalServer.ps1) | Runs the game in a browser on your PC. See [Testing in a browser on your PC](#testing-in-a-browser-on-your-pc). |
 | [tools/set-version.mjs](tools/set-version.mjs) | Sets a new version number, and the matching `?v=` tag on every game file, so browsers never mix cached files from two versions. Run `node tools/set-version.mjs 1.2.3` for each release. |
+| [tools/build-offline.mjs](tools/build-offline.mjs) | Builds the offline app, `sw.js`, from [tools/sw-template.js](tools/sw-template.js) and the list of every file the game needs (with a fingerprint of each). Run automatically after the story files; see [Playing offline](#playing-offline). |
+| [manifest.json](manifest.json), [offline.html](offline.html), [images/icons/](images/icons/) | The installable app: its name, colors and Home Screen icons, and the page shown if something can't open offline. |
 | [tools/build-storyline.mjs](tools/build-storyline.mjs) | Builds each theme's story file (`storyline.json`) from its fact files, `game-text.json` and pictures. Run automatically; see [Adding pictures](#adding-pictures). |
 | [tests/](tests/) | Automated tests. See [Running the tests](#running-the-tests). |
 | [package.json](package.json) | Only tells Node.js that the game's `.js` files are modules, so the tests can load them. No packages are installed. |
@@ -37,7 +39,8 @@ Each theme keeps all of its resources (facts, story text, pictures, sounds and t
 | 4. The adventure | Done: the trail map with a flag every 10 steps, detours after a wrong answer (called **wandering** in the game: "Wandering question 1 of 3"), going back to the last flag when a whole detour is missed, Resume Adventure, and Trail's End with the new sticker, a slideshow of its pictures and a trip summary. |
 | 5. Sound, voice and timer | Done: sound effects, questions and story moments read aloud with a Repeat button, the thinking timer (shown on Trail's End), and a "Tap to continue" screen when the iPad pauses sound. Grown-ups can turn the voice and the sound effects on or off in Settings, choose the voice and its speed (tap a voice to hear it), and see which voice is used. |
 | 6. Saving, stats, high scores and backup | Done (0.6.0): players, settings, stickers and the adventure in progress are saved on the iPad and survive closing the game; Need More Practice and high scores in My Stats; Back up and Restore (with undo) in Grown-up Settings. See [Saving and backup](#saving-and-backup). **0.6.1:** Learn from Incorrect, and recorded flag sounds. **0.6.2:** three dinosaur roars and two truck engines, picked at random at each flag. **0.6.3:** 🙏 Help (counting blocks) for addition and subtraction (high scores also weigh Help used), two dirt bike flag sounds, detours are called "wandering", and the answer is typed straight into the question. **0.6.4:** the dinosaur theme is called Dinosaur Adventure; the title no longer covers Back on narrow screens; the 80 player picture colors are ready for Stage 7. **0.6.5:** players choose a picture and one of its 5 options (numbered 1 to 5), and can change it by tapping their picture on Home. |
-| 7–8 | Not started |
+| 7. Offline app | Done (0.7.0): the game saves itself on the iPad (both themes, about 22 MB) and plays with no internet; **Add to Home Screen** makes it a full-screen app called **Math Odyssey**; updates download in the background and apply the next time the game opens. See [Playing offline](#playing-offline). The debug panel shows how much is stored and the memory used. |
+| 8. Release and iPad acceptance | Not started |
 
 ## Running the tests
 
@@ -48,7 +51,7 @@ cd arithmetic-odyssey
 node --test
 ```
 
-You should see `# fail 0` (201 tests in version 0.6.3). Each test name starts with its ID from the test plan in [GAME-PLAN.md](GAME-PLAN.md) where it has one, for example `T1.3`.
+You should see `# fail 0` (235 tests in version 0.7.0). Each test name starts with its ID from the test plan in [GAME-PLAN.md](GAME-PLAN.md) where it has one, for example `T1.3`.
 
 ## Testing in a browser on your PC
 
@@ -60,11 +63,21 @@ Unblock-File .\Start-LocalServer.ps1    # only needed once, for files downloaded
 pwsh -ExecutionPolicy Bypass -File .\Start-LocalServer.ps1
 ```
 
-It first rebuilds the story files if Node.js is installed (otherwise it warns and uses the last build), then serves the whole repository and opens the game at `http://localhost:8080/arithmetic-odyssey/`, the same folder layout as the published site. Add `?debug=1` to the address to show the debug panel. Press **Ctrl+C** in the PowerShell window to stop the server. If port 8080 is busy, add `-Port 8081`.
+It first rebuilds the story files and the offline app (`sw.js`) if Node.js is installed (otherwise it warns and uses the last build), then serves the whole repository and opens the game at `http://localhost:8080/arithmetic-odyssey/`, the same folder layout as the published site. Add `?debug=1` to the address to show the debug panel. Press **Ctrl+C** in the PowerShell window to stop the server. If port 8080 is busy, add `-Port 8081`.
 
 To see the game at iPad size, press **F12** in Chrome or Edge, then **Ctrl+Shift+M**, and choose an iPad from the device list.
 
 The debug panel sits in the top-right corner; **Hide** folds it away. Besides the device facts, it has buttons to **add a test player**, **collect the next 5 Dino stickers** (to try the Sticker Album) and **remove the player's stickers**. It can also open the **voice and sound tester**, which plays every English voice on the device with a choice of sample line, speed and pitch (or all of them in turn, saying each name) and every sound effect, and make speech **pretend the end event never comes**, to check the game never waits on speech. During an adventure, it can also **answer right** or **answer wrong** (to force a detour or a trip back to the flag) and **jump to just before the next flag** or **to the last step**. **Delete this game's saved data** starts over with no players.
+
+**Storage and memory** (in the debug panel, measured when it opens and with **Measure storage and memory**):
+- **Saved game data:** the size of the players' saves, in total and for each player, against the browser's limit of about 5 MB. Other tools on the same github.io address share that limit, so their data is shown too.
+- **Offline copy:** how many files are saved for offline play and their size.
+- **Browser storage used:** the browser's own count of everything the game stores, out of what it allows, and whether it is **kept when the iPad is short of space**.
+- **Memory (JavaScript):** only Chrome and Edge report it (on the PC). Safari on the iPad never does, so the panel also shows what the page holds right now: its elements, pictures and loaded sounds.
+
+The panel also has **Offline: check for an update now**, **apply a waiting update now** and **delete the saved copy** (players are kept).
+
+**The offline copy while you work on the game.** The game plays from its saved copy, so after changing a file: restart the server (it rebuilds `sw.js`), then open the game and reload once. The new version takes over on the start screen. Or use **Offline: delete the saved copy** in the debug panel.
 
 **Grown-up Settings** opens by holding the **Grown-ups** button on a player's home screen for 3 seconds. Deleting a player is there, so children can't do it by accident.
 
@@ -79,11 +92,23 @@ Every push to the repository's `main` branch runs `.github/workflows/deploy.yml`
 
 The **Actions** tab shows each run; a green tick means it published. Tests, tools and `downloaded-pictures` are never published. To preview exactly what will be published, run `node .github/scripts/assemble-site.mjs` from the repository folder; it copies the site into `_site`.
 
+## Playing offline
+
+The game saves itself on the iPad the first time it opens with internet: every screen, both themes' pictures and sounds, and all the player pictures (about 22 MB). The start screen shows **Saving the game for offline play… 45%**, then **✓ Ready to play offline**. From then on it plays with no internet, even after the iPad restarts.
+
+**Install it as an app (best):** open the game's address in Safari, tap **Share › Add to Home Screen**, then open it from its icon (**Math Odyssey**). It opens full screen, like an app. Open it once with internet so it saves itself; the Home Screen app keeps its own saved copy and its own players (separate from the Safari tab).
+
+**Updates:** when a new version is published, the game downloads it in the background the next time it opens with internet (only the files that changed). It never switches in the middle of an adventure: the start screen says **Update ready: it will apply next time you open the game**, and the next time the game opens it switches before anyone plays. **Update now** (on the start screen, or in Grown-up Settings › Offline play) switches straight away; an adventure in progress is kept.
+
+**If something didn't save:** the start screen says some files couldn't be saved and **Ready to play offline** doesn't appear. The game still plays online; the next time it opens with internet it saves the rest (only what is missing).
+
+**What it checks:** every file is checked against a fingerprint when it is saved, and the list of files is built from the game itself each time it is published, so newly uploaded pictures are always included. `tests/stage7.test.js` checks the list is complete.
+
 ## Saving and backup
 
 **What is saved.** Players, their settings, stickers, high scores, the last 10 games and any adventure in progress are saved on the iPad as they change: an adventure after every question, so closing the game never loses more than the question on screen. When the game opens again, **Resume Adventure** carries on from the same question.
 
-**Where.** Only on this iPad, in the browser's storage. Nothing is sent anywhere, and it is not synced to other devices. The Safari tab and the Home Screen app (Stage 7) keep **separate** saves, so always play from the same one. Grown-up Settings shows how much space the save uses.
+**Where.** Only on this iPad, in the browser's storage. Nothing is sent anywhere, and it is not synced to other devices. The Safari tab and the Home Screen app keep **separate** saves, so always play from the same one. Grown-up Settings shows how much space the save uses.
 
 **My Stats.**
 - **Need More Practice:** the problems missed most often in the last 10 games, then ones that took 5 seconds or more.
@@ -131,6 +156,8 @@ Most things can be changed without knowing much code. After a change, run the te
 | **How high scores are ranked** | `compareScores()` in `js/scores.js`; the board size and history length (10) at the top of the same file. |
 | **When a problem counts as slow** in Need More Practice | `SLOW_MS` at the top of `js/scores.js` (5000 milliseconds). |
 | **The backup reminder** | `BACKUP_REMINDER_GAMES` at the top of `js/profiles.js` (5 adventures). |
+| **The app's name and icon** on the Home Screen | `short_name` in `manifest.json` and `apple-mobile-web-app-title` in `index.html` (both "Math Odyssey", 12 letters at most); the icons in `images/icons/` (180, 192 and 512 pixels square). |
+| **The offline app** | `tools/sw-template.js` (how files are saved and answered), `tools/build-offline.mjs` (which files), `js/offline.js` (the messages and when an update applies). The offline budget is `OFFLINE_BUDGET_BYTES` in `tools/build-offline.mjs`. |
 | **The detour road** on the trail map | Its shape in `js/detour-road.js` (`LOOP`); its colours in `css/style.css` under `.detour-road`. |
 
 After changing any `.js` file, give the game a new version number so iPads load the new files: `node tools/set-version.mjs 1.2.3`.

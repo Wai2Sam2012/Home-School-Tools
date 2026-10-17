@@ -38,6 +38,12 @@ jobs:
       - name: Build the game's story files
         run: node arithmetic-odyssey/tools/build-storyline.mjs
 
+      # sw.js (the offline app) is not stored in git either: it lists every
+      # file the game needs, with a fingerprint of each, so it is built here
+      # after the story files. Fails if a listed file is missing.
+      - name: Build the offline app
+        run: node arithmetic-odyssey/tools/build-offline.mjs
+
       - name: Run each tool's tests
         run: |
           found=0

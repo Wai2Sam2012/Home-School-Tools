@@ -1,7 +1,7 @@
 // Loads a theme's storyline.json (built by tools/build-storyline.mjs) and
 // answers questions about it: which sticker comes next, where pictures are.
 
-import { THEMES } from './settings.js?v=0.6.5';
+import { THEMES } from './settings.js?v=0.7.0';
 
 export const STORYLINE_SCHEMA = 1;
 

@@ -2,8 +2,8 @@
 // example 7 + 5 = ? as the 7 block, +, the 5 block, = and ?), opened with the
 // 🙏 button next to a question. Addition and subtraction only, for now.
 
-import { hasTip, tipSvg } from './blocks.js?v=0.6.5';
-import { h } from './ui.js?v=0.6.5';
+import { hasTip, tipSvg } from './blocks.js?v=0.7.0';
+import { h } from './ui.js?v=0.7.0';
 
 /**
  * Returns { el, show(problem), hide(), shown() }. onClose runs when the

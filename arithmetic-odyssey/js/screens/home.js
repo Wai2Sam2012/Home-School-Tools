@@ -2,9 +2,9 @@
 // their picture, switch player, or (grown-ups, by holding for 3 seconds) open
 // Settings.
 
-import { createHoldButton } from '../hold.js?v=0.6.5';
-import { playerIcon } from '../avatars.js?v=0.6.5';
-import { h } from '../ui.js?v=0.6.5';
+import { createHoldButton } from '../hold.js?v=0.7.0';
+import { playerIcon } from '../avatars.js?v=0.7.0';
+import { h } from '../ui.js?v=0.7.0';
 
 export function homeScreen(ctx) {
   const player = ctx.profiles.active();

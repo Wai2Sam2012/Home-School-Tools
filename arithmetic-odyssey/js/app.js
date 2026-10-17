@@ -1,26 +1,28 @@
 // Starts the game: keeps the players and story files, and switches between
 // screens. Each screen is a function in js/screens/ that builds its page.
 
-import { APP_VERSION } from './version.js?v=0.6.5';
-import { addDebugAction, addDebugInfo, isDebugOn, showDebugPanel } from './debug.js?v=0.6.5';
-import { audioSuspended, loadRecording, pickDifferent, playRecording, playSound, soundLength, unlockAudio } from './audio.js?v=0.6.5';
-import { AVATARS, createProfileStore } from './profiles.js?v=0.6.5';
-import { askToKeepData, createStorage, deviceStorage } from './storage.js?v=0.6.5';
-import { SPEECH_RATES, chooseVoice, createSpeaker, loadVoices } from './speech.js?v=0.6.5';
-import { THEMES } from './settings.js?v=0.6.5';
-import { collectNext, loadStoryline, pictureUrl } from './storyline.js?v=0.6.5';
-import { h } from './ui.js?v=0.6.5';
-import { startScreen } from './screens/start.js?v=0.6.5';
-import { newPlayerScreen, playerPictureScreen, profilesScreen } from './screens/profiles.js?v=0.6.5';
-import { homeScreen } from './screens/home.js?v=0.6.5';
-import { setupScreen } from './screens/setup.js?v=0.6.5';
-import { adventureScreen } from './screens/adventure.js?v=0.6.5';
-import { trailEndScreen } from './screens/trail-end.js?v=0.6.5';
-import { albumScreen } from './screens/album.js?v=0.6.5';
-import { statsScreen } from './screens/stats.js?v=0.6.5';
-import { learnScreen } from './screens/learn.js?v=0.6.5';
-import { settingsScreen } from './screens/settings.js?v=0.6.5';
-import { voiceLabScreen } from './screens/voice-lab.js?v=0.6.5';
+import { APP_VERSION } from './version.js?v=0.7.0';
+import { addDebugAction, addDebugInfo, isDebugOn, refreshDebugPanel, showDebugPanel } from './debug.js?v=0.7.0';
+import { measureAll } from './storage-report.js?v=0.7.0';
+import { audioSuspended, loadRecording, pickDifferent, playRecording, playSound, soundLength, unlockAudio } from './audio.js?v=0.7.0';
+import { AVATARS, createProfileStore } from './profiles.js?v=0.7.0';
+import { askToKeepData, createStorage, deviceStorage } from './storage.js?v=0.7.0';
+import { SPEECH_RATES, chooseVoice, createSpeaker, loadVoices } from './speech.js?v=0.7.0';
+import { THEMES } from './settings.js?v=0.7.0';
+import { collectNext, loadStoryline, pictureUrl } from './storyline.js?v=0.7.0';
+import { h } from './ui.js?v=0.7.0';
+import { startScreen } from './screens/start.js?v=0.7.0';
+import { newPlayerScreen, playerPictureScreen, profilesScreen } from './screens/profiles.js?v=0.7.0';
+import { createOffline } from './offline.js?v=0.7.0';
+import { homeScreen } from './screens/home.js?v=0.7.0';
+import { setupScreen } from './screens/setup.js?v=0.7.0';
+import { adventureScreen } from './screens/adventure.js?v=0.7.0';
+import { trailEndScreen } from './screens/trail-end.js?v=0.7.0';
+import { albumScreen } from './screens/album.js?v=0.7.0';
+import { statsScreen } from './screens/stats.js?v=0.7.0';
+import { learnScreen } from './screens/learn.js?v=0.7.0';
+import { settingsScreen } from './screens/settings.js?v=0.7.0';
+import { voiceLabScreen } from './screens/voice-lab.js?v=0.7.0';
 
 const SCREENS = {
   start: { build: startScreen },
@@ -186,6 +188,12 @@ const ctx = {
     page.querySelector('h1')?.focus({ preventScroll: true });
   },
 
+  /** Offline play (js/offline.js): saving the game on the iPad, and updates. */
+  offline: createOffline({
+    // A new version takes over only on the start screen, so no adventure is interrupted.
+    canApplyUpdate: () => current.name === 'start',
+  }),
+
   /** Draws the current screen again (used after debug actions). */
   refresh() {
     ctx.show(current.name, current.params);
@@ -246,7 +254,37 @@ function addDebugTools() {
     ctx.refresh();
     return `Removed ${player.name}'s stickers.`;
   });
+
+  // Offline play, storage and memory (measured in the background; "Measure" updates them).
+  addDebugInfo('Offline play', () => `${ctx.offline.message() || 'starting'} [${ctx.offline.state().status}]`);
+  let measured = {};
+  const STORAGE_ROWS = ['Saved game data', 'Saved data by player', "Other tools' saved data here", 'Offline copy', 'Browser storage used',
+    'Kept when the iPad is short of space', 'Memory (JavaScript)', 'Page right now', 'Measured at'];
+  for (const label of STORAGE_ROWS) addDebugInfo(label, () => measured[label] ?? 'measuring…');
+  async function measure() {
+    let storage = null;
+    try {
+      storage = globalThis.localStorage;
+    } catch {
+      // Saving is blocked; measureAll says so.
+    }
+    measured = await measureAll({ storage, players: ctx.profiles.list(), sounds: [...flagRecordings.values()].reduce((n, list) => n + list.length, 0) });
+    refreshDebugPanel();
+    return 'Measured storage and memory.';
+  }
+  addDebugAction('Measure storage and memory', measure);
+  addDebugAction('Offline: check for an update now', () => (ctx.offline.checkForUpdate({ force: true }) ? 'Checking for a new version…' : 'Not possible right now (no internet or offline play is unavailable).'));
+  addDebugAction('Offline: delete the saved copy', async () => {
+    const removed = await ctx.offline.remove();
+    return `Deleted ${removed} saved ${removed === 1 ? 'copy' : 'copies'} and the offline app. Players are kept. Reload to save it again.`;
+  });
+  addDebugAction('Offline: apply a waiting update now', () => (ctx.offline.applyUpdate() ? 'Updating: the page will reload.' : 'No update is waiting.'));
+  ctx.offline.onChange((state) => {
+    if (state.status === 'ready' || state.status === 'failed') measure();
+    else refreshDebugPanel();
+  });
   showDebugPanel(APP_VERSION);
+  measure();
 }
 
 // No pinch zoom while playing. Safari ignores user-scalable=no and doesn't
@@ -284,6 +322,7 @@ document.addEventListener('touchend', (event) => {
 // "Tap to continue": back from the background, the iPad may have suspended
 // sound. A tap is needed to start it again.
 document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) ctx.offline.checkForUpdate();
   if (document.hidden || !audioSuspended() || document.querySelector('.resume-overlay')) return;
   const overlay = h('div', { class: 'overlay resume-overlay', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Tap to continue' },
     h('button', {
@@ -304,6 +343,7 @@ if (isDebugOn()) {
   globalThis.aoDebug = ctx;
 }
 ctx.show('start');
+ctx.offline.start();
 
 // Tells the loading check in index.html that the scripts ran.
 document.documentElement.dataset.ready = '1';

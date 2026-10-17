@@ -1,6 +1,6 @@
 // 1. Tap to Start: shown on every launch. The tap unlocks sound and speech.
 
-import { h } from '../ui.js?v=0.6.5';
+import { h } from '../ui.js?v=0.7.0';
 
 /** The math symbol between the dinosaur and the truck changes through these. */
 export const START_SYMBOLS = Object.freeze(['➗', '➕', '➖', '✖️']);
@@ -19,6 +19,19 @@ export function startScreen(ctx) {
   }, SYMBOL_MS);
   ctx.onLeave(() => clearInterval(timer));
 
+  // Offline play: saving progress, "Ready to play offline", or an update to apply.
+  const offlineText = h('span', {});
+  const updateButton = h('button', { type: 'button', class: 'big-button quiet update-button', hidden: true, onclick: () => ctx.offline.applyUpdate() }, 'Update now');
+  const offlineLine = h('p', { class: 'offline-status', role: 'status' }, offlineText, updateButton);
+  const showOffline = (state) => {
+    offlineText.textContent = ctx.offline.message();
+    offlineLine.dataset.status = state.status;
+    offlineLine.hidden = state.status === 'unsupported' || state.status === 'checking';
+    updateButton.hidden = state.status !== 'update-ready';
+  };
+  showOffline(ctx.offline.state());
+  ctx.onLeave(ctx.offline.onChange(showOffline));
+
   return h('main', { class: 'screen start-screen' },
     h('div', { class: 'start-art', 'aria-hidden': 'true' }, '🦕', symbol, '🛻'),
     h('h1', { tabIndex: -1 }, 'Arithmetic Odyssey'),
@@ -32,5 +45,6 @@ export function startScreen(ctx) {
       },
     }, 'Tap to Start'),
     h('p', { class: 'version' }, `Version ${ctx.version}`),
+    offlineLine,
   );
 }

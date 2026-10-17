@@ -5,7 +5,16 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#1f6f5c">
   <title>Arithmetic Odyssey</title>
-  <link rel="stylesheet" href="css/style.css?v=0.6.5">
+  <!-- The installable app: Add to Home Screen opens it full screen, and it
+       plays offline once saved (manifest.json, sw.js, js/offline.js). -->
+  <link rel="manifest" href="manifest.json">
+  <link rel="icon" href="images/icons/icon-192.png">
+  <link rel="apple-touch-icon" href="images/icons/icon-180.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-title" content="Math Odyssey">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <link rel="stylesheet" href="css/style.css?v=0.7.0">
   <script>
     // Collects errors while the game starts, so the loading check below can
     // show what went wrong (there are no developer tools on an iPad).
@@ -20,7 +29,7 @@
   </script>
   <!-- The ?v= tags give each version new addresses, so the browser never mixes
        cached files from two versions. Set them with tools/set-version.mjs. -->
-  <script type="module" src="js/app.js?v=0.6.5" onerror="window.aoLoadErrors.push('A game file could not be downloaded.')"></script>
+  <script type="module" src="js/app.js?v=0.7.0" onerror="window.aoLoadErrors.push('A game file could not be downloaded.')"></script>
 </head>
 <body>
   <!-- js/app.js replaces this with the game's screens. -->
