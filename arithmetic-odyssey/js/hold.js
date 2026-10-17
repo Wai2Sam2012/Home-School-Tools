@@ -1,7 +1,7 @@
 // The grown-up check: a button that must be held down for 3 seconds.
 // Letting go early resets it.
 
-import { h } from './ui.js?v=0.5.1';
+import { h } from './ui.js?v=0.5.2';
 
 export const HOLD_MS = 3000;
 

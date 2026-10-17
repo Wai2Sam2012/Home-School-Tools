@@ -1,23 +1,23 @@
 // Starts the game: keeps the players and story files, and switches between
 // screens. Each screen is a function in js/screens/ that builds its page.
 
-import { APP_VERSION } from './version.js?v=0.5.1';
-import { addDebugAction, addDebugInfo, isDebugOn, showDebugPanel } from './debug.js?v=0.5.1';
-import { audioSuspended, playSound, unlockAudio } from './audio.js?v=0.5.1';
-import { AVATARS, createProfileStore } from './profiles.js?v=0.5.1';
-import { SPEECH_RATES, chooseVoice, createSpeaker, loadVoices } from './speech.js?v=0.5.1';
-import { collectNext, loadStoryline } from './storyline.js?v=0.5.1';
-import { h } from './ui.js?v=0.5.1';
-import { startScreen } from './screens/start.js?v=0.5.1';
-import { newPlayerScreen, profilesScreen } from './screens/profiles.js?v=0.5.1';
-import { homeScreen } from './screens/home.js?v=0.5.1';
-import { setupScreen } from './screens/setup.js?v=0.5.1';
-import { adventureScreen } from './screens/adventure.js?v=0.5.1';
-import { trailEndScreen } from './screens/trail-end.js?v=0.5.1';
-import { albumScreen } from './screens/album.js?v=0.5.1';
-import { statsScreen } from './screens/stats.js?v=0.5.1';
-import { settingsScreen } from './screens/settings.js?v=0.5.1';
-import { voiceLabScreen } from './screens/voice-lab.js?v=0.5.1';
+import { APP_VERSION } from './version.js?v=0.5.2';
+import { addDebugAction, addDebugInfo, isDebugOn, showDebugPanel } from './debug.js?v=0.5.2';
+import { audioSuspended, playSound, unlockAudio } from './audio.js?v=0.5.2';
+import { AVATARS, createProfileStore } from './profiles.js?v=0.5.2';
+import { SPEECH_RATES, chooseVoice, createSpeaker, loadVoices } from './speech.js?v=0.5.2';
+import { collectNext, loadStoryline } from './storyline.js?v=0.5.2';
+import { h } from './ui.js?v=0.5.2';
+import { startScreen } from './screens/start.js?v=0.5.2';
+import { newPlayerScreen, profilesScreen } from './screens/profiles.js?v=0.5.2';
+import { homeScreen } from './screens/home.js?v=0.5.2';
+import { setupScreen } from './screens/setup.js?v=0.5.2';
+import { adventureScreen } from './screens/adventure.js?v=0.5.2';
+import { trailEndScreen } from './screens/trail-end.js?v=0.5.2';
+import { albumScreen } from './screens/album.js?v=0.5.2';
+import { statsScreen } from './screens/stats.js?v=0.5.2';
+import { settingsScreen } from './screens/settings.js?v=0.5.2';
+import { voiceLabScreen } from './screens/voice-lab.js?v=0.5.2';
 
 const SCREENS = {
   start: { build: startScreen },
@@ -124,7 +124,7 @@ const ctx = {
     }
     root.replaceChildren(page);
     root.dataset.screen = name;
-    window.scrollTo(0, 0);
+    root.scrollTop = 0;
     page.querySelector('h1')?.focus({ preventScroll: true });
   },
 
@@ -148,10 +148,10 @@ function addDebugTools() {
   addDebugInfo('Sound and speech unlocked', () => (ctx.audio ? `sound ${ctx.audio.sound ? 'yes' : 'no'}, speech ${ctx.audio.speech ? 'yes' : 'no'}` : 'not yet (tap Start)'));
   addDebugInfo('Voice', () => (ctx.speaker.voice ? `${ctx.speaker.voice.name} (${ctx.speaker.voice.lang}, ${ctx.speaker.voice.localService ? 'offline' : 'needs internet'})` : ctx.voiceState));
   addDebugInfo('Last speech finished by', () => ctx.speaker.lastEnd || 'nothing spoken yet');
-  addDebugAction('Open the voice tester', () => {
-    ctx.unlock(); // the tap on this button also unlocks speech
+  addDebugAction('Open the voice and sound tester', () => {
+    ctx.unlock(); // the tap on this button also unlocks sound and speech
     ctx.show('voiceLab');
-    return 'Voice tester opened. Hide this panel to see it all.';
+    return 'Tester opened. Hide this panel to see it all.';
   });
   addDebugAction('Speech: pretend the end event never comes', () => {
     ctx.speaker.simulateStuck = !ctx.speaker.simulateStuck;

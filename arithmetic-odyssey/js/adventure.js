@@ -7,8 +7,8 @@
 //     clears it (back to the same step); all wrong goes back to the checkpoint.
 //   The trail ends at step `length`, and the next sticker is unlocked.
 
-import { checkAnswer, createProblemGenerator } from './math.js?v=0.5.1';
-import { collectNext, nextSticker } from './storyline.js?v=0.5.1';
+import { checkAnswer, createProblemGenerator } from './math.js?v=0.5.2';
+import { collectNext, nextSticker } from './storyline.js?v=0.5.2';
 
 export const ADVENTURE_SCHEMA = 1;
 export const MILESTONE_EVERY = 10;

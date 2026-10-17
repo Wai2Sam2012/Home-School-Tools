@@ -11,7 +11,8 @@ import {
   rankVoices, voiceId, voiceQuality,
 } from '../js/speech.js';
 import { createThinkingTimer, formatDuration } from '../js/timer.js';
-import { SOUNDS, playSound } from '../js/audio.js';
+import { SOUNDS, SYNTHS, SYNTH_LENGTHS, playSound } from '../js/audio.js';
+import { THEMES } from '../js/settings.js';
 import { answerProblem, startAdventure, withNextProblem } from '../js/adventure.js';
 
 // ---------------------------------------------------------------- fakes
@@ -390,7 +391,22 @@ test('every sound effect is short and in a comfortable pitch range', () => {
     assert.ok(['sine', 'triangle'].includes(sound.wave), `${name} wave`);
     const end = Math.max(...sound.notes.map(([, start, length]) => start + length));
     assert.ok(end <= 1.5, `${name} lasts ${end} s`);
-    for (const [frequency] of sound.notes) assert.ok(frequency >= 200 && frequency <= 1400, `${name} ${frequency} Hz`);
+    for (const [frequency, , , loudness = 1] of sound.notes) {
+      // Main notes stay in a comfortable range; only quiet overtones (the ding's shimmer) go higher.
+      const top = loudness < 0.5 ? 8000 : 1400;
+      assert.ok(frequency >= 200 && frequency <= top, `${name} ${frequency} Hz`);
+    }
   }
+  assert.ok(SOUNDS.right.notes[0][2] >= 0.8, 'the right-answer ding rings for a moment');
   for (const name of ['right', 'wrong', 'detour', 'cleared', 'setback', 'milestone', 'finish']) assert.ok(SOUNDS[name], name);
+});
+
+test('each theme has its own flag sound: a roar for dinosaurs, an engine for trucks', () => {
+  assert.equal(THEMES.dino.flagSound, 'roar');
+  assert.equal(THEMES.parks.flagSound, 'engine');
+  for (const theme of Object.values(THEMES)) {
+    assert.equal(typeof SYNTHS[theme.flagSound], 'function', theme.id);
+    assert.ok(SYNTH_LENGTHS[theme.flagSound] <= 2, `${theme.flagSound} is short`);
+  }
+  assert.equal(playSound('roar'), false, 'not before Tap to Start');
 });

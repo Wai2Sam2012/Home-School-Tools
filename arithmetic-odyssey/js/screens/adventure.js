@@ -8,13 +8,15 @@
 // Submit. It pauses while Repeat is reading and while the game is in the
 // background. The keypad works the whole time; nothing waits on speech.
 
-import { answerProblem, jumpTo, milestoneSteps, storyText, unlockSticker, withNextProblem } from '../adventure.js?v=0.5.1';
-import { stickerPicture } from '../art.js?v=0.5.1';
-import { createKeypad } from '../keypad.js?v=0.5.1';
-import { THEMES } from '../settings.js?v=0.5.1';
-import { createThinkingTimer } from '../timer.js?v=0.5.1';
-import { nextSticker } from '../storyline.js?v=0.5.1';
-import { h, topBar } from '../ui.js?v=0.5.1';
+import { answerProblem, jumpTo, milestoneSteps, storyText, unlockSticker, withNextProblem } from '../adventure.js?v=0.5.2';
+import { stickerPicture } from '../art.js?v=0.5.2';
+import { avatarIcon } from '../avatars.js?v=0.5.2';
+import { createDetourRoad, loopProgress } from '../detour-road.js?v=0.5.2';
+import { createKeypad } from '../keypad.js?v=0.5.2';
+import { THEMES } from '../settings.js?v=0.5.2';
+import { createThinkingTimer } from '../timer.js?v=0.5.2';
+import { nextSticker } from '../storyline.js?v=0.5.2';
+import { h, topBar } from '../ui.js?v=0.5.2';
 
 const PRAISE = ['Correct!', 'Great job!', 'You got it!', 'Awesome!', 'Nice work!'];
 // A right answer moves on by itself; after a wrong one the game waits for
@@ -41,14 +43,16 @@ export function adventureScreen(ctx) {
 
   // ---- trail map
   const fill = h('div', { class: 'trail-fill' });
-  const traveler = h('div', { class: 'trail-traveler', 'aria-hidden': 'true' }, theme.icon);
+  // The player's own icon travels the trail (all icons face right, toward the finish).
+  const traveler = h('div', { class: 'trail-traveler', 'aria-hidden': 'true' }, avatarIcon(player.avatar));
+  const road = createDetourRoad(player.avatar);
   const flags = milestoneSteps(state.length).map((step) =>
     h('div', { class: 'trail-flag', style: `left: ${(step / state.length) * 100}%`, dataset: { step: String(step) }, 'aria-hidden': 'true' }, '🚩'));
   const goal = h('div', { class: 'trail-goal', 'aria-hidden': 'true' }, '🏁');
   const count = h('p', { class: 'trail-count' });
   const map = h('div', { class: 'trail-map', role: 'img' },
-    h('div', { class: 'trail-track' }, fill, flags, traveler),
-    goal);
+    h('div', { class: 'trail-lane' }, h('div', { class: 'trail-track' }, fill, flags, traveler, road.el)),
+    h('div', { class: 'trail-finish' }, goal, count));
 
   // ---- story, question and feedback
   const story = h('p', { class: 'story', role: 'status' });
@@ -120,7 +124,10 @@ export function adventureScreen(ctx) {
     const at = (state.step / state.length) * 100;
     fill.style.width = `${at}%`;
     traveler.style.left = `${at}%`;
-    traveler.classList.toggle('on-detour', state.mode === 'detour');
+    // On a detour the icon leaves the trail and drives around the detour road.
+    traveler.hidden = state.mode === 'detour';
+    if (state.mode === 'detour') road.show(at, loopProgress(state.detour.asked, state.detourLength));
+    else road.hide();
     for (const flag of flags) flag.classList.toggle('reached', Number(flag.dataset.step) <= state.checkpoint);
 
     count.textContent = `Step ${state.step} of ${state.length}`;
@@ -181,7 +188,7 @@ export function adventureScreen(ctx) {
     if (milestone) {
       line = storyText(lines, milestone) || `Flag ${milestone.number} reached!`;
       setStory(`🚩 ${line}`, 'milestone');
-      ctx.sound('milestone');
+      ctx.sound(theme.flagSound ?? 'milestone'); // a roar for dinosaurs, an engine for trucks
     } else if (detourStart) {
       line = storyText(lines, detourStart);
       setStory(`🚧 ${line}`, 'detour');
@@ -219,11 +226,11 @@ export function adventureScreen(ctx) {
     keypad.setEnabled(false);
     question.textContent = `${problem.text} = ${value}`;
     if (check.correct) {
-      feedback.replaceChildren(h('span', { 'aria-hidden': 'true' }, '✔ '), PRAISE[Math.floor(Math.random() * PRAISE.length)]);
+      feedback.replaceChildren(h('span', { 'aria-hidden': 'true' }, '✓ '), PRAISE[Math.floor(Math.random() * PRAISE.length)]);
       feedback.className = 'feedback right';
       ctx.sound('right');
     } else {
-      feedback.replaceChildren(h('span', { 'aria-hidden': 'true' }, '✖ '), `Not quite. ${problem.text} = ${problem.answer}`);
+      feedback.replaceChildren(h('span', { 'aria-hidden': 'true' }, '✗ '), `Not quite. ${problem.text} = ${problem.answer}`);
       feedback.className = 'feedback wrong';
       ctx.sound('wrong');
       say(`Not quite. ${problem.speech} is ${problem.answer}.`);
@@ -304,7 +311,7 @@ export function adventureScreen(ctx) {
 
   return h('main', { class: 'screen adventure-screen' },
     topBar(`${theme.icon} ${theme.title}`, () => ctx.show('home')),
-    h('section', { class: 'trail-area' }, map, count),
+    h('section', { class: 'trail-area' }, map),
     h('div', { class: 'adventure-layout' },
       h('section', { class: 'question-area' }, story, detourCount, h('div', { class: 'question-row' }, question, repeat), feedback),
       keypad.el,

@@ -1,8 +1,9 @@
 // The player's home: start an adventure, see stickers and stats, switch
 // player, or (grown-ups, by holding for 3 seconds) open Settings.
 
-import { createHoldButton } from '../hold.js?v=0.5.1';
-import { h } from '../ui.js?v=0.5.1';
+import { createHoldButton } from '../hold.js?v=0.5.2';
+import { avatarIcon } from '../avatars.js?v=0.5.2';
+import { h } from '../ui.js?v=0.5.2';
 
 export function homeScreen(ctx) {
   const player = ctx.profiles.active();
@@ -10,7 +11,7 @@ export function homeScreen(ctx) {
   const trip = player.adventure && player.adventure.mode !== 'done' ? player.adventure : null;
   return h('main', { class: 'screen home-screen' },
     h('header', { class: 'home-header' },
-      h('span', { class: 'player-avatar large', 'aria-hidden': 'true' }, player.avatar),
+      h('span', { class: 'player-avatar large', 'aria-hidden': 'true' }, avatarIcon(player.avatar)),
       h('h1', { tabIndex: -1 }, `Hi, ${player.name}!`),
       h('p', { class: 'lead' }, dinoCount ? `You have ${dinoCount} Dino ${dinoCount === 1 ? 'sticker' : 'stickers'}.` : 'Ready for an adventure?'),
     ),

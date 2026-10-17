@@ -1,6 +1,6 @@
 // 1. Tap to Start: shown on every launch. The tap unlocks sound and speech.
 
-import { h } from '../ui.js?v=0.5.1';
+import { h } from '../ui.js?v=0.5.2';
 
 export function startScreen(ctx) {
   return h('main', { class: 'screen start-screen' },

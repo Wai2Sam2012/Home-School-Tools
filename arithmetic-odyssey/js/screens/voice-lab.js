@@ -1,10 +1,23 @@
-// Voice tester (opened from the ?debug=1 panel): plays any English voice on
-// this device with a choice of sample line, speed and pitch, so a grown-up
-// can compare them and pick the one that sounds best.
+// Voice and sound tester (opened from the ?debug=1 panel): plays any English
+// voice on this device with a choice of sample line, speed and pitch, and
+// every sound effect, so a grown-up can compare them and pick the best.
 
-import { describeVoice } from './settings.js?v=0.5.1';
-import { chooseVoice, isFunVoice, loadVoices, rankVoices, voiceId } from '../speech.js?v=0.5.1';
-import { choiceRow, h, topBar } from '../ui.js?v=0.5.1';
+import { describeVoice } from './settings.js?v=0.5.2';
+import { chooseVoice, isFunVoice, loadVoices, rankVoices, voiceId } from '../speech.js?v=0.5.2';
+import { SOUNDS, SYNTHS, playSound } from '../audio.js?v=0.5.2';
+import { choiceRow, h, topBar } from '../ui.js?v=0.5.2';
+
+const SOUND_NAMES = {
+  right: 'Right answer (ding)',
+  wrong: 'Wrong answer',
+  detour: 'Detour starts',
+  cleared: 'Detour cleared',
+  setback: 'Back to a flag',
+  milestone: 'Flag (no theme sound)',
+  finish: "Trail's End",
+  roar: 'Flag in Dino Tour (roar)',
+  engine: 'Flag in Off-Roading (engine)',
+};
 
 const SAMPLES = {
   question: 'What is 7 times 8?',
@@ -99,7 +112,13 @@ export function voiceLabScreen(ctx) {
   });
 
   return h('main', { class: 'screen voice-lab-screen' },
-    topBar('Voice tester', () => ctx.show(player ? 'settings' : 'profiles')),
+    topBar('Voice and sound tester', () => ctx.show(player ? 'settings' : 'profiles')),
+    h('section', { class: 'panel' },
+      h('h2', {}, 'Sound effects'),
+      h('div', { class: 'sound-buttons' },
+        [...Object.keys(SOUNDS), ...Object.keys(SYNTHS)].map((name) =>
+          h('button', { type: 'button', class: 'choice', dataset: { sound: name }, onclick: () => playSound(name) }, `▶ ${SOUND_NAMES[name] ?? name}`))),
+    ),
     h('section', { class: 'panel' },
       h('h2', {}, 'Sample'),
       choiceRow({
