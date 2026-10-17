@@ -7,8 +7,8 @@
 //     clears it (back to the same step); all wrong goes back to the checkpoint.
 //   The trail ends at step `length`, and the next sticker is unlocked.
 
-import { checkAnswer, createProblemGenerator } from './math.js?v=0.6.2';
-import { collectNext, nextSticker } from './storyline.js?v=0.6.2';
+import { checkAnswer, createProblemGenerator } from './math.js?v=0.6.3';
+import { collectNext, nextSticker } from './storyline.js?v=0.6.3';
 
 export const ADVENTURE_SCHEMA = 1;
 export const MILESTONE_EVERY = 10;
@@ -44,8 +44,9 @@ export function startAdventure({ theme, length, detourLength, operations, diffic
     detour: null, // { number, asked, correct } while in a detour
     problem: null,
     lastKey: null,
+    tipFor: null, // the problem whose counting tip has been shown (counted once per question)
     // missed: wrong answers per problem; times: the longest thinking time per problem (for Need More Practice).
-    stats: { answered: 0, correct: 0, detours: 0, setbacks: 0, thinkingMs: 0, missed: {}, times: {} },
+    stats: { answered: 0, correct: 0, detours: 0, setbacks: 0, thinkingMs: 0, tips: 0, missed: {}, times: {} },
   };
 }
 
@@ -58,7 +59,13 @@ export function withNextProblem(state, random = Math.random) {
     random,
     lastKey: state.lastKey,
   }).next();
-  return { ...state, problem, lastKey: problem.key };
+  return { ...state, problem, lastKey: problem.key, tipFor: null };
+}
+
+/** Counts a counting tip for the current question (once, however often it is opened). */
+export function useTip(state) {
+  if (!state.problem || state.tipFor === state.problem.key) return state;
+  return { ...state, tipFor: state.problem.key, stats: { ...state.stats, tips: (state.stats.tips ?? 0) + 1 } };
 }
 
 /**

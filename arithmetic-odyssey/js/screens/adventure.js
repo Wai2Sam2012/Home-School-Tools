@@ -8,15 +8,17 @@
 // Submit. It pauses while Repeat is reading and while the game is in the
 // background. The keypad works the whole time; nothing waits on speech.
 
-import { answerProblem, jumpTo, milestoneSteps, storyText, unlockSticker, withNextProblem } from '../adventure.js?v=0.6.2';
-import { stickerPicture } from '../art.js?v=0.6.2';
-import { avatarIcon } from '../avatars.js?v=0.6.2';
-import { createDetourRoad, loopProgress } from '../detour-road.js?v=0.6.2';
-import { createKeypad } from '../keypad.js?v=0.6.2';
-import { THEMES } from '../settings.js?v=0.6.2';
-import { createThinkingTimer } from '../timer.js?v=0.6.2';
-import { nextSticker } from '../storyline.js?v=0.6.2';
-import { h, topBar } from '../ui.js?v=0.6.2';
+import { answerProblem, jumpTo, milestoneSteps, storyText, unlockSticker, useTip, withNextProblem } from '../adventure.js?v=0.6.3';
+import { hasTip } from '../blocks.js?v=0.6.3';
+import { createTipButton, createTipCard } from '../tip-card.js?v=0.6.3';
+import { stickerPicture } from '../art.js?v=0.6.3';
+import { avatarIcon } from '../avatars.js?v=0.6.3';
+import { createDetourRoad, loopProgress } from '../detour-road.js?v=0.6.3';
+import { createKeypad } from '../keypad.js?v=0.6.3';
+import { THEMES } from '../settings.js?v=0.6.3';
+import { createThinkingTimer } from '../timer.js?v=0.6.3';
+import { nextSticker } from '../storyline.js?v=0.6.3';
+import { h, topBar } from '../ui.js?v=0.6.3';
 
 const PRAISE = ['Correct!', 'Great job!', 'You got it!', 'Awesome!', 'Nice work!'];
 // A right answer moves on by itself; after a wrong one the game waits for
@@ -65,6 +67,15 @@ export function adventureScreen(ctx) {
   const feedback = h('p', { class: 'feedback', role: 'status' });
   const detourCount = h('p', { class: 'detour-count' });
   const repeat = h('button', { type: 'button', class: 'round-button repeat-button', 'aria-label': 'Read the question again', onclick: () => repeatQuestion() }, '🔊');
+  // 💡 A counting tip (addition and subtraction): the question drawn with blocks,
+  // over the trail map. Each question's tip counts once in the trip's "tips used".
+  const tipCard = createTipCard();
+  const tipButton = createTipButton(() => showTip());
+  function showTip() {
+    if (busy || !hasTip(state.problem)) return false;
+    if (tipCard.show(state.problem)) save(useTip(state));
+    return true;
+  }
 
   // ---- speech and the thinking timer
   /**
@@ -175,6 +186,8 @@ export function adventureScreen(ctx) {
     busy = false;
     thinking.stop();
     questionNo += 1;
+    tipCard.hide();
+    tipButton.hidden = !hasTip(state.problem);
     repeat.hidden = !ctx.voiceOn(player);
     if (ctx.voiceOn(player)) askAloud(intro, afterMs);
     else startTimer(); // text only: timing starts when the question is shown
@@ -242,6 +255,8 @@ export function adventureScreen(ctx) {
     thinking.stop();
     silence();
     busy = true;
+    tipCard.hide();
+    tipButton.hidden = true;
     const problem = state.problem;
     save(next);
     keypad.setEnabled(false);
@@ -295,6 +310,10 @@ export function adventureScreen(ctx) {
       const answer = right ? state.problem.answer : state.problem.answer + 1;
       submit(String(answer));
       return right ? 'Answered right.' : 'Answered wrong.';
+    },
+    tip() {
+      if (busy) return 'Wait for the next question.';
+      return showTip() ? 'Tip shown.' : 'No tip for this question.';
     },
     jump(where) {
       if (busy) return 'Wait for the next question.';
@@ -364,12 +383,12 @@ export function adventureScreen(ctx) {
   showQuestion(opening);
 
   const layout = h('div', { class: 'adventure-layout' },
-    h('section', { class: 'question-area' }, story, detourCount, h('div', { class: 'question-row' }, question, repeat), feedback),
+    h('section', { class: 'question-area' }, story, detourCount, h('div', { class: 'question-row' }, question, repeat, tipButton), feedback),
     keypad.el,
   );
   page = h('main', { class: `screen adventure-screen theme-${state.theme}`, dataset: { fit: '0' } },
     topBar(`${theme.icon} ${theme.title}`, () => ctx.show('home')),
-    h('section', { class: 'trail-area' }, map),
+    h('section', { class: 'trail-area' }, map, tipCard.el),
     layout,
   );
   // The screen is at least as tall as the window, so watch what is inside it.

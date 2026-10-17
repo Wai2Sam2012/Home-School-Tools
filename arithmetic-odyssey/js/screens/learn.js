@@ -4,11 +4,13 @@
 // thinking timer starts when reading ends (or at the first key press), and a
 // wrong answer shows the right one and waits for "Got it".
 
-import { LEARN_NEEDS, answerLearning, currentProblem, startLearning } from '../learn.js?v=0.6.2';
-import { createKeypad } from '../keypad.js?v=0.6.2';
-import { PRACTICE_SIZE, needMorePractice } from '../scores.js?v=0.6.2';
-import { createThinkingTimer } from '../timer.js?v=0.6.2';
-import { h, topBar } from '../ui.js?v=0.6.2';
+import { LEARN_NEEDS, answerLearning, currentProblem, startLearning } from '../learn.js?v=0.6.3';
+import { hasTip } from '../blocks.js?v=0.6.3';
+import { createKeypad } from '../keypad.js?v=0.6.3';
+import { createTipButton, createTipCard } from '../tip-card.js?v=0.6.3';
+import { PRACTICE_SIZE, needMorePractice } from '../scores.js?v=0.6.3';
+import { createThinkingTimer } from '../timer.js?v=0.6.3';
+import { h, topBar } from '../ui.js?v=0.6.3';
 
 const PRAISE = ['Correct!', 'Great job!', 'You got it!', 'Nice work!'];
 const NEXT_AFTER_RIGHT_MS = 1100;
@@ -48,6 +50,11 @@ export function learnScreen(ctx) {
   const question = h('p', { class: 'question', 'aria-live': 'polite' });
   const feedback = h('p', { class: 'feedback', role: 'status' });
   const repeat = h('button', { type: 'button', class: 'round-button repeat-button', 'aria-label': 'Read the question again', onclick: () => repeatQuestion() }, '🔊');
+  // 💡 The same counting tip as in the adventure (practice: tips are not counted).
+  const tipCard = createTipCard();
+  const tipButton = createTipButton(() => {
+    if (!busy && !state.done) tipCard.show(currentProblem(state));
+  });
 
   // ---- speech and the thinking timer (as in the adventure)
   function say(text, then, afterMs = 0) {
@@ -109,6 +116,8 @@ export function learnScreen(ctx) {
     busy = false;
     thinking.stop();
     questionNo += 1;
+    tipCard.hide();
+    tipButton.hidden = !hasTip(problem);
     showChips();
     repeat.hidden = !ctx.voiceOn(player);
     if (ctx.voiceOn(player)) askAloud(intro, afterMs);
@@ -127,6 +136,8 @@ export function learnScreen(ctx) {
     thinking.stop();
     silence();
     busy = true;
+    tipCard.hide();
+    tipButton.hidden = true;
     state = next;
     keypad.setEnabled(false);
     question.textContent = `${problem.text} = ${value}`;
@@ -170,6 +181,7 @@ export function learnScreen(ctx) {
     const learnedCount = result.learned.length;
     const all = learnedCount === result.total;
     layout.hidden = true;
+    tipCard.hide();
     banner.textContent = all ? '🌟 You learned them all!' : `⭐ You learned ${learnedCount} of ${result.total}!`;
     summary.hidden = false;
     summary.replaceChildren(
@@ -217,7 +229,7 @@ export function learnScreen(ctx) {
   };
 
   const layout = h('div', { class: 'adventure-layout' },
-    h('section', { class: 'question-area' }, h('div', { class: 'question-row' }, question, repeat), feedback),
+    h('section', { class: 'question-area' }, tipCard.el, h('div', { class: 'question-row' }, question, repeat, tipButton), feedback),
     keypad.el);
   banner.textContent = `Let's practise ${state.items.length === 1 ? 'a tricky one' : `${state.items.length} tricky ones`}! Answer each one right ${LEARN_NEEDS} times.`;
   showQuestion(`Let's practise the tricky ones!`);

@@ -11,7 +11,7 @@
 export const BLOCKS = Object.freeze([
   { value: 1, name: 'Green', color: '#3fa34d', rows: 1, cols: 1 },
   { value: 2, name: 'Orange', color: '#f28c28', rows: 1, cols: 2 },
-  { value: 3, name: 'Pink', color: '#ef6fa8', rows: 1, cols: 3 },
+  { value: 3, name: 'Pink', color: '#f7a8cf', rows: 1, cols: 3 },
   { value: 4, name: 'Yellow', color: '#f5c518', rows: 1, cols: 4 },
   { value: 5, name: 'Light Blue', color: '#5bc0eb', rows: 1, cols: 5 },
   { value: 6, name: 'Purple', color: '#8e5cc2', rows: 1, cols: 6 },
@@ -95,12 +95,86 @@ export function blockSvg(value, { unit = 40, vertical = false, label = true, num
     }
   }
   const outline = `<rect x="${pad / 2}" y="${pad / 2}" width="${width - pad}" height="${height - pad}" rx="${radius}" fill="none" stroke="${line}" stroke-width="${pad}"/>`;
-  // The value sits in a round badge on the first square (not over the numbers).
+  // The value sits in a round badge on the last square: the right end of a
+  // block lying down, the bottom of one standing up (not over the numbers).
+  const bx = pad + (cols - 1) * unit + unit / 2;
+  const by = pad + (rows - 1) * unit + unit / 2;
   const badge = label && !numbered
-    ? `<circle cx="${pad + unit / 2}" cy="${pad + unit / 2}" r="${unit * 0.36}" fill="#ffffff" opacity="0.92"/>`
-      + `<text x="${pad + unit / 2}" y="${pad + unit / 2 + unit * (value >= 100 ? 0.11 : 0.14)}" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="${Math.round(unit * (value >= 100 ? 0.3 : value >= 10 ? 0.36 : 0.42))}" fill="#1d2a24">${value}</text>`
+    ? `<circle cx="${bx}" cy="${by}" r="${unit * 0.36}" fill="#ffffff" opacity="0.92"/>`
+      + `<text x="${bx}" y="${by + unit * (value >= 100 ? 0.11 : 0.14)}" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="${Math.round(unit * (value >= 100 ? 0.3 : value >= 10 ? 0.36 : 0.42))}" fill="#1d2a24">${value}</text>`
     : '';
   const title = `<title>${value} block (${block.name}, ${block.rows === 1 ? `1 x ${block.cols}` : `${block.rows} x ${block.cols}`})</title>`;
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" width="${width}" height="${height}" role="img" class="count-block" data-value="${value}">`
     + `${title}<g>${squares.join('')}</g>${outline}${badge}</svg>`;
 }
+
+// ---------------------------------------------------------------- tips
+
+/** Operations that have a counting tip (for now). */
+export const TIP_OPERATIONS = Object.freeze(['+', '−']);
+
+/** True when a problem has a counting tip: addition and subtraction up to 99. */
+export function hasTip(problem) {
+  return Boolean(problem) && TIP_OPERATIONS.includes(problem.op) && problem.a <= 99 && problem.b <= 99;
+}
+
+/**
+ * A counting tip as one SVG picture: the problem drawn with blocks, for
+ * example 7 + 5 = ? as the 7 block, "+", the 5 block, "=" and "?". Numbers up
+ * to 10 lie down; with bigger numbers every block stands up, the tens side by
+ * side, so the picture stays short. The picture scales to fit its box.
+ */
+export function tipSvg(problem, { unit = 20 } = {}) {
+  if (!hasTip(problem)) throw new Error(`There is no tip for ${problem?.text ?? 'this problem'}.`);
+  const vertical = problem.a > 10 || problem.b > 10;
+  const gap = Math.round(unit * 0.3);
+  const parts = [];
+  let x = 0;
+  let height = 0;
+
+  // Each number: its blocks, side by side when standing, one per row when lying.
+  const groups = [problem.a, problem.b].map((n) => {
+    const blocks = numberAsBlocks(n).map((v) => {
+      const svg = blockSvg(v, { unit, vertical });
+      const [, w, hh] = svg.match(/viewBox="0 0 ([\d.]+) ([\d.]+)"/).map(Number);
+      return { svg, w, h: hh };
+    });
+    const w = vertical ? blocks.reduce((s, b) => s + b.w, 0) + gap * (blocks.length - 1) : Math.max(...blocks.map((b) => b.w));
+    const h = vertical ? Math.max(...blocks.map((b) => b.h)) : blocks.reduce((s, b) => s + b.h, 0) + gap * (blocks.length - 1);
+    height = Math.max(height, h);
+    return { blocks, w, h };
+  });
+  height = Math.max(height, unit * 2); // room for the + and = signs
+  // The signs grow with the picture, so they stay easy to see next to tall blocks.
+  const symbolSize = vertical ? height * 0.45 : Math.max(unit * 1.6, height * 0.24);
+  const symbolWidth = symbolSize * 1.4;
+
+  const place = (group) => {
+    // Standing blocks stand on the same line; lying blocks are centered.
+    let y = vertical ? height - group.h : (height - group.h) / 2;
+    let bx = x;
+    for (const b of group.blocks) {
+      const by = vertical ? height - b.h : y;
+      // The block's shapes, moved into place (not a picture inside the picture,
+      // which a page's styles for svg could stretch).
+      const shapes = b.svg.slice(b.svg.indexOf('>') + 1, b.svg.lastIndexOf('</svg>')).replace(/<title>.*?<\/title>/, '');
+      parts.push(`<g transform="translate(${bx} ${by})">${shapes}</g>`);
+      if (vertical) bx += b.w + gap;
+      else y += b.h + gap;
+    }
+    x += group.w;
+  };
+  const symbol = (text) => {
+    parts.push(`<text x="${x + symbolWidth / 2}" y="${height / 2 + symbolSize * 0.35}" text-anchor="middle" font-family="Arial, Helvetica, sans-serif" font-weight="700" font-size="${Math.round(symbolSize)}" fill="currentColor">${text}</text>`);
+    x += symbolWidth;
+  };
+
+  place(groups[0]);
+  symbol(problem.op);
+  place(groups[1]);
+  symbol('=');
+  symbol('?');
+  const label = `${problem.a} ${problem.op === '+' ? 'plus' : 'minus'} ${problem.b} with counting blocks`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${x} ${height}" class="tip-picture" role="img" aria-label="${label}">${parts.join('')}</svg>`;
+}
+

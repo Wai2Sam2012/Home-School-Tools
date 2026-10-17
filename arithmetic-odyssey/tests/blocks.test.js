@@ -6,7 +6,7 @@ import assert from 'node:assert/strict';
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { BLOCKS, blockFor, blockSvg, numberAsBlocks, textColorFor } from '../js/blocks.js';
+import { BLOCKS, blockFor, blockSvg, hasTip, numberAsBlocks, textColorFor, tipSvg } from '../js/blocks.js';
 import { BLOCKS_DIR, blockFileName, blockFiles } from '../tools/build-blocks.mjs';
 
 test('there are 11 blocks with the values, colors and sizes asked for', () => {
@@ -68,4 +68,48 @@ test('the picture files in images/blocks/ match the blocks (run tools/build-bloc
   assert.deepEqual(readdirSync(BLOCKS_DIR).filter((f) => f.endsWith('.svg')).sort(), Object.keys(files).sort());
   for (const [name, svg] of Object.entries(files)) assert.equal(readFileSync(join(BLOCKS_DIR, name), 'utf8'), svg, name);
   assert.equal(blockFileName(blockFor(5)), '5_Light-Blue_1x5.svg');
+});
+
+test('the value sits on the last square: the right end lying down, the bottom standing up', () => {
+  const badge = (svg) => svg.match(/<circle cx="([\d.]+)" cy="([\d.]+)"/).slice(1).map(Number);
+  assert.deepEqual(badge(blockSvg(7)), [2 + 6 * 40 + 20, 2 + 20], 'lying down: the 7th square');
+  assert.deepEqual(badge(blockSvg(7, { vertical: true })), [2 + 20, 2 + 6 * 40 + 20], 'standing up: the bottom square');
+  assert.deepEqual(badge(blockSvg(1)), [22, 22]);
+  assert.deepEqual(badge(blockSvg(100)), [2 + 9 * 40 + 20, 2 + 9 * 40 + 20], 'the 100 block: the bottom-right square');
+});
+
+test('the 3 block is a light pink', () => {
+  assert.equal(blockFor(3).color, '#f7a8cf');
+});
+
+// ---------------------------------------------------------------- tips
+
+const problem = (op, a, b) => ({ op, a, b, text: `${a} ${op} ${b}` });
+
+test('tips are for addition and subtraction only (for now)', () => {
+  assert.ok(hasTip(problem('+', 7, 5)));
+  assert.ok(hasTip(problem('−', 12, 5)));
+  assert.ok(hasTip(problem('+', 99, 99)));
+  assert.ok(!hasTip(problem('×', 7, 5)));
+  assert.ok(!hasTip(problem('÷', 12, 3)));
+  assert.ok(!hasTip(null));
+  assert.throws(() => tipSvg(problem('×', 7, 5)), /no tip/);
+});
+
+test('a tip shows the problem with blocks: 7 block, +, 5 block, =, ?', () => {
+  const svg = tipSvg(problem('+', 7, 5));
+  const texts = [...svg.matchAll(/>([^<>]+)<\/text>/g)].map((m) => m[1]);
+  assert.deepEqual(texts, ['7', '+', '5', '=', '?'], 'the 7 block (its badge), +, the 5 block, = and ?');
+  assert.ok(!svg.includes('<svg x='), 'blocks are drawn as shapes, not pictures in the picture');
+  assert.match(svg, /aria-label="7 plus 5 with counting blocks"/);
+  assert.equal((svg.match(/width="20" height="20" /g) ?? []).length, 12, '12 squares in all (7 + 5)');
+});
+
+test('bigger numbers use tens and the rest, standing up: 47 + 35', () => {
+  const svg = tipSvg(problem('+', 47, 35));
+  const texts = [...svg.matchAll(/>([^<>]+)<\/text>/g)].map((m) => m[1]);
+  assert.deepEqual(texts, ['10', '10', '10', '10', '7', '+', '10', '10', '10', '5', '=', '?']);
+  assert.equal((svg.match(/width="20" height="20" /g) ?? []).length, 82);
+  const sub = tipSvg(problem('−', 12, 5));
+  assert.deepEqual([...sub.matchAll(/>([^<>]+)<\/text>/g)].map((m) => m[1]), ['10', '2', '−', '5', '=', '?']);
 });

@@ -297,7 +297,7 @@ test('T6.5 high scores are kept apart by adventure length and difficulty', () =>
   assert.equal(boards['40|beginner'].length, 1);
 });
 
-test('T6.5 a finished trip with a setback still counts, and fewer setbacks rank higher (then less time)', () => {
+test('T6.5 a finished trip with a setback still counts, and more right answers rank higher (then less time)', () => {
   const d = device();
   const a = d.open();
   const sam = a.add('Sam', 'trex');
@@ -313,10 +313,20 @@ test('T6.5 a finished trip with a setback still counts, and fewer setbacks rank 
   assert.equal(fastSetback.rank, 2);
 });
 
-test('the score order: fewer setbacks, then less time, then the earlier game', () => {
-  const s = (setbacks, thinkingMs, at) => ({ setbacks, thinkingMs, at });
-  const list = [s(1, 100, 'b'), s(0, 900, 'b'), s(0, 300, 'b'), s(0, 300, 'a')].sort(compareScores);
-  assert.deepEqual(list, [s(0, 300, 'a'), s(0, 300, 'b'), s(0, 900, 'b'), s(1, 100, 'b')]);
+test('the score order: the most right answers, then less time, then fewer tips, then the earlier game', () => {
+  const s = (correct, thinkingMs, tips, at, answered = 20) => ({ correct, answered, thinkingMs, tips, at, setbacks: 0 });
+  const list = [
+    s(18, 100, 0, 'b'), // 90% right, though the quickest
+    s(20, 900, 0, 'b'),
+    s(20, 300, 2, 'b'),
+    s(20, 300, 0, 'b'),
+    s(20, 300, 0, 'a'),
+    s(22, 900, 0, 'b', 22), // 100% right with more questions (detours) ranks with the other 100% ones
+  ].sort(compareScores);
+  assert.deepEqual(list.map((e) => [e.correct, e.answered, e.thinkingMs, e.tips, e.at]), [
+    [20, 20, 300, 0, 'a'], [20, 20, 300, 0, 'b'], [20, 20, 300, 2, 'b'], [20, 20, 900, 0, 'b'], [22, 22, 900, 0, 'b'], [18, 20, 100, 0, 'b'],
+  ]);
+  assert.equal(compareScores({ correct: 0, answered: 0, thinkingMs: 1 }, { correct: 0, answered: 0, thinkingMs: 2 }) < 0, true, 'no answers: no crash');
   let boards = {};
   for (let i = 0; i < 12; i++) boards = addHighScore(boards, { at: `2026-01-${10 + i}T00:00:00Z`, length: 20, difficulty: 'beginner', setbacks: 0, thinkingMs: 1000 * (12 - i), answered: 20, correct: 20, operations: '+' }).boards;
   assert.equal(boards['20|beginner'].length, 10);
@@ -508,3 +518,39 @@ test('saved values are cleaned up: unknown pictures, too-long names and out-of-r
   const index = checkIndex({ schema: 1, profiles: [{ id: 'a b', name: 'X' }, { id: 'ok', name: 'Y' }, { id: 'ok', name: 'Z' }] });
   assert.deepEqual(index.profiles.map((e) => e.name), ['Y'], 'bad and repeated ids are dropped');
 });
+
+// ---------------------------------------------------------------- counting tips (0.6.3)
+
+test('a counting tip counts once per question, is saved, and goes on the high-score board', async () => {
+  const { useTip } = await import('../js/adventure.js');
+  const d = device();
+  const a = d.open();
+  const sam = a.add('Sam', 'trex');
+  let trip = play(newTrip(), all(2));
+  trip = useTip(trip);
+  trip = useTip(trip); // opened again: still one
+  assert.equal(trip.stats.tips, 1);
+  a.saveAdventure(sam.id, trip);
+  const resumed = d.open().get(sam.id).adventure;
+  assert.equal(resumed.stats.tips, 1, 'saved with the trip');
+  assert.equal(useTip(resumed).stats.tips, 1, 'the same question after resuming: still one');
+  trip = play(resumed, [true]);
+  trip = useTip(trip);
+  assert.equal(trip.stats.tips, 2, 'the next question can use a tip too');
+  trip = play(trip, all(30));
+  const result = a.finishAdventure(sam.id, trip, { collected: ['eoraptor'], stickerId: 'eoraptor' });
+  assert.equal(result.stats.tips, 2);
+  const p = d.open().get(sam.id);
+  assert.equal(p.highScores['20|beginner'][0].tips, 2);
+  assert.equal(p.history[0].tips, 2);
+});
+
+test('saves from before tips existed read as 0 tips', () => {
+  const p = checkProfile({ schema: 1, id: 'x', highScores: { '20|beginner': [{ at: '2026-10-01T00:00:00Z', thinkingMs: 1000, setbacks: 0, answered: 20, correct: 20, operations: '+' }] } });
+  assert.equal(p.highScores['20|beginner'][0].tips, 0);
+  assert.equal(checkHistory({ schema: 1, games: [{ at: '2026-10-01T00:00:00Z', theme: 'dino', length: 20 }] }).games[0].tips, 0);
+  const trip = play(newTrip(), all(2));
+  delete trip.stats.tips;
+  assert.equal(checkActive({ schema: 1, adventure: trip }).adventure.stats.tips, 0);
+});
+
