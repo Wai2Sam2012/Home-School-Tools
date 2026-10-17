@@ -99,6 +99,14 @@ A wrong or damaged file is refused and nothing changes. Before a restore the gam
 
 **If something goes wrong:** damaged saved data is set aside (kept under a `quarantine` name) and the game carries on with safe settings; a full or blocked storage shows a message suggesting a backup, and the game keeps working until it is closed. Settings lists any saving problems from this session.
 
+## Credits
+
+Picture and sound credits are in each theme's `CREDITS.md` ([Dino Tour](themes/dino/CREDITS.md), [Off-Roading](themes/national-parks/CREDITS.md)). The flag sounds are from [Freesound](https://freesound.org/); four are public domain (CC0), and one needs this credit:
+
+- "Truck-Uphill.wav" by moshwe — https://freesound.org/s/554426/
+  Licensed under CC BY 3.0: https://creativecommons.org/licenses/by/3.0/
+  (Modified: trimmed/converted)
+
 ## Changing the game
 
 Most things can be changed without knowing much code. After a change, run the tests (see [Running the tests](#running-the-tests)) and try it with the local server.
