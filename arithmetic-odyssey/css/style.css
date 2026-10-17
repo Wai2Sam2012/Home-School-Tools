@@ -1808,8 +1808,54 @@ h1:focus {
 
 /* ------------------------------------------------------------ counting tips (0.6.3) */
 
+/* The 🙏 Tip button sits under the question. */
+.tip-row {
+  display: flex;
+  justify-content: center;
+  margin-top: 6px;
+}
+
 .tip-button {
-  font-size: 26px;
+  min-height: 60px;
+  padding: 6px 30px;
+  border-color: #d4a017;
+  box-shadow: 0 5px 0 #b8890f;
+  font-size: 28px;
+}
+
+.tip-icon {
+  font-size: 36px;
+  line-height: 1;
+}
+
+.tip-button[hidden] {
+  display: none;
+}
+
+/* Upright screen: Help in front of the question. Wide screen (landscape
+   iPad): Help under the question. */
+.tip-row {
+  display: none;
+}
+
+.tip-front {
+  min-height: 52px;
+  padding: 4px 18px;
+  font-size: 24px;
+}
+
+.tip-front .tip-icon {
+  font-size: 30px;
+}
+
+@media (orientation: landscape) and (min-width: 900px) {
+  .tip-row {
+    display: flex;
+  }
+
+  .question-row .tip-front {
+    display: none;
+  }
 }
 
 /* In the adventure the tip covers the trail map, so the screen doesn't change size. */
@@ -1833,7 +1879,8 @@ h1:focus {
 
 .learn-screen .tip-card {
   position: relative;
-  min-height: 140px;
+  inset: auto;
+  min-height: 150px;
 }
 
 .tip-title {
@@ -1853,12 +1900,72 @@ h1:focus {
 .tip-picture-box > svg {
   width: 100%;
   height: 100%;
-  max-height: 160px;
+}
+
+/* Open in place of the map, the window grows with its picture: as wide as
+   the screen allows, up to about a third of the screen's height. */
+.adventure-screen.tip-open .tip-picture-box > svg,
+.learn-screen .tip-picture-box > svg {
+  height: auto;
+  max-height: clamp(110px, 30vh, 320px);
+}
+
+/* While the tip is open it takes the place of the trail map and the story,
+   so it can be bigger. */
+.adventure-screen.tip-open .trail-map,
+.adventure-screen.tip-open .story {
+  display: none;
+}
+
+.adventure-screen.tip-open .tip-card {
+  position: relative;
+  inset: auto;
+  min-height: 150px;
 }
 
 .tip-close {
   position: absolute;
   top: 8px;
   right: 8px;
+}
+
+/* ------------------------------------------------------------ the answer in the question (0.6.3) */
+
+/* What the player types replaces the "?" in the question, in orange. */
+.question .typed {
+  color: #e8730c;
+}
+
+.question.right-answer .typed {
+  color: var(--ok);
+}
+
+.question.wrong-answer .typed {
+  color: inherit;
+}
+
+.question.full {
+  animation: shake 0.3s;
+}
+
+/* After a wrong answer: the question with the right answer, in green. */
+.correct-line {
+  margin: 4px auto 0;
+  padding: 4px 18px;
+  width: fit-content;
+  max-width: 100%;
+  border: 3px solid var(--ok);
+  border-radius: 16px;
+  background: #e7f6ec;
+  color: var(--ok);
+  font-size: clamp(30px, 5vw, 46px);
+  font-weight: 800;
+  line-height: 1.2;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.correct-line[hidden] {
+  display: none;
 }
 

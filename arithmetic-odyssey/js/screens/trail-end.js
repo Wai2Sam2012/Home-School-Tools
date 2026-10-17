@@ -81,7 +81,7 @@ export function trailEndScreen(ctx, result = {}) {
           row('Wanderings', stats.detours),
           row('Sent back to a flag', stats.setbacks),
           row('Thinking time', formatDuration(stats.thinkingMs ?? 0)),
-          row('Tips used', stats.tips ?? 0),
+          row('Help used', stats.tips ?? 0),
         ),
         h('div', { class: 'trail-end-buttons' },
           h('button', { type: 'button', class: 'big-button primary', onclick: () => ctx.show('setup') }, 'New adventure'),

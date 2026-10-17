@@ -48,7 +48,7 @@ export function statsScreen(ctx) {
           h('th', { scope: 'col' }, 'Date'),
           h('th', { scope: 'col' }, 'Right'),
           h('th', { scope: 'col' }, 'Time'),
-          h('th', { scope: 'col' }, 'Tips'),
+          h('th', { scope: 'col' }, 'Help'),
           h('th', { scope: 'col' }, 'Math'))),
         h('tbody', {}, entries.map((e, i) => h('tr', { class: i === 0 ? 'best' : '' },
           h('td', {}, i === 0 ? '🏆' : String(i + 1)),
@@ -57,7 +57,7 @@ export function statsScreen(ctx) {
           h('td', {}, formatDuration(e.thinkingMs)),
           h('td', {}, String(e.tips ?? 0)),
           h('td', { class: 'score-ops' }, e.operations))))),
-      h('p', { class: 'note' }, 'Most right answers wins; then the shortest thinking time; then the fewest tips (🙏).'),
+      h('p', { class: 'note' }, 'Most right answers wins; then the shortest thinking time; then the least Help (🙏).'),
     );
   }
   showBoard();

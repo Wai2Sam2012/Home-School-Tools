@@ -53,10 +53,13 @@ const NAMES = { [BACK]: 'Backspace', [SUBMIT]: 'Submit' };
  * Builds the keypad with its answer display.
  *   onSubmit(value)  called when Submit is pressed
  *   onChange(value)  called after each change
+ *   onFull()         called when a digit is pressed but the answer is full
+ *   showDisplay      false leaves out the answer box (the screen shows the
+ *                    answer itself, for example in the question)
  * Returns { el, display, value(), clear(), setEnabled(bool), ignoreTaps(ms), destroy() }.
  * Call destroy() when the screen closes, to stop listening to the PC keyboard.
  */
-export function createKeypad({ maxDigits = MAX_ANSWER_DIGITS, onSubmit = () => {}, onChange = () => {} } = {}) {
+export function createKeypad({ maxDigits = MAX_ANSWER_DIGITS, onSubmit = () => {}, onChange = () => {}, onFull = () => {}, showDisplay = true } = {}) {
   let value = '';
   let enabled = true;
   let ignoreUntil = 0;
@@ -74,6 +77,7 @@ export function createKeypad({ maxDigits = MAX_ANSWER_DIGITS, onSubmit = () => {
     display.classList.remove('full');
     void display.offsetWidth;
     display.classList.add('full');
+    onFull();
   }
 
   function press(key) {
@@ -119,7 +123,7 @@ export function createKeypad({ maxDigits = MAX_ANSWER_DIGITS, onSubmit = () => {
   document.addEventListener('keydown', onKeyDown);
 
   return {
-    el: h('div', { class: 'keypad-area' }, display, pad),
+    el: h('div', { class: 'keypad-area' }, showDisplay ? display : null, pad),
     display,
     value: () => value,
     clear() {

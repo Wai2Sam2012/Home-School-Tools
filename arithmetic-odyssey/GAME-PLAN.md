@@ -464,7 +464,7 @@ Every stage ends with its tests passing, the site republished, and a short repor
 - The voice waits for a sound effect to finish before reading: the flag roar, the detour sound, the wrong-answer sound and the Trail's End fanfare.
 - The sticker card changes pictures by itself every 3 seconds (dots show which one); there are no arrows.
 - Album tiles and the finish picture show the whole picture (many dinosaur pictures are about twice as wide as the tile), and long names such as Thecodontosaurus get a smaller size so they stay on one line.
-- After a wrong answer the screen shows the player's answer in red and crossed out, "✗ Incorrect ✗", and the question with the right answer in green in the answer box (0.5.5)
+- After a wrong answer the screen shows the player's answer in red and crossed out, "✗ Incorrect ✗", and the question with the right answer in green (0.5.5; since 0.6.3 on a green line under the question, as the answer box is gone)
 - The voice now says "Incorrect. 7 times 8 is 56." after a wrong answer, matching the screen. (0.5.6)
 - No zooming or scrolling while playing (T3.5 on the iPad, 0.5.6):
   - pinch zoom is blocked everywhere, and double-tap zoom on quick taps is blocked without losing fast typing;
@@ -526,8 +526,9 @@ Every stage ends with its tests passing, the site republished, and a short repor
 **0.6.3:** two more Off-Roading flag sounds, both CC0: a dirt bike passing and jumping a ramp ("motorcycle dirt bike motocross pass by medium speed and jump dirt ramp1.wav" by kyles) and a motorbike pulling away ("motorbike crm 250 cc onboard ride pullaway.wav" by martian), cleaned up the same way (4.8 s each). Off-Roading now picks from 4 flag sounds, Dino Tour from 3.
 
 **0.6.3 (also):**
-- **Counting tips** (🙏) for addition and subtraction: the question drawn with counting blocks over the trail map (`tipSvg()` in `js/blocks.js`, `js/tip-card.js`); each question's tip counts once in the trip's tips used. Learn from Incorrect has them too, not counted.
-- **High scores** now rank by the most right answers (as a share of all answers; a trip with more wandering questions isn't favoured), then the shortest thinking time, then the fewest tips. (This replaces "fewest setbacks first".)
+- **Help** (🙏, counting blocks) for addition and subtraction: the question drawn with counting blocks in place of the trail map (`tipSvg()` in `js/blocks.js`, `js/tip-card.js`); each question's Help counts once in the trip's "Help used". Learn from Incorrect has it too, not counted.
+- **High scores** now rank by the most right answers (as a share of all answers; a trip with more wandering questions isn't favoured), then the shortest thinking time, then the least Help. (This replaces "fewest setbacks first".)
+- **Layout:** the answer box above the keypad is gone; typed digits show in orange in the question in place of the ?. The 🙏 Help button sits in front of the question on an upright iPad and under it on a sideways one; the Help picture takes the place of the trail map and story while open, so it can be bigger.
 - The block badge sits on the last square (right end lying down, bottom standing up); the 3 block is a lighter pink.
 - Detours are called **wandering** wherever players see or hear it ("Wandering question 1 of 3", Wandering length, Wanderings on Trail's End); the code still says detour.
 
