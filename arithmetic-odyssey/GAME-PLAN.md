@@ -464,6 +464,8 @@ Every stage ends with its tests passing, the site republished, and a short repor
 - The voice waits for a sound effect to finish before reading: the flag roar, the detour sound, the wrong-answer sound and the Trail's End fanfare.
 - The sticker card changes pictures by itself every 3 seconds (dots show which one); there are no arrows.
 - Album tiles and the finish picture show the whole picture (many dinosaur pictures are about twice as wide as the tile), and long names such as Thecodontosaurus get a smaller size so they stay on one line.
+- After a wrong answer the screen shows the player's answer in red and crossed out, "✗ Incorrect ✗", and the question with the right answer in green in the answer box (the voice still says "Not quite. 7 times 8 is 56."). (0.5.5)
+- `tools/Get-ParkPictures.ps1` downloads about 5 Wikimedia Commons photos of each park attraction, with their credits, for the Off-Roading theme.
 - Voice lists show each voice once, in its best version; the iPad can list a name two or three times, including Apple's lowest-quality "super-compact" copies, which are labelled Basic. The tester can still show every copy.
 - `?debug=1` can make speech "never finish", to check the safety timeout (T5.3). Automated browser checks use a fake speech engine; the real voices are checked on the iPad (T5.2, T5.6).
 

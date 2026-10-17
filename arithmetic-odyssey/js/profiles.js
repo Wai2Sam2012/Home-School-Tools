@@ -1,8 +1,8 @@
 // Players (profiles). Stage 3 keeps them in memory only, so they reset when
 // the page reloads; Stage 6 saves them with storage.js.
 
-import { AVATAR_IDS } from './avatars.js?v=0.5.4';
-import { DEFAULT_SETTINGS, DEFAULT_SETUP, THEMES, normalizeSettings, normalizeSetup } from './settings.js?v=0.5.4';
+import { AVATAR_IDS } from './avatars.js?v=0.5.5';
+import { DEFAULT_SETTINGS, DEFAULT_SETUP, THEMES, normalizeSettings, normalizeSetup } from './settings.js?v=0.5.5';
 
 // Player icon ids; the drawings are in js/avatars.js.
 export const AVATARS = AVATAR_IDS;

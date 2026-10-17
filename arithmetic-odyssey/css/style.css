@@ -626,6 +626,12 @@ h1:focus {
   color: var(--ok);
 }
 
+.question.wrong-answer {
+  color: var(--error);
+  text-decoration: line-through;
+  text-decoration-thickness: 4px;
+}
+
 .feedback.wrong {
   color: var(--error);
 }
@@ -661,6 +667,15 @@ h1:focus {
   line-height: 64px;
   text-align: center;
   font-variant-numeric: tabular-nums;
+}
+
+/* After a wrong answer: the question with the right answer, in green. */
+.answer-display.correct-answer {
+  border-color: var(--ok);
+  background: #e7f6ec;
+  color: var(--ok);
+  font-size: clamp(30px, 4.5vw, 44px);
+  white-space: nowrap;
 }
 
 .answer-display.empty {
