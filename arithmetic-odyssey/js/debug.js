@@ -113,7 +113,11 @@ function element(tag, props = {}, children = []) {
   return el;
 }
 
-function render(message = '') {
+// The last button's result stays on show when the panel is drawn again in the background.
+let lastMessage = '';
+
+function render(message = lastMessage) {
+  lastMessage = message;
   const rows = infoRows.map(({ label, getValue }) => {
     let value;
     try {
@@ -164,9 +168,9 @@ function render(message = '') {
   );
 }
 
-/** Draws the panel again (after values measured in the background change). */
+/** Draws the panel again (after values measured in the background change), keeping the last result. */
 export function refreshDebugPanel() {
-  if (panel) render();
+  if (panel) render(lastMessage);
 }
 
 /** Creates the panel (once) and shows it. */
