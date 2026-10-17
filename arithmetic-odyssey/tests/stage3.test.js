@@ -118,7 +118,7 @@ test('T3.1 buttons are large: at least 60 px high', () => {
 test('T3.1 every screen in the app has its module', () => {
   const app = read('js/app.js');
   const screens = [...app.matchAll(/^ {2}(\w+): \{ build: (\w+)/gm)];
-  assert.deepEqual(screens.map((m) => m[1]), ['start', 'profiles', 'newPlayer', 'home', 'setup', 'adventure', 'trailEnd', 'album', 'stats', 'learn', 'settings', 'voiceLab']);
+  assert.deepEqual(screens.map((m) => m[1]), ['start', 'profiles', 'newPlayer', 'home', 'playerPicture', 'setup', 'adventure', 'trailEnd', 'album', 'stats', 'learn', 'settings', 'voiceLab']);
   for (const [, , builder] of screens) assert.match(app, new RegExp(`import \\{[^}]*\\b${builder}\\b[^}]*\\} from './screens/`), builder);
 });
 
@@ -287,8 +287,8 @@ test('placeholder colours stay the same for each sticker', () => {
 test('there are 16 player pictures, the ones asked for, each a file in images/avatars', async () => {
   const { AVATARS: PICTURES, avatarInfo, avatarUrl } = await import('../js/avatars.js');
   assert.deepEqual(PICTURES.map((a) => a.label), [
-    'Long-neck dinosaur', 'Triceratops', 'T. rex', 'Mosasaur', 'Pterosaur', 'Blue pickup truck', 'Monster truck', 'Dirt bike',
-    'Blue SUV', 'Blue ATV', 'Robot', 'Rocket', 'Butterfly', 'Unicorn', 'Dog', 'Cat',
+    'Diplodocus', 'Triceratops', 'T. rex', 'Mosasaur', 'Pterosaur', 'Pickup truck', 'Monster truck', 'Dirt bike',
+    'SUV', 'ATV', 'Robot', 'Rocket', 'Butterfly', 'Unicorn', 'Dog', 'Cat',
   ]);
   assert.deepEqual(AVATARS, PICTURES.map((a) => a.id), 'players choose from the same list');
   assert.equal(new Set(AVATARS).size, 16);
@@ -303,5 +303,6 @@ test('there are 16 player pictures, the ones asked for, each a file in images/av
     }
   }
   assert.equal(avatarInfo('not-a-picture').id, 'longneck', 'an unknown picture falls back to the first');
-  assert.equal(avatarUrl('trex'), 'images/avatars/trex.svg', 'a relative address, so it works under /Home-School-Tools/');
+  assert.equal(avatarUrl('trex'), 'images/avatars/trex/green.png', 'a relative address, so it works under /Home-School-Tools/');
+  assert.equal(avatarUrl('trex', 3), 'images/avatars/trex/orange.png');
 });

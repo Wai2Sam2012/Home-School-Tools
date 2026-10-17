@@ -8,17 +8,17 @@
 // Submit. It pauses while Repeat is reading and while the game is in the
 // background. The keypad works the whole time; nothing waits on speech.
 
-import { answerProblem, jumpTo, milestoneSteps, storyText, unlockSticker, useTip, withNextProblem } from '../adventure.js?v=0.6.4';
-import { hasTip } from '../blocks.js?v=0.6.4';
-import { createTipButton, createTipCard, showTipButtons } from '../tip-card.js?v=0.6.4';
-import { stickerPicture } from '../art.js?v=0.6.4';
-import { avatarIcon } from '../avatars.js?v=0.6.4';
-import { createDetourRoad, loopProgress } from '../detour-road.js?v=0.6.4';
-import { createKeypad } from '../keypad.js?v=0.6.4';
-import { THEMES } from '../settings.js?v=0.6.4';
-import { createThinkingTimer } from '../timer.js?v=0.6.4';
-import { nextSticker } from '../storyline.js?v=0.6.4';
-import { h, topBar } from '../ui.js?v=0.6.4';
+import { answerProblem, jumpTo, milestoneSteps, storyText, unlockSticker, useTip, withNextProblem } from '../adventure.js?v=0.6.5';
+import { hasTip } from '../blocks.js?v=0.6.5';
+import { createTipButton, createTipCard, showTipButtons } from '../tip-card.js?v=0.6.5';
+import { stickerPicture } from '../art.js?v=0.6.5';
+import { playerIcon } from '../avatars.js?v=0.6.5';
+import { createDetourRoad, loopProgress } from '../detour-road.js?v=0.6.5';
+import { createKeypad } from '../keypad.js?v=0.6.5';
+import { THEMES } from '../settings.js?v=0.6.5';
+import { createThinkingTimer } from '../timer.js?v=0.6.5';
+import { nextSticker } from '../storyline.js?v=0.6.5';
+import { h, topBar } from '../ui.js?v=0.6.5';
 
 const PRAISE = ['Correct!', 'Great job!', 'You got it!', 'Awesome!', 'Nice work!'];
 // A right answer moves on by itself; after a wrong one the game waits for
@@ -52,8 +52,8 @@ export function adventureScreen(ctx) {
   // ---- trail map
   const fill = h('div', { class: 'trail-fill' });
   // The player's own icon travels the trail (all icons face right, toward the finish).
-  const traveler = h('div', { class: 'trail-traveler', 'aria-hidden': 'true' }, avatarIcon(player.avatar));
-  const road = createDetourRoad(player.avatar);
+  const traveler = h('div', { class: 'trail-traveler', 'aria-hidden': 'true' }, playerIcon(player));
+  const road = createDetourRoad(player.avatar, player.color);
   const flags = milestoneSteps(state.length).map((step) =>
     h('div', { class: 'trail-flag', style: `left: ${(step / state.length) * 100}%`, dataset: { step: String(step) }, 'aria-hidden': 'true' }, '🚩'));
   const goal = h('div', { class: 'trail-goal', 'aria-hidden': 'true' }, '🏁');

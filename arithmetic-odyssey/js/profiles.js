@@ -2,13 +2,13 @@
 // Only what changed is written: the adventure in progress once per question,
 // and the player's record when settings change or an adventure ends.
 
-import { AVATAR_IDS } from './avatars.js?v=0.6.4';
-import { KEYS, PREFIX, createStorage, memoryStorage } from './storage.js?v=0.6.4';
+import { AVATAR_IDS, checkColor } from './avatars.js?v=0.6.5';
+import { KEYS, PREFIX, createStorage, memoryStorage } from './storage.js?v=0.6.5';
 import {
   LEARNED_MAX, MAX_PROFILES, NAME_MAX_LENGTH, RECORD_SCHEMA, checkActive, checkHistory, checkIndex, checkProfile, cleanName, profileRecord,
-} from './records.js?v=0.6.4';
-import { addHighScore, addToHistory, gameSummary } from './scores.js?v=0.6.4';
-import { DEFAULT_SETTINGS, DEFAULT_SETUP, THEMES, normalizeSettings, normalizeSetup } from './settings.js?v=0.6.4';
+} from './records.js?v=0.6.5';
+import { addHighScore, addToHistory, gameSummary } from './scores.js?v=0.6.5';
+import { DEFAULT_SETTINGS, DEFAULT_SETUP, THEMES, normalizeSettings, normalizeSetup } from './settings.js?v=0.6.5';
 
 // Player icon ids; the pictures are in images/avatars/ (js/avatars.js).
 export const AVATARS = AVATAR_IDS;
@@ -55,7 +55,7 @@ export function createProfileStore({ storage = createStorage(memoryStorage()), m
 
   // ---------------------------------------------------------------- saving
   const saveIndex = () => {
-    index.profiles = profiles.map(({ id, name, avatar }) => ({ id, name, avatar }));
+    index.profiles = profiles.map(({ id, name, avatar, color }) => ({ id, name, avatar, color }));
     return storage.write(KEYS.index, index);
   };
   const saveProfile = (p) => storage.write(KEYS.profile(p.id), profileRecord(p));
@@ -79,6 +79,7 @@ export function createProfileStore({ storage = createStorage(memoryStorage()), m
       id: record.id,
       name: record.name,
       avatar: record.avatar,
+      color: checkColor(record.color),
       settings: record.settings,
       setup: record.setup,
       collected: record.collected,
@@ -102,7 +103,7 @@ export function createProfileStore({ storage = createStorage(memoryStorage()), m
     for (const entry of saved.profiles) {
       const record = storage.read(KEYS.profile(entry.id), (d) => checkProfile(d, entry.id))
         // A damaged record was set aside: keep the player with fresh settings.
-        ?? checkProfile({ schema: RECORD_SCHEMA, id: entry.id, name: entry.name, avatar: entry.avatar });
+        ?? checkProfile({ schema: RECORD_SCHEMA, id: entry.id, name: entry.name, avatar: entry.avatar, color: entry.color });
       const history = storage.read(KEYS.history(entry.id), checkHistory)?.games ?? [];
       const adventure = storage.read(KEYS.active(entry.id), checkActive)?.adventure ?? null;
       profiles.push(player(record, history, adventure));
@@ -119,7 +120,7 @@ export function createProfileStore({ storage = createStorage(memoryStorage()), m
     storage,
 
     /** Adds a player. Throws with a friendly message if the name can't be used or the list is full. */
-    add(name, avatar) {
+    add(name, avatar, color = 1) {
       if (profiles.length >= MAX_PROFILES) throw new Error(`There can be up to ${MAX_PROFILES} players.`);
       const problem = checkProfileName(name, profiles);
       if (problem) throw new Error(problem);
@@ -127,6 +128,7 @@ export function createProfileStore({ storage = createStorage(memoryStorage()), m
         id: freshId(),
         name: cleanName(name),
         avatar: AVATARS.includes(avatar) ? avatar : AVATARS[0],
+        color: checkColor(color),
         settings: { ...DEFAULT_SETTINGS },
         setup: normalizeSetup(DEFAULT_SETUP),
         collected: emptyCollection(),
@@ -168,6 +170,15 @@ export function createProfileStore({ storage = createStorage(memoryStorage()), m
       p.setup = normalizeSetup({ ...p.setup, ...changes });
       saveProfile(p);
       return p.setup;
+    },
+
+    /** Changes a player's picture and its color (1-5). Returns false if it couldn't be saved. */
+    setPicture(id, avatar, color = 1) {
+      const p = this.get(id);
+      if (!p) throw new Error('That player no longer exists.');
+      p.avatar = AVATARS.includes(avatar) ? avatar : p.avatar;
+      p.color = checkColor(color);
+      return [saveProfile(p), saveIndex()].every(Boolean);
     },
 
     /** Saves the adventure in progress (null or finished: removes it). Returns false if it couldn't be saved. */

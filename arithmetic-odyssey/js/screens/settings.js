@@ -1,12 +1,12 @@
 // 8. Settings (grown-ups, behind the 3-second hold): voice, adventure and
 // detour length, saving, backup and restore, and deleting the player.
 
-import { ADVENTURE_LENGTHS, DETOUR_MAX, DETOUR_MIN, stepDetourLength } from '../settings.js?v=0.6.4';
-import { bestVersions, chooseVoice, isFunVoice, voiceId, voiceQuality } from '../speech.js?v=0.6.4';
-import { avatarIcon } from '../avatars.js?v=0.6.4';
-import { canUndoRestore, makeBackup, parseBackup, restoreBackup, saveBackupFile, undoRestore } from '../backup.js?v=0.6.4';
-import { formatBytes } from '../storage.js?v=0.6.4';
-import { choiceDialog, choiceRow, confirmDialog, h, topBar } from '../ui.js?v=0.6.4';
+import { ADVENTURE_LENGTHS, DETOUR_MAX, DETOUR_MIN, stepDetourLength } from '../settings.js?v=0.6.5';
+import { bestVersions, chooseVoice, isFunVoice, voiceId, voiceQuality } from '../speech.js?v=0.6.5';
+import { playerIcon } from '../avatars.js?v=0.6.5';
+import { canUndoRestore, makeBackup, parseBackup, restoreBackup, saveBackupFile, undoRestore } from '../backup.js?v=0.6.5';
+import { formatBytes } from '../storage.js?v=0.6.5';
+import { choiceDialog, choiceRow, confirmDialog, h, topBar } from '../ui.js?v=0.6.5';
 
 const REGIONS = { US: 'US', GB: 'UK', AU: 'Australia', IE: 'Ireland', IN: 'India', ZA: 'South Africa', NZ: 'New Zealand', CA: 'Canada', SG: 'Singapore' };
 const SAMPLE = 'Hi! What is 7 times 8?';
@@ -224,7 +224,7 @@ export function settingsScreen(ctx) {
 
   return h('main', { class: 'screen settings-screen' },
     topBar('Grown-up Settings', () => ctx.show('home')),
-    h('p', { class: 'lead settings-for' }, 'Settings for ', avatarIcon(player.avatar, { className: 'avatar-icon inline' }), ` ${player.name}`),
+    h('p', { class: 'lead settings-for' }, 'Settings for ', playerIcon(player, { className: 'avatar-icon inline' }), ` ${player.name}`),
     h('div', { class: 'settings-layout' },
       h('section', { class: 'panel' },
         h('h2', {}, 'Questions'),

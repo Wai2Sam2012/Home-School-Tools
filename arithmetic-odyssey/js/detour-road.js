@@ -3,7 +3,7 @@
 // around it as the detour questions are answered, back to the spot where it
 // left the trail.
 
-import { avatarIcon } from './avatars.js?v=0.6.4';
+import { avatarIcon } from './avatars.js?v=0.6.5';
 
 // The loop, in a 150 × 60 pixel box whose point (24, 0) sits on the trail.
 const WIDTH = 150;
@@ -23,7 +23,7 @@ export function loopsLeft(atPercent) {
   return atPercent > 60;
 }
 
-export function createDetourRoad(avatarId) {
+export function createDetourRoad(avatarId, color = 1) {
   const holder = document.createElement('div');
   holder.innerHTML = `<svg class="detour-road-svg" viewBox="0 0 ${WIDTH} ${HEIGHT}" width="${WIDTH}" height="${HEIGHT}" aria-hidden="true">
     <path d="${LOOP}" fill="none" stroke="#c8b58a" stroke-width="10" stroke-linecap="round"/>
@@ -32,7 +32,7 @@ export function createDetourRoad(avatarId) {
   </svg>`;
   const svg = holder.firstElementChild;
   const path = svg.querySelector('.detour-road-path');
-  const icon = avatarIcon(avatarId, { className: 'avatar-icon detour-traveler' });
+  const icon = avatarIcon(avatarId, { color, className: 'avatar-icon detour-traveler' });
   const el = document.createElement('div');
   el.className = 'detour-road';
   el.hidden = true;

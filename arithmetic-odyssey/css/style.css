@@ -509,8 +509,8 @@ h1:focus {
 }
 
 .avatar-choice .avatar-icon {
-  width: 60px;
-  height: 60px;
+  width: 76px;
+  height: 76px;
 }
 
 .avatar-name {
@@ -522,6 +522,82 @@ h1:focus {
 .avatar-choice[aria-pressed="true"] {
   border-color: var(--accent);
   background: var(--accent-soft);
+}
+
+/* The 5 colors of the chosen picture, as the pictures themselves (a color
+   like "calico" or "rainbow" is easier to see than to name). */
+.color-title {
+  margin-top: 14px;
+}
+
+.color-grid {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 10px;
+}
+
+.color-choice {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2px;
+  min-height: 112px;
+  padding: 6px 4px;
+  border: 3px solid var(--line);
+  border-radius: 16px;
+  background: var(--surface);
+}
+
+.color-choice .avatar-icon {
+  width: 72px;
+  height: 72px;
+}
+
+/* The options are numbered 1 to 5 (for the cat and dog they are kinds, not colors). */
+.color-number {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  border-radius: 50%;
+  background: var(--line);
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.color-choice[aria-pressed="true"] .color-number {
+  background: var(--accent);
+  color: #fff;
+}
+
+.color-choice[aria-pressed="true"] {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+/* On Home the picture is a button: tap it to choose another picture or color. */
+.avatar-button {
+  position: relative;
+  padding: 0;
+  border: none;
+  background: none;
+  line-height: 1;
+}
+
+.avatar-edit {
+  position: absolute;
+  right: -6px;
+  bottom: 0;
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border: 2px solid var(--line);
+  border-radius: 50%;
+  background: var(--surface);
+  font-size: 20px;
 }
 
 .name-input {
@@ -537,7 +613,14 @@ h1:focus {
   user-select: text;
 }
 
-.new-player-screen .panel {
+.name-row {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.new-player-screen .panel,
+.player-picture-screen .panel {
   display: flex;
   flex-direction: column;
   gap: 8px;
@@ -1446,7 +1529,8 @@ h1:focus {
   }
 
   /* All 16 player pictures in two rows. */
-  .new-player-screen .panel {
+  .new-player-screen .panel,
+  .player-picture-screen .panel {
     max-width: 1000px;
   }
 
@@ -1459,8 +1543,33 @@ h1:focus {
   }
 
   .avatar-choice .avatar-icon {
-    width: 50px;
-    height: 50px;
+    width: 64px;
+    height: 64px;
+  }
+
+  .color-title {
+    margin-top: 4px;
+  }
+
+  .name-row {
+    flex-direction: row;
+  }
+
+  .name-row .name-input {
+    flex: 1;
+  }
+
+  .name-row .big-button {
+    flex: 0 0 300px;
+  }
+
+  .color-choice {
+    min-height: 84px;
+  }
+
+  .color-choice .avatar-icon {
+    width: 54px;
+    height: 54px;
   }
 
   .home-grid.has-trip {

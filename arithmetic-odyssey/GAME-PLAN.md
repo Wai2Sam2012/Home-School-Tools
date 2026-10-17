@@ -537,6 +537,10 @@ Every stage ends with its tests passing, the site republished, and a short repor
 - **Top bar:** a long title no longer covers the Back button on a narrow screen. The empty right side gives way first and the title wraps; on the iPad the title stays centered.
 - **Player picture colors:** the 80 pictures (16 characters, 5 colors each) are cut from the author's catalog and saved in `images/avatars/<id>/<color>.png`, ready for Stage 7 (see below).
 
+**0.6.5:**
+- **New player pictures in use:** players choose one of 16 pictures and one of its 5 colors (`js/avatar-picker.js`), on the New player screen and by tapping their picture on Home. The color is saved with the player (old players get color 1). See the Stage 7 notes below.
+- The pickup truck, SUV and ATV are no longer called "blue", since they now come in 5 colors, and the long-neck dinosaur is called **Diplodocus** (its saved id is still `longneck`, so players keep their picture).
+
 ### Stage 7: Offline app (PWA)
 
 **Build:** `manifest.json`, the iPad tags, the icons, `sw.js` with the generated file list, update handling and `offline.html`.
@@ -549,7 +553,7 @@ Every stage ends with its tests passing, the site republished, and a short repor
 | T7.4 | A new version installs without interrupting an adventure and applies on the next launch | PC |
 | T7.5 | It works from a subpath (`http://localhost:8080/arithmetic-odyssey/`), and the service worker does not control pages outside `arithmetic-odyssey/` | PC |
 
-**Also in Stage 7: five colors of each player picture.** Players pick one of the 16 pictures, then one of its 5 colors (80 in all), from the author's picture set:
+**Five colors of each player picture (done early, in 0.6.4 and 0.6.5).** Players pick one of the 16 pictures, then one of its 5 colors (80 in all), from the author's picture set:
 
 | Picture (id) | Colors 1–5 |
 |---|---|
@@ -566,21 +570,21 @@ Every stage ends with its tests passing, the site republished, and a short repor
 | Butterfly (`butterfly`) | orange, blue, pink, purple, green |
 | Dirt bike (`dirtbike`) | red, blue, green, orange, yellow |
 | Dog (`dog`) | golden, black, brown and white, husky, white |
-| Long-neck dinosaur (`longneck`) | green, blue, brown, purple, teal |
+| Diplodocus (`longneck`) | green, blue, brown, purple, teal |
 | Mosasaur (`mosasaur`) | blue, teal, gray, purple, green |
 | Pickup truck (`pickup`) | red, blue, black, white, green |
 
 - **Files (done in 0.6.4):** `images/avatars/<id>/<color>.png`, for example `images/avatars/cat/gray.png`, and the color order in `AVATAR_COLORS` in `js/avatars.js`. They were cut from the author's catalog sheet: each is a 256 × 256 PNG with a see-through background, about 15 KB (1.2 MB for all 80, so they can be saved for offline play). Every picture faces right, toward the finish on the trail map; the T. rex, pterosaur, unicorn and dirt bike faced left in the catalog and were flipped. The catalog sheet is not kept in the repository. On the sheet each character was only about 120 pixels across, so the pictures are a little soft when shown large; the 512 × 512 originals can replace them later with the same file names.
-- **Choosing:** on the new-player and edit-player screens, tap a picture, then one of 5 color dots under it. The choice shows straight away.
-- **Saving:** the player keeps their picture `id` and adds a `color` (1–5). Players saved before this, and backups from older versions, get color 1. The game falls back to the drawn picture (the current `.svg`) if a picture file is missing.
+- **Choosing (0.6.5):** on the New player screen, tap a picture, then one of its 5 options, numbered 1 to 5 under the pictures themselves (for the cat and dog the options are kinds, like calico or husky, not colors, so numbers work better than names). The pictures show no names on screen; the buttons still tell a screen reader what they are. Picking another picture starts it at color 1. A player changes theirs later by tapping their picture on Home (a ✏️ marks it), which opens the same choice with **Use this picture**; Back leaves it as it was. On a sideways iPad the name box and **Create player** sit side by side, so the whole form fits without scrolling.
+- **Saving (0.6.5):** the player keeps their picture `id` and adds a `color` (1–5), in their record and the player list, and in backups. Players saved before this, backups from older versions, and a damaged color get color 1. The game falls back to the drawn picture (the old `.svg`) if a color's file is missing, and tries only once.
 - **Credits:** where the pictures came from goes in `images/avatars/README.md`.
 
 | ID | Test | Kind |
 |---|---|---|
 | T7.6 | Every picture has 5 color files; each is a 256 × 256 PNG with a see-through background, under 100 KB (done in 0.6.4, `tests/avatars.test.js`), and in the offline file list | Automated |
-| T7.7 | A player's color is saved, survives a reload, is kept in a backup, and an old save or backup without one reads as color 1; a damaged color reads as 1 | Automated |
-| T7.8 | Choosing a picture and a color on the new-player and edit-player screens shows that color on Home, the trail map and My Stats | PC |
-| T7.9 | Every picture faces right on the trail map, and the color dots are easy to tap on the iPad | iPad |
+| T7.7 | A player's color is saved, survives a reload, is kept in a backup, and an old save or backup without one reads as color 1; a damaged color reads as 1 (done in 0.6.5, `tests/avatars.test.js`) | Automated |
+| T7.8 | Choosing a picture and a color on the New player screen and from Home shows that color in the player list, on Home, in Settings and on the trail map (done in 0.6.5) | PC |
+| T7.9 | Every picture faces right on the trail map, and the colors are easy to tap on the iPad | iPad |
 
 ### Stage 8: Release and iPad acceptance
 
