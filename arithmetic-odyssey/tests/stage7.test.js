@@ -140,7 +140,8 @@ test('the manifest makes a full-screen app that starts in its own folder', () =>
   assert.equal(m.display, 'standalone');
   assert.equal(m.start_url, './');
   assert.equal(m.scope, './');
-  assert.ok(m.name && m.short_name && m.short_name.length <= 12, 'a short name that fits under a Home Screen icon');
+  assert.equal(m.short_name, 'Arithmetic Odyssey', 'the name under the Home Screen icon (the author chose the full name)');
+  assert.ok(m.name);
   for (const icon of m.icons) {
     const png = readFileSync(join(GAME, icon.src));
     const [w, h] = [png.readUInt32BE(16), png.readUInt32BE(20)];
@@ -152,7 +153,7 @@ test('index.html has the iPad tags and a 180 x 180 Home Screen icon', () => {
   const page = read('index.html');
   assert.match(page, /<link rel="manifest" href="manifest\.json">/);
   assert.match(page, /<meta name="apple-mobile-web-app-capable" content="yes">/);
-  assert.match(page, /<meta name="apple-mobile-web-app-title" content="[^"]{1,12}">/);
+  assert.match(page, /<meta name="apple-mobile-web-app-title" content="Arithmetic Odyssey">/, 'the same name on the iPad');
   const icon = page.match(/<link rel="apple-touch-icon" href="([^"]+)">/)[1];
   const png = readFileSync(join(GAME, icon));
   assert.deepEqual([png.readUInt32BE(16), png.readUInt32BE(20)], [180, 180]);

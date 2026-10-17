@@ -1,6 +1,6 @@
 {
   "name": "Arithmetic Odyssey",
-  "short_name": "Math Odyssey",
+  "short_name": "Arithmetic Odyssey",
   "description": "A math adventure game for the iPad that works offline.",
   "start_url": "./",
   "scope": "./",
