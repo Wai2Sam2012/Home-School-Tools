@@ -2,13 +2,13 @@
 // Only what changed is written: the adventure in progress once per question,
 // and the player's record when settings change or an adventure ends.
 
-import { AVATAR_IDS } from './avatars.js?v=0.6.1';
-import { KEYS, PREFIX, createStorage, memoryStorage } from './storage.js?v=0.6.1';
+import { AVATAR_IDS } from './avatars.js?v=0.6.3';
+import { KEYS, PREFIX, createStorage, memoryStorage } from './storage.js?v=0.6.3';
 import {
   LEARNED_MAX, MAX_PROFILES, NAME_MAX_LENGTH, RECORD_SCHEMA, checkActive, checkHistory, checkIndex, checkProfile, cleanName, profileRecord,
-} from './records.js?v=0.6.1';
-import { addHighScore, addToHistory, gameSummary } from './scores.js?v=0.6.1';
-import { DEFAULT_SETTINGS, DEFAULT_SETUP, THEMES, normalizeSettings, normalizeSetup } from './settings.js?v=0.6.1';
+} from './records.js?v=0.6.3';
+import { addHighScore, addToHistory, gameSummary } from './scores.js?v=0.6.3';
+import { DEFAULT_SETTINGS, DEFAULT_SETUP, THEMES, normalizeSettings, normalizeSetup } from './settings.js?v=0.6.3';
 
 // Player icon ids; the pictures are in images/avatars/ (js/avatars.js).
 export const AVATARS = AVATAR_IDS;

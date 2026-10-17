@@ -464,7 +464,7 @@ Every stage ends with its tests passing, the site republished, and a short repor
 - The voice waits for a sound effect to finish before reading: the flag roar, the detour sound, the wrong-answer sound and the Trail's End fanfare.
 - The sticker card changes pictures by itself every 3 seconds (dots show which one); there are no arrows.
 - Album tiles and the finish picture show the whole picture (many dinosaur pictures are about twice as wide as the tile), and long names such as Thecodontosaurus get a smaller size so they stay on one line.
-- After a wrong answer the screen shows the player's answer in red and crossed out, "✗ Incorrect ✗", and the question with the right answer in green in the answer box (0.5.5)
+- After a wrong answer the screen shows the player's answer in red and crossed out, "✗ Incorrect ✗", and the question with the right answer in green (0.5.5; since 0.6.3 on a green line under the question, as the answer box is gone)
 - The voice now says "Incorrect. 7 times 8 is 56." after a wrong answer, matching the screen. (0.5.6)
 - No zooming or scrolling while playing (T3.5 on the iPad, 0.5.6):
   - pinch zoom is blocked everywhere, and double-tap zoom on quick taps is blocked without losing fast typing;
@@ -516,8 +516,21 @@ Every stage ends with its tests passing, the site republished, and a short repor
 **0.6.1 (added after Stage 6, asked for after trying it):**
 
 - **Learn from Incorrect** (`js/learn.js`, `js/screens/learn.js`), opened from My Stats: a practice round with the Need More Practice problems (up to 8). A problem is learned after 2 right answers in the round (a problem that was only slow must be answered within 5 seconds); a wrong answer resets its count and it comes back 2 questions later; the round stops when all are learned or after 4 questions per problem. No stickers or high scores. Learned problems are saved in the player's record (`learned`, the date each was learned, at most 200) and leave Need More Practice until a later game misses them (or is slow on them) again.
-- **Recorded flag sounds:** `themes/<theme>/sounds/flag.mp3` (or `.m4a`, `.wav`) plays at the flags instead of the made-up roar or engine; the story file lists it, the voice waits for it (at most 4 seconds), it is evened out to about the voice's loudness, and it must be credited and at most 600 KB. The voice and sound tester has a button for each recording.
+- **Recorded flag sounds:** `themes/<theme>/sounds/flag.mp3` (or `.m4a`, `.wav`) plays at the flags instead of the made-up roar or engine; the story file lists it, the voice waits for it (at most 5 seconds since 0.6.2), it is evened out to about the voice's loudness, and it must be credited and at most 600 KB. The voice and sound tester has a button for each recording.
 - **The Uppbeat "T-Rex Roar"** (by Epic Stock Media) was looked into and not added: the free (Basic) license allows sounds inside web games but forbids sharing the original audio file, and every file in this public repository can be downloaded by anyone. A public domain (CC0) recording is the safe choice.
+
+**0.6.2:** the flag sounds are recordings from Freesound, cleaned up (the best part, under 5 s; rumble below 40 Hz removed; short fades; even volume; mono MP3, 20 to 60 KB each): three dinosaur roars by jarredgibb and two truck engines by canucklovingbrit and moshwe. A theme can have several (`sounds/flag-1.mp3`, `flag-2.mp3`, ...); one is picked at random at each flag, never the same twice in a row. The original uploads (about 10 MB) were removed. Licenses (checked on Freesound): the three roars and the diesel rev are CC0; "Truck-Uphill.wav" by moshwe is CC BY 3.0, credited in the parks `CREDITS.md` and the README.
+
+**Counting blocks (for tips, added after 0.6.2):** `js/blocks.js` defines 11 blocks, each made of unit squares and colored by value: 1 Green (1x1), 2 Orange (1x2), 3 Pink (1x3), 4 Yellow (1x4), 5 Light Blue (1x5), 6 Purple (1x6), 7 Tan (1x7), 8 Brown (1x8), 9 Mint Green (1x9), 10 Dark Blue (1x10) and 100 Red (10x10). `blockSvg()` draws one (lying down or standing up, any size, with its value or with numbered squares) and `numberAsBlocks()` splits a number into the fewest blocks. `tools/build-blocks.mjs` writes them as pictures to `images/blocks/`. They are not used in the game yet; they are meant for counting tips later (for example, 7 + 5 shown as a 7 block and a 5 block, then as a 10 block and a 2 block).
+
+**0.6.3:** two more Off-Roading flag sounds, both CC0: a dirt bike passing and jumping a ramp ("motorcycle dirt bike motocross pass by medium speed and jump dirt ramp1.wav" by kyles) and a motorbike pulling away ("motorbike crm 250 cc onboard ride pullaway.wav" by martian), cleaned up the same way (4.8 s each). Off-Roading now picks from 4 flag sounds, Dino Tour from 3.
+
+**0.6.3 (also):**
+- **Help** (🙏, counting blocks) for addition and subtraction: the question drawn with counting blocks in place of the trail map (`tipSvg()` in `js/blocks.js`, `js/tip-card.js`); each question's Help counts once in the trip's "Help used". Learn from Incorrect has it too, not counted.
+- **High scores** now rank by the most right answers (as a share of all answers; a trip with more wandering questions isn't favoured), then the shortest thinking time, then the least Help. (This replaces "fewest setbacks first".)
+- **Layout:** the answer box above the keypad is gone; typed digits show in orange in the question in place of the ?. The 🙏 Help button sits in front of the question on an upright iPad and under it on a sideways one; the Help picture takes the place of the trail map and story while open, so it can be bigger.
+- The block badge sits on the last square (right end lying down, bottom standing up); the 3 block is a lighter pink.
+- Detours are called **wandering** wherever players see or hear it ("Wandering question 1 of 3", Wandering length, Wanderings on Trail's End); the code still says detour.
 
 ### Stage 7: Offline app (PWA)
 

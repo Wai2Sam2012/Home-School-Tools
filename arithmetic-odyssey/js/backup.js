@@ -4,8 +4,8 @@
 // of it is wrong; before it changes anything, the current data is kept so
 // the restore can be undone.
 
-import { KEYS } from './storage.js?v=0.6.1';
-import { MAX_PROFILES, checkActive, checkHistory, checkProfile } from './records.js?v=0.6.1';
+import { KEYS } from './storage.js?v=0.6.3';
+import { MAX_PROFILES, checkActive, checkHistory, checkProfile } from './records.js?v=0.6.3';
 
 export const BACKUP_FORMAT = 'arithmetic-odyssey-backup';
 export const BACKUP_SCHEMA = 1;

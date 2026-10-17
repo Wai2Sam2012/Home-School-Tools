@@ -1,37 +1,37 @@
 {
-  "title": "Dino Tour",
-  "intro": "Travel back in time through the Triassic, Jurassic and Cretaceous to meet the dinosaurs!",
+  "title": "Dinosaur Adventure",
+  "intro": "This is a journey for a curious little dinosaur exploring the Triassic, Jurassic and Cretaceous periods. Along the way you will come across challenges. Solve the problems to move forward!",
   "traveler": "🦕",
   "milestones": [
-    "You crossed the steaming swamp!",
+    "You safely crossed the steaming swamp!",
     "You reached the giant fern forest!",
-    "You found a field of fossil footprints!",
-    "You made it past the bubbling volcano!",
-    "You reached the big blue lake!",
+    "You found a field of yummy plants!",
+    "You made it past the bubbling volcano field!",
+    "You reached the biggest freshwater lake you have ever seen!",
     "You climbed over the rocky ridge!",
-    "You found a hidden dinosaur nest!",
+    "You found a hidden cave that no one was using!",
     "You crossed the wide river delta!",
-    "You reached the tall conifer woods!",
+    "You carefully went past the quicksand!",
     "You can see your destination ahead!"
   ],
   "detours": [
-    "Oh no, a volcano is rumbling! Solve {count} problems to find a safe path around it.",
-    "A herd of long-necked dinosaurs is crossing the trail. Solve {count} problems while you wait for them to pass!",
-    "Your time machine needs a quick repair. Solve {count} problems to fix it!",
+    "Oh no, a volcano is rumbling! Solve {count} problems to find a safe path back.",
+    "A herd of Brachiosaurus is crossing the trail. Solve {count} problems while you wait for them to pass!",
+    "You were not paying attention and wandered off the trail. Solve {count} problems to find your group!",
     "A river flooded the path! Solve {count} problems to build a log bridge.",
-    "Thick fog rolled in. Solve {count} problems to find the trail again!",
-    "Sticky mud is everywhere! Solve {count} problems to pull your boots free.",
-    "A big rock slid onto the path. Solve {count} problems to roll it away!",
-    "A curious little dinosaur took your map! Solve {count} problems to get it back."
+    "Thick fog rolled in. Solve {count} problems to find your way again!",
+    "Sticky mud is everywhere! Solve {count} problems to pull your legs free.",
+    "A big rock slide has blocked your path. Solve {count} problems to clear the way!",
+    "A curious Microraptor took your map! Solve {count} problems to get it back."
   ],
   "detourCleared": [
     "You did it! Back on the trail.",
     "Great work! The path is clear again.",
-    "Detour done! Let's keep exploring."
+    "You found your way again! Let's keep exploring."
   ],
   "setback": [
-    "Uh-oh, that detour was tricky! Let's go back to the last flag and try again. You can do it!",
-    "No problem! Explorers sometimes take the long way. Back to the last flag we go!"
+    "Uh-oh, that wandering was tricky! Let's go back to the last safe spot and try again. You can do it!",
+    "No problem! Explorers sometimes take the long way. Back to the last safe spot we go!"
   ],
   "kidFacts": {
     "eoraptor": [

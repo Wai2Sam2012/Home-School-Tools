@@ -8,15 +8,17 @@
 // Submit. It pauses while Repeat is reading and while the game is in the
 // background. The keypad works the whole time; nothing waits on speech.
 
-import { answerProblem, jumpTo, milestoneSteps, storyText, unlockSticker, withNextProblem } from '../adventure.js?v=0.6.1';
-import { stickerPicture } from '../art.js?v=0.6.1';
-import { avatarIcon } from '../avatars.js?v=0.6.1';
-import { createDetourRoad, loopProgress } from '../detour-road.js?v=0.6.1';
-import { createKeypad } from '../keypad.js?v=0.6.1';
-import { THEMES } from '../settings.js?v=0.6.1';
-import { createThinkingTimer } from '../timer.js?v=0.6.1';
-import { nextSticker } from '../storyline.js?v=0.6.1';
-import { h, topBar } from '../ui.js?v=0.6.1';
+import { answerProblem, jumpTo, milestoneSteps, storyText, unlockSticker, useTip, withNextProblem } from '../adventure.js?v=0.6.3';
+import { hasTip } from '../blocks.js?v=0.6.3';
+import { createTipButton, createTipCard, showTipButtons } from '../tip-card.js?v=0.6.3';
+import { stickerPicture } from '../art.js?v=0.6.3';
+import { avatarIcon } from '../avatars.js?v=0.6.3';
+import { createDetourRoad, loopProgress } from '../detour-road.js?v=0.6.3';
+import { createKeypad } from '../keypad.js?v=0.6.3';
+import { THEMES } from '../settings.js?v=0.6.3';
+import { createThinkingTimer } from '../timer.js?v=0.6.3';
+import { nextSticker } from '../storyline.js?v=0.6.3';
+import { h, topBar } from '../ui.js?v=0.6.3';
 
 const PRAISE = ['Correct!', 'Great job!', 'You got it!', 'Awesome!', 'Nice work!'];
 // A right answer moves on by itself; after a wrong one the game waits for
@@ -42,6 +44,7 @@ export function adventureScreen(ctx) {
   let busy = false;
   let waitingFor = null; // the events of a wrong answer, until "Got it" is pressed
   const thinking = createThinkingTimer();
+  let page = null; // the screen's <main>, made at the end
   let questionNo = 0;
   let sayToken = 0;
   let speakTimer = 0;
@@ -63,8 +66,32 @@ export function adventureScreen(ctx) {
   const story = h('p', { class: 'story', role: 'status' });
   const question = h('p', { class: 'question', 'aria-live': 'polite' });
   const feedback = h('p', { class: 'feedback', role: 'status' });
+  // After a wrong answer: the question with the right answer, in green.
+  const correctLine = h('p', { class: 'correct-line', hidden: true });
+
+  /** The question with what the player has typed in place of the "?", in orange. */
+  function showTyped(value = '') {
+    question.replaceChildren(`${state.problem.text} = `, value === '' ? '?' : h('span', { class: 'typed' }, value));
+  }
+  /** A little shake when no more digits fit. */
+  function bumpQuestion() {
+    question.classList.remove('full');
+    void question.offsetWidth;
+    question.classList.add('full');
+  }
   const detourCount = h('p', { class: 'detour-count' });
   const repeat = h('button', { type: 'button', class: 'round-button repeat-button', 'aria-label': 'Read the question again', onclick: () => repeatQuestion() }, '🔊');
+  // 🙏 Help (addition and subtraction): the question drawn with counting blocks.
+  // Each question's Help counts once in the trip's "Help used".
+  // While the tip is open it takes the place of the trail map and the story, so it can be bigger.
+  const tipCard = createTipCard({ onToggle: (open) => page?.classList.toggle('tip-open', open) });
+  // Help in front of the question (upright screen) and under it (wide screen); style.css shows one.
+  const tipButtons = [createTipButton(() => showTip(), { place: 'front' }), createTipButton(() => showTip(), { place: 'below' })];
+  function showTip() {
+    if (busy || !hasTip(state.problem)) return false;
+    if (tipCard.show(state.problem)) save(useTip(state));
+    return true;
+  }
 
   // ---- speech and the thinking timer
   /**
@@ -165,9 +192,11 @@ export function adventureScreen(ctx) {
   function showQuestion(intro = '', afterMs = 0) {
     // The detour counter changes with the question, not while the last answer is still shown.
     detourCount.hidden = state.mode !== 'detour';
-    if (state.detour) detourCount.textContent = `Detour question ${state.detour.asked + 1} of ${state.detourLength}`;
-    question.textContent = `${state.problem.text} = ?`;
-    question.classList.remove('wrong-answer');
+    // Players call a detour "wandering" (the code keeps the word detour).
+    if (state.detour) detourCount.textContent = `Wandering question ${state.detour.asked + 1} of ${state.detourLength}`;
+    showTyped('');
+    question.classList.remove('wrong-answer', 'right-answer');
+    correctLine.hidden = true;
     feedback.textContent = '';
     feedback.className = 'feedback';
     keypad.clear();
@@ -175,6 +204,8 @@ export function adventureScreen(ctx) {
     busy = false;
     thinking.stop();
     questionNo += 1;
+    tipCard.hide();
+    showTipButtons(tipButtons, hasTip(state.problem));
     repeat.hidden = !ctx.voiceOn(player);
     if (ctx.voiceOn(player)) askAloud(intro, afterMs);
     else startTimer(); // text only: timing starts when the question is shown
@@ -203,7 +234,7 @@ export function adventureScreen(ctx) {
     const detourStart = events.find((e) => e.type === 'detour-start');
     const cleared = events.find((e) => e.type === 'detour-cleared');
     const setback = events.find((e) => e.type === 'setback');
-    const lines = storyline ?? { milestones: [], detours: [], detourCleared: ['Detour done! Back on the trail.'], setback: ["Back to the last flag. You can do it!"] };
+    const lines = storyline ?? { milestones: [], detours: [], detourCleared: ['Wandering done! Back on the trail.'], setback: ["Back to the last flag. You can do it!"] };
     let line = '';
     let wait = 0; // how long the sound effect lasts; the voice waits for it
     if (milestone) {
@@ -242,20 +273,24 @@ export function adventureScreen(ctx) {
     thinking.stop();
     silence();
     busy = true;
+    tipCard.hide();
+    showTipButtons(tipButtons, false);
     const problem = state.problem;
     save(next);
     keypad.setEnabled(false);
-    question.textContent = `${problem.text} = ${value}`;
+    question.replaceChildren(`${problem.text} = `, h('span', { class: 'typed' }, value));
     // A wrong answer: the player's answer in red, crossed out, and the right
     // one in green in the answer box.
     question.classList.toggle('wrong-answer', !check.correct);
+    question.classList.toggle('right-answer', check.correct);
     if (check.correct) {
       feedback.replaceChildren(h('span', { 'aria-hidden': 'true' }, '✓ '), PRAISE[Math.floor(Math.random() * PRAISE.length)]);
       feedback.className = 'feedback right';
       ctx.sound('right');
     } else {
       feedback.replaceChildren(h('span', { 'aria-hidden': 'true' }, '✗ '), 'Incorrect', h('span', { 'aria-hidden': 'true' }, ' ✗'));
-      keypad.showCorrect(`${problem.text} = ${problem.answer}`);
+      correctLine.textContent = `${problem.text} = ${problem.answer}`;
+      correctLine.hidden = false;
       feedback.className = 'feedback wrong';
       say(`Incorrect. ${problem.speech} is ${problem.answer}.`, null, ctx.sound('wrong'));
     }
@@ -280,7 +315,15 @@ export function adventureScreen(ctx) {
   }
 
   // The first key press starts the timer if reading hasn't finished yet.
-  const keypad = createKeypad({ onSubmit: submit, onChange: () => startTimer() });
+  const keypad = createKeypad({
+    showDisplay: false, // the answer shows in the question instead
+    onSubmit: submit,
+    onChange: (value) => {
+      startTimer();
+      showTyped(value);
+    },
+    onFull: bumpQuestion,
+  });
   // Covers the keys (not the answer box) after a wrong answer, so the screen doesn't change size.
   const gotIt = h('button', { type: 'button', class: 'big-button primary got-it', onclick: acknowledge }, 'Got it ›');
   const gotItCover = h('div', { class: 'got-it-cover', hidden: true }, gotIt);
@@ -296,6 +339,10 @@ export function adventureScreen(ctx) {
       submit(String(answer));
       return right ? 'Answered right.' : 'Answered wrong.';
     },
+    tip() {
+      if (busy) return 'Wait for the next question.';
+      return showTip() ? 'Tip shown.' : 'No tip for this question.';
+    },
     jump(where) {
       if (busy) return 'Wait for the next question.';
       const target = where === 'end' ? state.length - 1 : Math.min(state.length - 1, (Math.floor(state.step / 10) + 1) * 10 - 1);
@@ -310,7 +357,6 @@ export function adventureScreen(ctx) {
   // ---- fit: the screen never scrolls. Each time its size or the window
   // changes, start from full size and step down to more compact sizes until
   // it fits; if even the smallest doesn't fit, let it scroll (see style.css).
-  let page = null;
   let fitFrame = 0;
   function fit() {
     cancelAnimationFrame(fitFrame);
@@ -357,19 +403,19 @@ export function adventureScreen(ctx) {
 
   if (!state.problem) save(withNextProblem(state));
   let opening = 'Welcome back! Keep going.';
-  if (state.mode === 'detour') opening = 'You are on a detour. Answer the questions to get back on the trail!';
+  if (state.mode === 'detour') opening = 'You are wandering off the trail. Answer the questions to get back on it!';
   else if (state.step === 0 && state.stats.answered === 0) opening = 'Off we go! Answer to move along the trail.';
   setStory(`${state.mode === 'detour' ? '🚧' : theme.icon} ${opening}`, state.mode === 'detour' ? 'detour' : 'cleared');
   showMap();
   showQuestion(opening);
 
   const layout = h('div', { class: 'adventure-layout' },
-    h('section', { class: 'question-area' }, story, detourCount, h('div', { class: 'question-row' }, question, repeat), feedback),
+    h('section', { class: 'question-area' }, story, detourCount, h('div', { class: 'question-row' }, tipButtons[0], question, repeat), correctLine, feedback, h('div', { class: 'tip-row' }, tipButtons[1])),
     keypad.el,
   );
   page = h('main', { class: `screen adventure-screen theme-${state.theme}`, dataset: { fit: '0' } },
     topBar(`${theme.icon} ${theme.title}`, () => ctx.show('home')),
-    h('section', { class: 'trail-area' }, map),
+    h('section', { class: 'trail-area' }, map, tipCard.el),
     layout,
   );
   // The screen is at least as tall as the window, so watch what is inside it.

@@ -2,10 +2,10 @@
 // Incorrect to practise them) and the high-score boards, one for each
 // adventure length and difficulty (GAME-PLAN.md 1.11).
 
-import { PRACTICE_SIZE, boardKey, needMorePractice } from '../scores.js?v=0.6.1';
-import { ADVENTURE_LENGTHS, DIFFICULTY_LABELS, THEMES } from '../settings.js?v=0.6.1';
-import { formatDuration } from '../timer.js?v=0.6.1';
-import { choiceRow, h, topBar } from '../ui.js?v=0.6.1';
+import { PRACTICE_SIZE, boardKey, needMorePractice } from '../scores.js?v=0.6.3';
+import { ADVENTURE_LENGTHS, DIFFICULTY_LABELS, THEMES } from '../settings.js?v=0.6.3';
+import { formatDuration } from '../timer.js?v=0.6.3';
+import { choiceRow, h, topBar } from '../ui.js?v=0.6.3';
 
 /** "Oct 17" */
 function shortDate(iso) {
@@ -46,18 +46,18 @@ export function statsScreen(ctx) {
         h('thead', {}, h('tr', {},
           h('th', { scope: 'col' }, '#'),
           h('th', { scope: 'col' }, 'Date'),
-          h('th', { scope: 'col' }, 'Time'),
           h('th', { scope: 'col' }, 'Right'),
-          h('th', { scope: 'col' }, 'Setbacks'),
+          h('th', { scope: 'col' }, 'Time'),
+          h('th', { scope: 'col' }, 'Help'),
           h('th', { scope: 'col' }, 'Math'))),
         h('tbody', {}, entries.map((e, i) => h('tr', { class: i === 0 ? 'best' : '' },
           h('td', {}, i === 0 ? '🏆' : String(i + 1)),
           h('td', {}, `${THEMES[e.theme]?.icon ?? ''} ${shortDate(e.at)}`),
-          h('td', {}, formatDuration(e.thinkingMs)),
           h('td', {}, e.answered ? `${Math.round((e.correct / e.answered) * 100)}%` : '–'),
-          h('td', {}, String(e.setbacks)),
+          h('td', {}, formatDuration(e.thinkingMs)),
+          h('td', {}, String(e.tips ?? 0)),
           h('td', { class: 'score-ops' }, e.operations))))),
-      h('p', { class: 'note' }, 'Fewest setbacks wins; then the shortest thinking time.'),
+      h('p', { class: 'note' }, 'Most right answers wins; then the shortest thinking time; then the least Help (🙏).'),
     );
   }
   showBoard();

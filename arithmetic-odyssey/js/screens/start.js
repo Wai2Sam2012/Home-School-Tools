@@ -1,6 +1,6 @@
 // 1. Tap to Start: shown on every launch. The tap unlocks sound and speech.
 
-import { h } from '../ui.js?v=0.6.1';
+import { h } from '../ui.js?v=0.6.3';
 
 /** The math symbol between the dinosaur and the truck changes through these. */
 export const START_SYMBOLS = Object.freeze(['➗', '➕', '➖', '✖️']);

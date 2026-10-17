@@ -3,7 +3,8 @@
 //
 //   History: the last 10 finished adventures, as compact summaries.
 //   High scores: a board for each adventure length and difficulty, top 10.
-//     Fewer milestone setbacks rank higher; then less total thinking time.
+//     The most right answers (as a share of answers) rank highest; then less
+//     total thinking time; then fewer counting tips.
 //   Need More Practice: the problems missed most often in the last 10 games,
 //     then the slowest ones. A problem learned in Learn from Incorrect leaves
 //     the list until it is missed (or slow) again in a later game.
@@ -38,6 +39,7 @@ export function gameSummary(state, at = new Date()) {
     detours: stats.detours,
     setbacks: stats.setbacks,
     thinkingMs: stats.thinkingMs,
+    tips: stats.tips ?? 0,
     missed: { ...stats.missed },
     slow: Object.fromEntries(slowest),
   };
@@ -48,9 +50,14 @@ export function addToHistory(games, game) {
   return [...games, game].slice(-HISTORY_SIZE);
 }
 
-/** Fewer setbacks first, then less thinking time, then the earlier game. */
+/** The share of answers that were right (0 to 1). */
+export function accuracy(score) {
+  return score.answered > 0 ? score.correct / score.answered : 0;
+}
+
+/** The most right answers (as a share) first, then less thinking time, then fewer tips, then the earlier game. */
 export function compareScores(a, b) {
-  return a.setbacks - b.setbacks || a.thinkingMs - b.thinkingMs || String(a.at).localeCompare(String(b.at));
+  return accuracy(b) - accuracy(a) || a.thinkingMs - b.thinkingMs || (a.tips ?? 0) - (b.tips ?? 0) || String(a.at).localeCompare(String(b.at));
 }
 
 /** A high-score entry: only what the board shows. */
@@ -60,6 +67,7 @@ export function scoreEntry(game) {
     theme: game.theme,
     thinkingMs: game.thinkingMs,
     setbacks: game.setbacks,
+    tips: game.tips ?? 0,
     answered: game.answered,
     correct: game.correct,
     operations: game.operations,

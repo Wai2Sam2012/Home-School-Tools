@@ -9,3 +9,8 @@ A line below can name one picture (`pictures/Alaska/Denali/denali-1.jpg`) or a w
 | Picture file | National park | Source (website or photographer) | License or permission |
 | --- | --- | --- | --- |
 | `pictures/Alaska/**` | Alaska parks | Wikimedia Commons, downloaded with `tools/Get-ParkPictures.ps1`. The author of each picture is not recorded yet. | Unknown. |
+| `sounds/flag-1.mp3` | Flag engine 1 | "Truck-Diesel 07Dodge Rev.mp3" by canucklovingbrit, https://freesound.org/s/478125/ (modified: trimmed to 4.7 s, evened out, converted to mono MP3) | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) (public domain): no credit needed; credited as a courtesy |
+| `sounds/flag-2.mp3` | Flag engine 2 | "Truck-Uphill.wav" by moshwe, https://freesound.org/s/554426/ (modified: trimmed to 4.8 s, evened out, converted to MP3) | Licensed under [CC BY 3.0](https://creativecommons.org/licenses/by/3.0/): **the credit is required** |
+| `sounds/flag-3.mp3` | Flag engine 3 (dirt bike) | "motorcycle dirt bike motocross pass by medium speed and jump dirt ramp1.wav" by kyles, https://freesound.org/s/450039/ (modified: trimmed to the pass-by and jump, 4.8 s, evened out, converted to mono MP3) | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) (public domain): no credit needed; credited as a courtesy |
+| `sounds/flag-4.mp3` | Flag engine 4 (motorbike) | "motorbike crm 250 cc onboard ride pullaway.wav" by martian, https://freesound.org/s/148868/ (modified: trimmed to the pull-away, 4.8 s, evened out, converted to mono MP3) | [CC0 1.0](https://creativecommons.org/publicdomain/zero/1.0/) (public domain): no credit needed; credited as a courtesy |
+

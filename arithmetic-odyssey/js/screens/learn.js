@@ -4,11 +4,13 @@
 // thinking timer starts when reading ends (or at the first key press), and a
 // wrong answer shows the right one and waits for "Got it".
 
-import { LEARN_NEEDS, answerLearning, currentProblem, startLearning } from '../learn.js?v=0.6.1';
-import { createKeypad } from '../keypad.js?v=0.6.1';
-import { PRACTICE_SIZE, needMorePractice } from '../scores.js?v=0.6.1';
-import { createThinkingTimer } from '../timer.js?v=0.6.1';
-import { h, topBar } from '../ui.js?v=0.6.1';
+import { LEARN_NEEDS, answerLearning, currentProblem, startLearning } from '../learn.js?v=0.6.3';
+import { hasTip } from '../blocks.js?v=0.6.3';
+import { createKeypad } from '../keypad.js?v=0.6.3';
+import { createTipButton, createTipCard, showTipButtons } from '../tip-card.js?v=0.6.3';
+import { PRACTICE_SIZE, needMorePractice } from '../scores.js?v=0.6.3';
+import { createThinkingTimer } from '../timer.js?v=0.6.3';
+import { h, topBar } from '../ui.js?v=0.6.3';
 
 const PRAISE = ['Correct!', 'Great job!', 'You got it!', 'Nice work!'];
 const NEXT_AFTER_RIGHT_MS = 1100;
@@ -47,7 +49,25 @@ export function learnScreen(ctx) {
   const banner = h('p', { class: 'story learn-banner' });
   const question = h('p', { class: 'question', 'aria-live': 'polite' });
   const feedback = h('p', { class: 'feedback', role: 'status' });
+  const correctLine = h('p', { class: 'correct-line', hidden: true });
+
+  /** The question with what the player has typed in place of the "?", in orange (as in the adventure). */
+  function showTyped(value = '') {
+    const problem = currentProblem(state);
+    if (problem) question.replaceChildren(`${problem.text} = `, value === '' ? '?' : h('span', { class: 'typed' }, value));
+  }
+  function bumpQuestion() {
+    question.classList.remove('full');
+    void question.offsetWidth;
+    question.classList.add('full');
+  }
   const repeat = h('button', { type: 'button', class: 'round-button repeat-button', 'aria-label': 'Read the question again', onclick: () => repeatQuestion() }, '🔊');
+  // 🙏 The same counting tip as in the adventure (practice: tips are not counted).
+  const tipCard = createTipCard();
+  const openTip = () => {
+    if (!busy && !state.done) tipCard.show(currentProblem(state));
+  };
+  const tipButtons = [createTipButton(openTip, { place: 'front' }), createTipButton(openTip, { place: 'below' })];
 
   // ---- speech and the thinking timer (as in the adventure)
   function say(text, then, afterMs = 0) {
@@ -100,8 +120,9 @@ export function learnScreen(ctx) {
 
   function showQuestion(intro = '', afterMs = 0) {
     const problem = currentProblem(state);
-    question.textContent = `${problem.text} = ?`;
-    question.classList.remove('wrong-answer');
+    showTyped('');
+    question.classList.remove('wrong-answer', 'right-answer');
+    correctLine.hidden = true;
     feedback.textContent = '';
     feedback.className = 'feedback';
     keypad.clear();
@@ -109,6 +130,8 @@ export function learnScreen(ctx) {
     busy = false;
     thinking.stop();
     questionNo += 1;
+    tipCard.hide();
+    showTipButtons(tipButtons, hasTip(problem));
     showChips();
     repeat.hidden = !ctx.voiceOn(player);
     if (ctx.voiceOn(player)) askAloud(intro, afterMs);
@@ -127,10 +150,13 @@ export function learnScreen(ctx) {
     thinking.stop();
     silence();
     busy = true;
+    tipCard.hide();
+    showTipButtons(tipButtons, false);
     state = next;
     keypad.setEnabled(false);
-    question.textContent = `${problem.text} = ${value}`;
+    question.replaceChildren(`${problem.text} = `, h('span', { class: 'typed' }, value));
     question.classList.toggle('wrong-answer', !check.correct);
+    question.classList.toggle('right-answer', check.correct);
     const learned = events.find((e) => e.type === 'learned');
     if (learned) ctx.profiles.markLearned(player.id, [learned.key]); // saved now, so closing the game keeps it
     const answer = events[0];
@@ -144,7 +170,8 @@ export function learnScreen(ctx) {
     } else {
       feedback.replaceChildren(h('span', { 'aria-hidden': 'true' }, '✗ '), 'Incorrect', h('span', { 'aria-hidden': 'true' }, ' ✗'));
       feedback.className = 'feedback wrong';
-      keypad.showCorrect(`${problem.text} = ${problem.answer}`);
+      correctLine.textContent = `${problem.text} = ${problem.answer}`;
+      correctLine.hidden = false;
       say(`Incorrect. ${problem.speech} is ${problem.answer}. It will come back soon.`, null, ctx.sound('wrong'));
       showChips();
       waiting = true;
@@ -170,6 +197,7 @@ export function learnScreen(ctx) {
     const learnedCount = result.learned.length;
     const all = learnedCount === result.total;
     layout.hidden = true;
+    tipCard.hide();
     banner.textContent = all ? '🌟 You learned them all!' : `⭐ You learned ${learnedCount} of ${result.total}!`;
     summary.hidden = false;
     summary.replaceChildren(
@@ -186,7 +214,15 @@ export function learnScreen(ctx) {
     say(all ? 'You learned them all! Amazing work!' : `You learned ${learnedCount} of ${result.total}. Good practice!`, null, ctx.sound('finish'));
   }
 
-  const keypad = createKeypad({ onSubmit: submit, onChange: () => startTimer() });
+  const keypad = createKeypad({
+    showDisplay: false, // the answer shows in the question instead
+    onSubmit: submit,
+    onChange: (value) => {
+      startTimer();
+      showTyped(value);
+    },
+    onFull: bumpQuestion,
+  });
   const gotIt = h('button', { type: 'button', class: 'big-button primary got-it', onclick: acknowledge }, 'Got it ›');
   const gotItCover = h('div', { class: 'got-it-cover', hidden: true }, gotIt);
   keypad.el.querySelector('.keypad').append(gotItCover);
@@ -217,7 +253,7 @@ export function learnScreen(ctx) {
   };
 
   const layout = h('div', { class: 'adventure-layout' },
-    h('section', { class: 'question-area' }, h('div', { class: 'question-row' }, question, repeat), feedback),
+    h('section', { class: 'question-area' }, tipCard.el, h('div', { class: 'question-row' }, tipButtons[0], question, repeat), correctLine, feedback, h('div', { class: 'tip-row' }, tipButtons[1])),
     keypad.el);
   banner.textContent = `Let's practise ${state.items.length === 1 ? 'a tricky one' : `${state.items.length} tricky ones`}! Answer each one right ${LEARN_NEEDS} times.`;
   showQuestion(`Let's practise the tricky ones!`);

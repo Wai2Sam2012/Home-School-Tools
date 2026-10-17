@@ -2,17 +2,17 @@
 // voice on this device with a choice of sample line, speed and pitch, and
 // every sound effect, so a grown-up can compare them and pick the best.
 
-import { describeVoice } from './settings.js?v=0.6.1';
-import { bestVersions, chooseVoice, isFunVoice, loadVoices, rankVoices, voiceId } from '../speech.js?v=0.6.1';
-import { SOUNDS, SYNTHS, playRecording, playSound } from '../audio.js?v=0.6.1';
-import { THEMES } from '../settings.js?v=0.6.1';
-import { choiceRow, h, topBar } from '../ui.js?v=0.6.1';
+import { describeVoice } from './settings.js?v=0.6.3';
+import { bestVersions, chooseVoice, isFunVoice, loadVoices, rankVoices, voiceId } from '../speech.js?v=0.6.3';
+import { SOUNDS, SYNTHS, playRecording, playSound } from '../audio.js?v=0.6.3';
+import { THEMES } from '../settings.js?v=0.6.3';
+import { choiceRow, h, topBar } from '../ui.js?v=0.6.3';
 
 const SOUND_NAMES = {
   right: 'Right answer (ding)',
   wrong: 'Wrong answer',
-  detour: 'Detour starts',
-  cleared: 'Detour cleared',
+  detour: 'Wandering starts',
+  cleared: 'Back from wandering',
   setback: 'Back to a flag',
   milestone: 'Flag (no theme sound)',
   finish: "Trail's End",
@@ -121,13 +121,13 @@ export function voiceLabScreen(ctx) {
 
   loadVoices(globalThis.speechSynthesis, { waitMs: 2500 }).then((voices) => showList(voices, false));
 
-  // Recorded flag sounds (themes/<theme>/sounds/flag.mp3), if any theme has one.
+  // Recorded flag sounds (themes/<theme>/sounds/flag-1.mp3, ...), if any theme has them.
   const recordingButtons = h('div', { class: 'sound-buttons recording-buttons' });
   for (const theme of Object.values(THEMES)) {
-    ctx.prepareSounds(theme.id).then((recording) => {
-      if (!recording) return;
-      recordingButtons.append(h('button', { type: 'button', class: 'choice', dataset: { recording: theme.id }, onclick: () => playRecording(recording) },
-        `▶ Flag in ${theme.title} (recording)`));
+    ctx.prepareSounds(theme.id).then((recordings) => {
+      recordings.forEach((recording, i) => recordingButtons.append(
+        h('button', { type: 'button', class: 'choice', dataset: { recording: `${theme.id}-${i + 1}` }, onclick: () => playRecording(recording) },
+          `▶ Flag in ${theme.title} (recording ${i + 1})`)));
     });
   }
 

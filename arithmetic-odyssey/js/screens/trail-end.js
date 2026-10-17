@@ -2,11 +2,11 @@
 // facts, and a summary of the trip. When every sticker is collected, a
 // "Collection complete!" celebration with all the theme's pictures.
 
-import { stickerPicture } from '../art.js?v=0.6.1';
-import { soundLength } from '../audio.js?v=0.6.1';
-import { DIFFICULTY_LABELS, THEMES } from '../settings.js?v=0.6.1';
-import { formatDuration } from '../timer.js?v=0.6.1';
-import { h } from '../ui.js?v=0.6.1';
+import { stickerPicture } from '../art.js?v=0.6.3';
+import { soundLength } from '../audio.js?v=0.6.3';
+import { DIFFICULTY_LABELS, THEMES } from '../settings.js?v=0.6.3';
+import { formatDuration } from '../timer.js?v=0.6.3';
+import { h } from '../ui.js?v=0.6.3';
 
 const SLIDE_MS = 3500;
 
@@ -78,9 +78,10 @@ export function trailEndScreen(ctx, result = {}) {
         h('dl', { class: 'summary' },
           row('Questions answered', stats.answered),
           row('Right answers', stats.correct),
-          row('Detours', stats.detours),
+          row('Wanderings', stats.detours),
           row('Sent back to a flag', stats.setbacks),
           row('Thinking time', formatDuration(stats.thinkingMs ?? 0)),
+          row('Help used', stats.tips ?? 0),
         ),
         h('div', { class: 'trail-end-buttons' },
           h('button', { type: 'button', class: 'big-button primary', onclick: () => ctx.show('setup') }, 'New adventure'),

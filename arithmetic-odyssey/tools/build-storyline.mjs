@@ -3,8 +3,9 @@
 //     found; national parks: names, regions, locations, key attractions),
 //   - the theme's game-text.json (kid-friendly facts and story text),
 //   - the pictures in the theme's pictures/ folder,
-//   - a recorded flag sound, if the theme's sounds/ folder has flag.mp3
-//     (or .m4a or .wav); without one the game makes its own,
+//   - recorded flag sounds, if the theme's sounds/ folder has flag.mp3 or
+//     several (flag-1.mp3, flag-2.mp3, ...; also .m4a or .wav): the game
+//     picks one at random at each flag; without any it makes its own,
 //   - the theme's CREDITS.md.
 //
 // Usage (from the arithmetic-odyssey folder):
@@ -26,13 +27,18 @@ export const PICTURE_TYPES = ['.jpg', '.jpeg', '.png', '.webp'];
 // Recorded sounds iPad Safari can play.
 export const SOUND_TYPES = ['.mp3', '.m4a', '.wav'];
 
-/** The theme's recorded sounds: { flag: 'sounds/flag.mp3' } (empty if there are none). */
+/**
+ * The theme's recorded sounds: { flag: ['sounds/flag-1.mp3', ...] } (empty if
+ * there are none). Flag sounds are named flag.mp3, or flag-1.mp3, flag-2.mp3
+ * and so on (any name starting with "flag").
+ */
 export function findSounds(themeDir) {
   const folder = join(themeDir, 'sounds');
   if (!existsSync(folder)) return {};
-  const files = readdirSync(folder).sort();
-  const flag = SOUND_TYPES.map((ext) => `flag${ext}`).find((name) => files.some((f) => f.toLowerCase() === name));
-  return flag ? { flag: `sounds/${files.find((f) => f.toLowerCase() === flag)}` } : {};
+  const flags = readdirSync(folder)
+    .filter((f) => /^flag\b|^flag[-_ ]/i.test(f) && SOUND_TYPES.includes(f.slice(f.lastIndexOf('.')).toLowerCase()))
+    .sort((a, b) => a.localeCompare(b, 'en', { numeric: true }));
+  return flags.length ? { flag: flags.map((f) => `sounds/${f}`) } : {};
 }
 
 // ---------------------------------------------------------------- helpers
@@ -313,7 +319,7 @@ function addFactsAndPictures(themeDir, text, stickers, folders, item) {
     for (const p of s.pictures) if (!isCredited(p, credits)) uncredited.push(p);
   }
   const sounds = findSounds(themeDir);
-  for (const p of Object.values(sounds)) if (!isCredited(p, credits)) uncredited.push(p);
+  for (const p of Object.values(sounds).flat()) if (!isCredited(p, credits)) uncredited.push(p);
   return { problems, uncredited, sounds };
 }
 

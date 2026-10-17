@@ -1,12 +1,12 @@
 // 3. Setup: theme, operations and difficulty, with the next sticker on the
 // trip ("Next stop: Eoraptor!").
 
-import { startAdventure, withNextProblem } from '../adventure.js?v=0.6.1';
-import { stickerPicture } from '../art.js?v=0.6.1';
-import { OPERATIONS } from '../math.js?v=0.6.1';
-import { DIFFICULTY_LABELS, THEMES, toggleOperation } from '../settings.js?v=0.6.1';
-import { nextSticker } from '../storyline.js?v=0.6.1';
-import { choiceRow, confirmDialog, flash, h, topBar } from '../ui.js?v=0.6.1';
+import { startAdventure, withNextProblem } from '../adventure.js?v=0.6.3';
+import { stickerPicture } from '../art.js?v=0.6.3';
+import { OPERATIONS } from '../math.js?v=0.6.3';
+import { DIFFICULTY_LABELS, THEMES, toggleOperation } from '../settings.js?v=0.6.3';
+import { nextSticker } from '../storyline.js?v=0.6.3';
+import { choiceRow, confirmDialog, flash, h, topBar } from '../ui.js?v=0.6.3';
 
 const OPERATION_NAMES = { '+': 'Add', '−': 'Subtract', '×': 'Multiply', '÷': 'Divide' };
 const DIFFICULTY_DETAILS = { beginner: 'Small numbers', intermediate: 'Bigger numbers', advanced: 'Big numbers' };
