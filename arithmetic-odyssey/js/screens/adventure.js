@@ -8,15 +8,15 @@
 // Submit. It pauses while Repeat is reading and while the game is in the
 // background. The keypad works the whole time; nothing waits on speech.
 
-import { answerProblem, jumpTo, milestoneSteps, storyText, unlockSticker, withNextProblem } from '../adventure.js?v=0.5.5';
-import { stickerPicture } from '../art.js?v=0.5.5';
-import { avatarIcon } from '../avatars.js?v=0.5.5';
-import { createDetourRoad, loopProgress } from '../detour-road.js?v=0.5.5';
-import { createKeypad } from '../keypad.js?v=0.5.5';
-import { THEMES } from '../settings.js?v=0.5.5';
-import { createThinkingTimer } from '../timer.js?v=0.5.5';
-import { nextSticker } from '../storyline.js?v=0.5.5';
-import { h, topBar } from '../ui.js?v=0.5.5';
+import { answerProblem, jumpTo, milestoneSteps, storyText, unlockSticker, withNextProblem } from '../adventure.js?v=0.5.6';
+import { stickerPicture } from '../art.js?v=0.5.6';
+import { avatarIcon } from '../avatars.js?v=0.5.6';
+import { createDetourRoad, loopProgress } from '../detour-road.js?v=0.5.6';
+import { createKeypad } from '../keypad.js?v=0.5.6';
+import { THEMES } from '../settings.js?v=0.5.6';
+import { createThinkingTimer } from '../timer.js?v=0.5.6';
+import { nextSticker } from '../storyline.js?v=0.5.6';
+import { h, topBar } from '../ui.js?v=0.5.6';
 
 const PRAISE = ['Correct!', 'Great job!', 'You got it!', 'Awesome!', 'Nice work!'];
 // A right answer moves on by itself; after a wrong one the game waits for
@@ -257,7 +257,7 @@ export function adventureScreen(ctx) {
       feedback.replaceChildren(h('span', { 'aria-hidden': 'true' }, '✗ '), 'Incorrect', h('span', { 'aria-hidden': 'true' }, ' ✗'));
       keypad.showCorrect(`${problem.text} = ${problem.answer}`);
       feedback.className = 'feedback wrong';
-      say(`Not quite. ${problem.speech} is ${problem.answer}.`, null, ctx.sound('wrong'));
+      say(`Incorrect. ${problem.speech} is ${problem.answer}.`, null, ctx.sound('wrong'));
     }
     showMap();
     if (check.correct) {
