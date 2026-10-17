@@ -1063,6 +1063,19 @@ h1:focus {
   height: clamp(60px, 8vh, 88px);
 }
 
+/* Off-Roading trail colours. */
+.theme-parks .trail-area {
+  background: var(--truck);
+}
+
+.theme-parks .trail-fill {
+  background: var(--truck-edge);
+}
+
+.theme-parks .goal-picture {
+  border-color: var(--truck-edge);
+}
+
 /* Compact sizes for short windows, smallest last. */
 .adventure-screen:is([data-fit="1"], [data-fit="2"], [data-fit="3"]) {
   gap: 10px;

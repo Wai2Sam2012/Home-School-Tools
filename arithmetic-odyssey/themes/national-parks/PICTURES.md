@@ -12,9 +12,9 @@ Each of the 63 parks becomes a sticker. Like the Dino theme, the game shows a pa
 | **Format** | JPEG (`.jpg`), quality about 80% | JPEG, PNG or WebP |
 | **How many** | 3 to 5 per park | Any number; a park with none shows a drawing |
 
-All 63 parks with 4 pictures each at about 250 KB is about 63 MB. The game should stay under about 50 MB per theme, so aim for about 3 pictures per park, or 4 smaller ones (about 200 KB).
+All 63 parks with 4 pictures each at about 250 KB is about 63 MB. The game must stay under 50 MB per theme (the tests stop the publish above that), so aim for about 3 pictures per park, or 4 smaller ones (about 200 KB). The 8 Alaska parks already have 71 pictures (19 MB); at that rate all 63 parks would be about 150 MB, so later regions need fewer pictures per park, and Alaska may need trimming once the other regions are in.
 
-To make a photo smaller on Windows: open it in **Photos** › **⋯** › **Resize image**, choose a custom width of 1600 pixels and quality 80, and save a copy. (A resize script will be added with this theme.)
+To make a photo smaller on Windows: open it in **Photos** › **⋯** › **Resize image**, choose a custom width of 1600 pixels and quality 80, and save a copy. The downloader's photos are already 1280 pixels wide, but some are over 400 KB; the tests name any picture that is too big.
 
 ## Downloading them with the script
 
@@ -28,7 +28,7 @@ The game is published, so only use pictures you are allowed to share:
 - **Wikimedia Commons** ([commons.wikimedia.org](https://commons.wikimedia.org/)) has photos of every park; most allow sharing with a credit (write the author and license in `CREDITS.md`).
 - **Your own photos** from your trips.
 
-Add a line to [CREDITS.md](CREDITS.md) for each picture (or one line for a whole folder, such as `pictures/**` if they all come from the NPS).
+Add a line to [CREDITS.md](CREDITS.md) for each picture (or one line for a whole folder, such as `pictures/**` if they all come from the NPS). For photos from the downloader, copy its `credits.csv` into this folder instead: every picture listed in it counts as credited.
 
 ## Folders
 

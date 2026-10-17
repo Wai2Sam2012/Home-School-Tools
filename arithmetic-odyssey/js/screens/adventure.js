@@ -366,7 +366,7 @@ export function adventureScreen(ctx) {
     h('section', { class: 'question-area' }, story, detourCount, h('div', { class: 'question-row' }, question, repeat), feedback),
     keypad.el,
   );
-  page = h('main', { class: 'screen adventure-screen', dataset: { fit: '0' } },
+  page = h('main', { class: `screen adventure-screen theme-${state.theme}`, dataset: { fit: '0' } },
     topBar(`${theme.icon} ${theme.title}`, () => ctx.show('home')),
     h('section', { class: 'trail-area' }, map),
     layout,

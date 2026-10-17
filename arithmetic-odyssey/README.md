@@ -31,7 +31,7 @@ Each theme keeps all of its resources (facts, story text, pictures, sounds and t
 | --- | --- |
 | 0. Project setup and first publish | Done: placeholder page, local server, debug panel and publishing workflow. The iPad check (T0.4) runs after the first publish. |
 | 1. Math engine | Done: `js/math.js` |
-| 2. Theme content | Dino theme done: story file builder, kid-friendly facts, story text and picture checks. Triassic pictures are in; Jurassic and Cretaceous show a drawing until their pictures are added. The Parks theme comes later. |
+| 2. Theme content | Both themes can be played. **Dino Tour:** Triassic pictures are in; Jurassic and Cretaceous show a drawing until their pictures are added. **Off-Roading (first version, 0.5.6):** all 63 parks with kid-friendly facts and truck story text; the 8 Alaska parks have pictures, the other parks show a drawing until theirs are added. |
 | 3. Screens and keypad | Done: Tap to Start, players, home, Setup, Sticker Album, Stats and grown-up Settings, with the on-screen keypad, in portrait and landscape. |
 | 4. The adventure | Done: the trail map with a flag every 10 steps, detours after a wrong answer, going back to the last flag when a whole detour is missed, Resume Adventure, and Trail's End with the new sticker, a slideshow of its pictures and a trip summary. Players, stickers and trips are not saved yet (Stage 6). |
 | 5. Sound, voice and timer | Done: sound effects, questions and story moments read aloud with a Repeat button, the thinking timer (shown on Trail's End), and a "Tap to continue" screen when the iPad pauses sound. Grown-ups can turn the voice and the sound effects on or off in Settings, choose the voice and its speed (tap a voice to hear it), and see which voice is used. |
@@ -46,7 +46,7 @@ cd arithmetic-odyssey
 node --test
 ```
 
-You should see `# fail 0` (134 tests at the end of Stage 5). Each test name starts with its ID from the test plan in [GAME-PLAN.md](GAME-PLAN.md) where it has one, for example `T1.3`.
+You should see `# fail 0` (146 tests in version 0.5.6). Each test name starts with its ID from the test plan in [GAME-PLAN.md](GAME-PLAN.md) where it has one, for example `T1.3`.
 
 ## Testing in a browser on your PC
 
@@ -203,7 +203,7 @@ themes/national-parks/downloaded-pictures/
 └── CREDITS-lines.md     table lines ready to paste into themes/national-parks/CREDITS.md
 ```
 
-The folders are the same as the game's (see [PICTURES.md](themes/national-parks/PICTURES.md)), so copy the photos you like into `themes/national-parks/pictures/` keeping the region and park folders, and paste their lines from `CREDITS-lines.md` into `CREDITS.md`.
+The folders are the same as the game's (see [PICTURES.md](themes/national-parks/PICTURES.md)), so copy the photos you like into `themes/national-parks/pictures/` keeping the region and park folders. Then copy `credits.csv` to `themes/national-parks/credits.csv`: every picture listed in it counts as credited, so there are no lines to paste. (Pasting the lines from `CREDITS-lines.md` into `CREDITS.md` works too.)
 
 - **Double-click** `tools\Run-ParkPictures.cmd`, or run it from PowerShell like the dinosaur script.
 - **It takes a while:** every attraction is about 6 requests with a 1-second pause between them, so all 63 parks take about 30 minutes. Try one park first: `.\Get-ParkPictures.ps1 -Park Arches -ListOnly` lists what it would download.

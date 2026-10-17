@@ -46,7 +46,7 @@ export function trailEndScreen(ctx, result = {}) {
     if (sticker) {
       const count = Math.max(1, sticker.pictures.length);
       runSlideshow(Array.from({ length: count }, (_, picture) => ({ sticker, picture })));
-      say(`You made it! Your new sticker is ${sticker.name}.`);
+      say(`You made it! Your new sticker is ${sticker.spokenName ?? sticker.name}.`);
       about.replaceChildren(
         h('h2', {}, `New sticker: ${sticker.number}. ${sticker.name}`),
         h('ul', { class: 'fact-list' }, sticker.facts.map((f) => h('li', {}, f))),

@@ -92,7 +92,8 @@ function showSticker(theme, sticker) {
   const onKey = (event) => {
     if (event.key === 'Escape') close();
   };
-  const details = [
+  // Parks list their own details (location, year, famous for); dinosaurs are built from their fields.
+  const details = Array.isArray(sticker.details) ? sticker.details : [
     sticker.group && `${sticker.group}${sticker.diet ? ` · ${sticker.diet}` : ''}`,
     sticker.when,
     sticker.found && `Found in: ${sticker.found}`,

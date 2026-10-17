@@ -199,7 +199,7 @@ test('settings are fixed up if they are missing or damaged', () => {
 
 test('setup is fixed up: a known theme that is ready, known operations, a known difficulty', () => {
   assert.deepEqual(normalizeSetup(null), { theme: 'dino', operations: ['+'], difficulty: 'beginner' });
-  assert.equal(normalizeSetup({ theme: 'parks' }).theme, 'dino', 'Parks is not ready yet');
+  assert.equal(normalizeSetup({ theme: 'parks' }).theme, 'parks', 'Off-Roading can be played');
   assert.equal(normalizeSetup({ theme: 'space' }).theme, 'dino');
   assert.deepEqual(normalizeSetup({ operations: ['÷', '-', '+'] }).operations, ['+', '÷'], 'a plain "-" is not the game minus sign');
   assert.deepEqual(normalizeSetup({ operations: [] }).operations, ['+'], 'at least one operation');
@@ -268,11 +268,11 @@ test('the story file is checked when it loads', async () => {
   await assert.rejects(loadStoryline('space', okFetch), /Unknown theme/);
 });
 
-test('every theme has a folder that exists, and only Dino is ready for now', () => {
+test('every theme has a folder that exists, and both themes can be played', () => {
   for (const theme of Object.values(THEMES)) {
     assert.ok(readdirSync(join(GAME, theme.folder)).length > 0, theme.folder);
   }
-  assert.deepEqual(Object.values(THEMES).filter((t) => t.ready).map((t) => t.id), ['dino']);
+  assert.deepEqual(Object.values(THEMES).filter((t) => t.ready).map((t) => t.id), ['dino', 'parks']);
 });
 
 test('placeholder colours stay the same for each sticker', () => {

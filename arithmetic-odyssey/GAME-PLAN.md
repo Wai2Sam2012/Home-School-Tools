@@ -470,6 +470,16 @@ Every stage ends with its tests passing, the site republished, and a short repor
   - pinch zoom is blocked everywhere, and double-tap zoom on quick taps is blocked without losing fast typing;
   - the adventure screen never scrolls: on a short window it steps down to more compact sizes, and only if even those don't fit does it scroll, so the keypad can always be reached;
   - a double tap on "Got it" no longer types a digit with its second tap.
+- The flag sounds (roar and engine) are about as loud as the voice (0.5.6). iPad speakers hardly play deep sounds, so both now keep most of their sound above about 300 Hz and play through a compressor, a boost and a limiter (no clipping).
+- **Off-Roading, first version (0.5.6):**
+  - all 63 parks, region by region in the README order and alphabetical inside each region;
+  - three kid-friendly facts per park, written from the region files;
+  - truck story text for flags, detours and setbacks;
+  - each park's sticker card shows its location, year and key attractions;
+  - "St." is read aloud as "Saint";
+  - the trail uses the truck colours, and the engine revs at each flag.
+
+  The 8 Alaska parks have pictures, and the rest show a drawing for now. The story file builder also accepts the downloader's `credits.csv` as the credits for its pictures.
 - `tools/Get-ParkPictures.ps1` downloads about 5 Wikimedia Commons photos of each park attraction, with their credits, for the Off-Roading theme.
 - Voice lists show each voice once, in its best version; the iPad can list a name two or three times, including Apple's lowest-quality "super-compact" copies, which are labelled Basic. The tester can still show every copy.
 - `?debug=1` can make speech "never finish", to check the safety timeout (T5.3). Automated browser checks use a fake speech engine; the real voices are checked on the iPad (T5.2, T5.6).
