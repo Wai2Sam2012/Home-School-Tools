@@ -10,7 +10,7 @@
 export const AVATAR_FOLDER = 'images/avatars/';
 
 export const AVATARS = Object.freeze([
-  { id: 'longneck', label: 'Long-neck dinosaur', file: 'longneck.svg' },
+  { id: 'longneck', label: 'Diplodocus', file: 'longneck.svg' },
   { id: 'triceratops', label: 'Triceratops', file: 'triceratops.svg' },
   { id: 'trex', label: 'T. rex', file: 'trex.svg' },
   { id: 'mosasaur', label: 'Mosasaur', file: 'mosasaur.svg' },

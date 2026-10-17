@@ -539,7 +539,7 @@ Every stage ends with its tests passing, the site republished, and a short repor
 
 **0.6.5:**
 - **New player pictures in use:** players choose one of 16 pictures and one of its 5 colors (`js/avatar-picker.js`), on the New player screen and by tapping their picture on Home. The color is saved with the player (old players get color 1). See the Stage 7 notes below.
-- The pickup truck, SUV and ATV are no longer called "blue", since they now come in 5 colors.
+- The pickup truck, SUV and ATV are no longer called "blue", since they now come in 5 colors, and the long-neck dinosaur is called **Diplodocus** (its saved id is still `longneck`, so players keep their picture).
 
 ### Stage 7: Offline app (PWA)
 
@@ -570,12 +570,12 @@ Every stage ends with its tests passing, the site republished, and a short repor
 | Butterfly (`butterfly`) | orange, blue, pink, purple, green |
 | Dirt bike (`dirtbike`) | red, blue, green, orange, yellow |
 | Dog (`dog`) | golden, black, brown and white, husky, white |
-| Long-neck dinosaur (`longneck`) | green, blue, brown, purple, teal |
+| Diplodocus (`longneck`) | green, blue, brown, purple, teal |
 | Mosasaur (`mosasaur`) | blue, teal, gray, purple, green |
 | Pickup truck (`pickup`) | red, blue, black, white, green |
 
 - **Files (done in 0.6.4):** `images/avatars/<id>/<color>.png`, for example `images/avatars/cat/gray.png`, and the color order in `AVATAR_COLORS` in `js/avatars.js`. They were cut from the author's catalog sheet: each is a 256 × 256 PNG with a see-through background, about 15 KB (1.2 MB for all 80, so they can be saved for offline play). Every picture faces right, toward the finish on the trail map; the T. rex, pterosaur, unicorn and dirt bike faced left in the catalog and were flipped. The catalog sheet is not kept in the repository. On the sheet each character was only about 120 pixels across, so the pictures are a little soft when shown large; the 512 × 512 originals can replace them later with the same file names.
-- **Choosing (0.6.5):** on the New player screen, tap a picture, then one of its 5 colors, shown as the pictures themselves (a color like "calico" or "rainbow" is easier to see than to name). Picking another picture starts it at color 1. A player changes theirs later by tapping their picture on Home (a ✏️ marks it), which opens the same choice with **Use this picture**; Back leaves it as it was. On a sideways iPad the name box and **Create player** sit side by side, so the whole form fits without scrolling.
+- **Choosing (0.6.5):** on the New player screen, tap a picture, then one of its 5 options, numbered 1 to 5 under the pictures themselves (for the cat and dog the options are kinds, like calico or husky, not colors, so numbers work better than names). The pictures show no names on screen; the buttons still tell a screen reader what they are. Picking another picture starts it at color 1. A player changes theirs later by tapping their picture on Home (a ✏️ marks it), which opens the same choice with **Use this picture**; Back leaves it as it was. On a sideways iPad the name box and **Create player** sit side by side, so the whole form fits without scrolling.
 - **Saving (0.6.5):** the player keeps their picture `id` and adds a `color` (1–5), in their record and the player list, and in backups. Players saved before this, backups from older versions, and a damaged color get color 1. The game falls back to the drawn picture (the old `.svg`) if a color's file is missing, and tries only once.
 - **Credits:** where the pictures came from goes in `images/avatars/README.md`.
 

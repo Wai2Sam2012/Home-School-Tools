@@ -6,7 +6,7 @@ The game shows the color files (`cat/orange.png` and so on, below). The `.svg` d
 
 | Folder | Picture | Colors 1–5 |
 | --- | --- | --- |
-| `longneck/` | Long-neck dinosaur | green, blue, brown, purple, teal |
+| `longneck/` | Diplodocus | green, blue, brown, purple, teal |
 | `triceratops/` | Triceratops | green, blue, brown, purple, gold |
 | `trex/` | T. rex | green, blue, orange, purple, olive |
 | `mosasaur/` | Mosasaur | blue, teal, gray, purple, green |

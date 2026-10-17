@@ -287,7 +287,7 @@ test('placeholder colours stay the same for each sticker', () => {
 test('there are 16 player pictures, the ones asked for, each a file in images/avatars', async () => {
   const { AVATARS: PICTURES, avatarInfo, avatarUrl } = await import('../js/avatars.js');
   assert.deepEqual(PICTURES.map((a) => a.label), [
-    'Long-neck dinosaur', 'Triceratops', 'T. rex', 'Mosasaur', 'Pterosaur', 'Pickup truck', 'Monster truck', 'Dirt bike',
+    'Diplodocus', 'Triceratops', 'T. rex', 'Mosasaur', 'Pterosaur', 'Pickup truck', 'Monster truck', 'Dirt bike',
     'SUV', 'ATV', 'Robot', 'Rocket', 'Butterfly', 'Unicorn', 'Dog', 'Cat',
   ]);
   assert.deepEqual(AVATARS, PICTURES.map((a) => a.id), 'players choose from the same list');
