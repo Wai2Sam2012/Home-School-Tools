@@ -2,11 +2,11 @@
 // facts, and a summary of the trip. When every sticker is collected, a
 // "Collection complete!" celebration with all the theme's pictures.
 
-import { stickerPicture } from '../art.js?v=0.6.0';
-import { soundLength } from '../audio.js?v=0.6.0';
-import { DIFFICULTY_LABELS, THEMES } from '../settings.js?v=0.6.0';
-import { formatDuration } from '../timer.js?v=0.6.0';
-import { h } from '../ui.js?v=0.6.0';
+import { stickerPicture } from '../art.js?v=0.6.1';
+import { soundLength } from '../audio.js?v=0.6.1';
+import { DIFFICULTY_LABELS, THEMES } from '../settings.js?v=0.6.1';
+import { formatDuration } from '../timer.js?v=0.6.1';
+import { h } from '../ui.js?v=0.6.1';
 
 const SLIDE_MS = 3500;
 

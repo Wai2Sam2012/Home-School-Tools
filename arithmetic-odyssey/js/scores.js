@@ -5,7 +5,8 @@
 //   High scores: a board for each adventure length and difficulty, top 10.
 //     Fewer milestone setbacks rank higher; then less total thinking time.
 //   Need More Practice: the problems missed most often in the last 10 games,
-//     then the slowest ones.
+//     then the slowest ones. A problem learned in Learn from Incorrect leaves
+//     the list until it is missed (or slow) again in a later game.
 
 export const HISTORY_SIZE = 10;
 export const BOARD_SIZE = 10;
@@ -85,15 +86,17 @@ export function problemText(key) {
 /**
  * The problems to practise, from the last games: the ones missed most often
  * (then the slowest of those), then, if there is room, ones that took
- * SLOW_MS or longer, slowest first.
+ * SLOW_MS or longer, slowest first. learned ({ key: date }) leaves out what
+ * happened to a problem before it was learned.
  * Returns [{ key, text, missed, slowMs }].
  */
-export function needMorePractice(games, size = PRACTICE_SIZE) {
+export function needMorePractice(games, size = PRACTICE_SIZE, learned = {}) {
   const missed = new Map();
   const slow = new Map();
+  const counts = (key, game) => !learned[key] || String(game.at) > learned[key];
   for (const game of games.slice(-HISTORY_SIZE)) {
-    for (const [key, n] of Object.entries(game.missed ?? {})) missed.set(key, (missed.get(key) ?? 0) + n);
-    for (const [key, ms] of Object.entries(game.slow ?? {})) slow.set(key, Math.max(slow.get(key) ?? 0, ms));
+    for (const [key, n] of Object.entries(game.missed ?? {})) if (counts(key, game)) missed.set(key, (missed.get(key) ?? 0) + n);
+    for (const [key, ms] of Object.entries(game.slow ?? {})) if (counts(key, game)) slow.set(key, Math.max(slow.get(key) ?? 0, ms));
   }
   const item = (key) => ({ key, text: problemText(key), missed: missed.get(key) ?? 0, slowMs: slow.get(key) ?? 0 });
   const missedList = [...missed.keys()].map(item).sort((a, b) => b.missed - a.missed || b.slowMs - a.slowMs);

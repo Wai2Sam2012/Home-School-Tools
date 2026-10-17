@@ -8,15 +8,15 @@
 // Submit. It pauses while Repeat is reading and while the game is in the
 // background. The keypad works the whole time; nothing waits on speech.
 
-import { answerProblem, jumpTo, milestoneSteps, storyText, unlockSticker, withNextProblem } from '../adventure.js?v=0.6.0';
-import { stickerPicture } from '../art.js?v=0.6.0';
-import { avatarIcon } from '../avatars.js?v=0.6.0';
-import { createDetourRoad, loopProgress } from '../detour-road.js?v=0.6.0';
-import { createKeypad } from '../keypad.js?v=0.6.0';
-import { THEMES } from '../settings.js?v=0.6.0';
-import { createThinkingTimer } from '../timer.js?v=0.6.0';
-import { nextSticker } from '../storyline.js?v=0.6.0';
-import { h, topBar } from '../ui.js?v=0.6.0';
+import { answerProblem, jumpTo, milestoneSteps, storyText, unlockSticker, withNextProblem } from '../adventure.js?v=0.6.1';
+import { stickerPicture } from '../art.js?v=0.6.1';
+import { avatarIcon } from '../avatars.js?v=0.6.1';
+import { createDetourRoad, loopProgress } from '../detour-road.js?v=0.6.1';
+import { createKeypad } from '../keypad.js?v=0.6.1';
+import { THEMES } from '../settings.js?v=0.6.1';
+import { createThinkingTimer } from '../timer.js?v=0.6.1';
+import { nextSticker } from '../storyline.js?v=0.6.1';
+import { h, topBar } from '../ui.js?v=0.6.1';
 
 const PRAISE = ['Correct!', 'Great job!', 'You got it!', 'Awesome!', 'Nice work!'];
 // A right answer moves on by itself; after a wrong one the game waits for
@@ -209,7 +209,7 @@ export function adventureScreen(ctx) {
     if (milestone) {
       line = storyText(lines, milestone) || `Flag ${milestone.number} reached!`;
       setStory(`🚩 ${line}`, 'milestone');
-      wait = ctx.sound(theme.flagSound ?? 'milestone'); // a roar for dinosaurs, an engine for trucks
+      wait = ctx.flagSound(state.theme); // a roar for dinosaurs, an engine for trucks (or the theme's recording)
     } else if (detourStart) {
       line = storyText(lines, detourStart);
       setStory(`🚧 ${line}`, 'detour');
@@ -339,6 +339,9 @@ export function adventureScreen(ctx) {
     window.removeEventListener('resize', fit);
     page?.parentElement?.classList.remove('fit-scroll');
   });
+
+  // A recorded flag sound, if the theme has one, is loaded now so it plays without a delay.
+  ctx.prepareSounds(state.theme);
 
   // The destination: the sticker this trail unlocks.
   ctx.getStoryline(state.theme).then((loaded) => {

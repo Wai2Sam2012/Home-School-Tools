@@ -2,10 +2,11 @@
 // voice on this device with a choice of sample line, speed and pitch, and
 // every sound effect, so a grown-up can compare them and pick the best.
 
-import { describeVoice } from './settings.js?v=0.6.0';
-import { bestVersions, chooseVoice, isFunVoice, loadVoices, rankVoices, voiceId } from '../speech.js?v=0.6.0';
-import { SOUNDS, SYNTHS, playSound } from '../audio.js?v=0.6.0';
-import { choiceRow, h, topBar } from '../ui.js?v=0.6.0';
+import { describeVoice } from './settings.js?v=0.6.1';
+import { bestVersions, chooseVoice, isFunVoice, loadVoices, rankVoices, voiceId } from '../speech.js?v=0.6.1';
+import { SOUNDS, SYNTHS, playRecording, playSound } from '../audio.js?v=0.6.1';
+import { THEMES } from '../settings.js?v=0.6.1';
+import { choiceRow, h, topBar } from '../ui.js?v=0.6.1';
 
 const SOUND_NAMES = {
   right: 'Right answer (ding)',
@@ -120,6 +121,16 @@ export function voiceLabScreen(ctx) {
 
   loadVoices(globalThis.speechSynthesis, { waitMs: 2500 }).then((voices) => showList(voices, false));
 
+  // Recorded flag sounds (themes/<theme>/sounds/flag.mp3), if any theme has one.
+  const recordingButtons = h('div', { class: 'sound-buttons recording-buttons' });
+  for (const theme of Object.values(THEMES)) {
+    ctx.prepareSounds(theme.id).then((recording) => {
+      if (!recording) return;
+      recordingButtons.append(h('button', { type: 'button', class: 'choice', dataset: { recording: theme.id }, onclick: () => playRecording(recording) },
+        `▶ Flag in ${theme.title} (recording)`));
+    });
+  }
+
   return h('main', { class: 'screen voice-lab-screen' },
     topBar('Voice and sound tester', () => ctx.show(player ? 'settings' : 'profiles')),
     h('section', { class: 'panel' },
@@ -127,6 +138,7 @@ export function voiceLabScreen(ctx) {
       h('div', { class: 'sound-buttons' },
         [...Object.keys(SOUNDS), ...Object.keys(SYNTHS)].map((name) =>
           h('button', { type: 'button', class: 'choice', dataset: { sound: name }, onclick: () => playSound(name) }, `▶ ${SOUND_NAMES[name] ?? name}`))),
+      recordingButtons,
     ),
     h('section', { class: 'panel' },
       h('h2', {}, 'Sample'),

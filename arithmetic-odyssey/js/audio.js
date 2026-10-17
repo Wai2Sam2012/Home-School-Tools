@@ -103,6 +103,65 @@ export function playSound(name) {
   }
 }
 
+// ---------------------------------------------------------------- recorded sounds
+
+// The voice waits at most this long for a recording (a long file doesn't hold up the game).
+export const RECORDING_WAIT_MAX_MS = 4000;
+// Recordings are evened out to this peak, about as loud as the voice.
+const RECORDING_PEAK = 0.9;
+const recordings = new Map(); // url -> Promise<{ buffer, gain } | null>
+
+/**
+ * Loads and decodes a recorded sound (after Tap to Start). Resolves
+ * { buffer, gain } or null if it can't be played; never rejects.
+ */
+export function loadRecording(url, fetchFile = globalThis.fetch) {
+  if (!context) return Promise.resolve(null);
+  if (!recordings.has(url)) {
+    const loading = (async () => {
+      try {
+        const response = await fetchFile(url);
+        if (!response.ok) return null;
+        const data = await response.arrayBuffer();
+        // Older Safari only has the callback form of decodeAudioData.
+        const buffer = await new Promise((resolve, reject) => {
+          const result = context.decodeAudioData(data, resolve, reject);
+          if (result?.then) result.then(resolve, reject);
+        });
+        let peak = 0;
+        for (let c = 0; c < buffer.numberOfChannels; c++) {
+          const samples = buffer.getChannelData(c);
+          for (let i = 0; i < samples.length; i += 4) peak = Math.max(peak, Math.abs(samples[i]));
+        }
+        return { buffer, gain: peak > 0.01 ? Math.min(4, RECORDING_PEAK / peak) : 1 };
+      } catch {
+        return null;
+      }
+    })();
+    recordings.set(url, loading);
+  }
+  return recordings.get(url);
+}
+
+/**
+ * Plays a loaded recording. Returns how long the voice should wait for it in
+ * milliseconds (0 if it couldn't play).
+ */
+export function playRecording(recording) {
+  if (!recording || !context || context.state !== 'running') return 0;
+  try {
+    const source = context.createBufferSource();
+    source.buffer = recording.buffer;
+    const level = context.createGain();
+    level.gain.value = recording.gain;
+    source.connect(level).connect(context.destination);
+    source.start(context.currentTime + 0.02);
+    return Math.min(RECORDING_WAIT_MAX_MS, Math.round(recording.buffer.duration * 1000));
+  } catch {
+    return 0;
+  }
+}
+
 /** A second of white noise, for the roar's breath and the engine's rumble. */
 function noise(ctx, seconds) {
   const buffer = ctx.createBuffer(1, Math.ceil(ctx.sampleRate * seconds), ctx.sampleRate);

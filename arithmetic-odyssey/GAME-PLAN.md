@@ -513,6 +513,12 @@ Every stage ends with its tests passing, the site republished, and a short repor
 - The Restore file picker is the only `<input>` besides the player name; it opens Files, never the keyboard (T3.3 still holds).
 - The Dino flag roar was rebuilt in the style of the big movie T. rex roars (a trumpeting scream, then a raspy growl; 2.6 s, made with Web Audio, not a recording).
 
+**0.6.1 (added after Stage 6, asked for after trying it):**
+
+- **Learn from Incorrect** (`js/learn.js`, `js/screens/learn.js`), opened from My Stats: a practice round with the Need More Practice problems (up to 8). A problem is learned after 2 right answers in the round (a problem that was only slow must be answered within 5 seconds); a wrong answer resets its count and it comes back 2 questions later; the round stops when all are learned or after 4 questions per problem. No stickers or high scores. Learned problems are saved in the player's record (`learned`, the date each was learned, at most 200) and leave Need More Practice until a later game misses them (or is slow on them) again.
+- **Recorded flag sounds:** `themes/<theme>/sounds/flag.mp3` (or `.m4a`, `.wav`) plays at the flags instead of the made-up roar or engine; the story file lists it, the voice waits for it (at most 4 seconds), it is evened out to about the voice's loudness, and it must be credited and at most 600 KB. The voice and sound tester has a button for each recording.
+- **The Uppbeat "T-Rex Roar"** (by Epic Stock Media) was looked into and not added: the free (Basic) license allows sounds inside web games but forbids sharing the original audio file, and every file in this public repository can be downloaded by anyone. A public domain (CC0) recording is the safe choice.
+
 ### Stage 7: Offline app (PWA)
 
 **Build:** `manifest.json`, the iPad tags, the icons, `sw.js` with the generated file list, update handling and `offline.html`.

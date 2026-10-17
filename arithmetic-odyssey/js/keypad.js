@@ -1,8 +1,8 @@
 // The on-screen number keypad. Answers are only ever typed here (or on a PC
 // keyboard), never in a text box, so the iPad's keyboard never opens.
 
-import { MAX_ANSWER_DIGITS } from './math.js?v=0.6.0';
-import { h } from './ui.js?v=0.6.0';
+import { MAX_ANSWER_DIGITS } from './math.js?v=0.6.1';
+import { h } from './ui.js?v=0.6.1';
 
 export const BACK = 'back';
 export const SUBMIT = 'submit';

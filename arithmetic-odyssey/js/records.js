@@ -8,11 +8,11 @@
 //   ao.v1.history.<id>   the last 10 finished games
 //   ao.v1.active.<id>    the adventure in progress
 
-import { ADVENTURE_SCHEMA } from './adventure.js?v=0.6.0';
-import { AVATAR_IDS } from './avatars.js?v=0.6.0';
-import { createProblemGenerator, restoreProblem } from './math.js?v=0.6.0';
-import { HISTORY_SIZE, BOARD_SIZE } from './scores.js?v=0.6.0';
-import { DEFAULT_SETTINGS, DEFAULT_SETUP, THEMES, normalizeSettings, normalizeSetup } from './settings.js?v=0.6.0';
+import { ADVENTURE_SCHEMA } from './adventure.js?v=0.6.1';
+import { AVATAR_IDS } from './avatars.js?v=0.6.1';
+import { createProblemGenerator, restoreProblem } from './math.js?v=0.6.1';
+import { HISTORY_SIZE, BOARD_SIZE } from './scores.js?v=0.6.1';
+import { DEFAULT_SETTINGS, DEFAULT_SETUP, THEMES, normalizeSettings, normalizeSetup } from './settings.js?v=0.6.1';
 
 export const RECORD_SCHEMA = 1;
 export const MAX_PROFILES = 8;
@@ -129,6 +129,16 @@ function checkBoards(raw) {
   return boards;
 }
 
+// At most this many learned problems are kept (the oldest are dropped).
+export const LEARNED_MAX = 200;
+
+/** { "7×8": "2026-10-17T12:00:00.000Z" }: when each problem was learned in Learn from Incorrect. */
+function checkLearned(raw) {
+  if (!isObject(raw)) return {};
+  const entries = Object.entries(raw).filter(([key, at]) => /^\d{1,4}[+−×÷]\d{1,4}$/.test(key) && isDate(at));
+  return Object.fromEntries(entries.sort((a, b) => a[1].localeCompare(b[1])).slice(-LEARNED_MAX));
+}
+
 function checkLastResult(raw) {
   if (!isObject(raw) || !THEMES[raw.theme]) return null;
   return {
@@ -155,6 +165,7 @@ export function checkProfile(data, expectedId = null) {
     collected: checkCollected(record.collected),
     highScores: checkBoards(record.highScores),
     lastResult: checkLastResult(record.lastResult),
+    learned: checkLearned(record.learned),
   };
 }
 
@@ -268,5 +279,6 @@ export function profileRecord(player) {
     collected: player.collected,
     highScores: player.highScores,
     lastResult: player.lastResult,
+    learned: player.learned,
   };
 }

@@ -1739,3 +1739,69 @@ h1:focus {
   letter-spacing: 0.1em;
 }
 
+/* ------------------------------------------------------------ Learn from Incorrect (0.6.1) */
+
+.learn-button {
+  margin-top: 16px;
+  width: 100%;
+}
+
+.learn-banner {
+  text-align: center;
+}
+
+.learn-chips {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.learn-chip {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border: 2px solid var(--line);
+  border-radius: 999px;
+  background: var(--surface);
+  font-size: 18px;
+  font-variant-numeric: tabular-nums;
+}
+
+.learn-chip.now {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px var(--accent-soft);
+}
+
+.learn-chip.learned {
+  border-color: var(--ok);
+  background: #e7f6ec;
+  color: var(--ok);
+}
+
+.learn-chip-text {
+  font-weight: 700;
+}
+
+.learn-stars {
+  color: #d4a017;
+  letter-spacing: 1px;
+}
+
+.learn-results {
+  display: grid;
+  gap: 6px;
+  margin: 0 0 12px;
+  padding: 0;
+  list-style: none;
+  font-size: 22px;
+}
+
+.learn-results li.learned {
+  color: var(--ok);
+}
+

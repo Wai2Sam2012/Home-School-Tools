@@ -2,13 +2,13 @@
 // Only what changed is written: the adventure in progress once per question,
 // and the player's record when settings change or an adventure ends.
 
-import { AVATAR_IDS } from './avatars.js?v=0.6.0';
-import { KEYS, PREFIX, createStorage, memoryStorage } from './storage.js?v=0.6.0';
+import { AVATAR_IDS } from './avatars.js?v=0.6.1';
+import { KEYS, PREFIX, createStorage, memoryStorage } from './storage.js?v=0.6.1';
 import {
-  MAX_PROFILES, NAME_MAX_LENGTH, RECORD_SCHEMA, checkActive, checkHistory, checkIndex, checkProfile, cleanName, profileRecord,
-} from './records.js?v=0.6.0';
-import { addHighScore, addToHistory, gameSummary } from './scores.js?v=0.6.0';
-import { DEFAULT_SETTINGS, DEFAULT_SETUP, THEMES, normalizeSettings, normalizeSetup } from './settings.js?v=0.6.0';
+  LEARNED_MAX, MAX_PROFILES, NAME_MAX_LENGTH, RECORD_SCHEMA, checkActive, checkHistory, checkIndex, checkProfile, cleanName, profileRecord,
+} from './records.js?v=0.6.1';
+import { addHighScore, addToHistory, gameSummary } from './scores.js?v=0.6.1';
+import { DEFAULT_SETTINGS, DEFAULT_SETUP, THEMES, normalizeSettings, normalizeSetup } from './settings.js?v=0.6.1';
 
 // Player icon ids; the pictures are in images/avatars/ (js/avatars.js).
 export const AVATARS = AVATAR_IDS;
@@ -84,6 +84,7 @@ export function createProfileStore({ storage = createStorage(memoryStorage()), m
       collected: record.collected,
       highScores: record.highScores,
       lastResult: record.lastResult,
+      learned: record.learned ?? {},
       history,
       adventure, // the adventure in progress (js/adventure.js)
     };
@@ -131,6 +132,7 @@ export function createProfileStore({ storage = createStorage(memoryStorage()), m
         collected: emptyCollection(),
         highScores: {},
         lastResult: null,
+        learned: {},
       });
       profiles.push(p);
       saveProfile(p);
@@ -193,6 +195,17 @@ export function createProfileStore({ storage = createStorage(memoryStorage()), m
       index.gamesSinceBackup += 1;
       saveIndex();
       return p.lastResult;
+    },
+
+    /** Records problems learned in Learn from Incorrect, so they leave Need More Practice. */
+    markLearned(id, keys) {
+      const p = this.get(id);
+      const at = now().toISOString();
+      const learned = { ...p.learned };
+      for (const key of keys) learned[key] = at;
+      // Keep the newest LEARNED_MAX.
+      p.learned = Object.fromEntries(Object.entries(learned).sort((a, b) => a[1].localeCompare(b[1])).slice(-LEARNED_MAX));
+      return saveProfile(p);
     },
 
     /** Debug and tests: sets a player's stickers for a theme. */
