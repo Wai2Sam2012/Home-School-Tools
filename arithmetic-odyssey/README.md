@@ -102,7 +102,7 @@ A wrong or damaged file is refused and nothing changes. Before a restore the gam
 
 ## Credits
 
-Picture and sound credits are in each theme's `CREDITS.md` ([Dino Tour](themes/dino/CREDITS.md), [Off-Roading](themes/national-parks/CREDITS.md)). The flag sounds are from [Freesound](https://freesound.org/); four are public domain (CC0), and one needs this credit:
+Picture and sound credits are in each theme's `CREDITS.md` ([Dino Tour](themes/dino/CREDITS.md), [Off-Roading](themes/national-parks/CREDITS.md)). The flag sounds are from [Freesound](https://freesound.org/); six are public domain (CC0), and one needs this credit:
 
 - "Truck-Uphill.wav" by moshwe — https://freesound.org/s/554426/
   Licensed under CC BY 3.0: https://creativecommons.org/licenses/by/3.0/

@@ -523,6 +523,8 @@ Every stage ends with its tests passing, the site republished, and a short repor
 
 **Counting blocks (for tips, added after 0.6.2):** `js/blocks.js` defines 11 blocks, each made of unit squares and colored by value: 1 Green (1x1), 2 Orange (1x2), 3 Pink (1x3), 4 Yellow (1x4), 5 Light Blue (1x5), 6 Purple (1x6), 7 Tan (1x7), 8 Brown (1x8), 9 Mint Green (1x9), 10 Dark Blue (1x10) and 100 Red (10x10). `blockSvg()` draws one (lying down or standing up, any size, with its value or with numbered squares) and `numberAsBlocks()` splits a number into the fewest blocks. `tools/build-blocks.mjs` writes them as pictures to `images/blocks/`. They are not used in the game yet; they are meant for counting tips later (for example, 7 + 5 shown as a 7 block and a 5 block, then as a 10 block and a 2 block).
 
+**0.6.3:** two more Off-Roading flag sounds, both CC0: a dirt bike passing and jumping a ramp ("motorcycle dirt bike motocross pass by medium speed and jump dirt ramp1.wav" by kyles) and a motorbike pulling away ("motorbike crm 250 cc onboard ride pullaway.wav" by martian), cleaned up the same way (4.8 s each). Off-Roading now picks from 4 flag sounds, Dino Tour from 3.
+
 ### Stage 7: Offline app (PWA)
 
 **Build:** `manifest.json`, the iPad tags, the icons, `sw.js` with the generated file list, update handling and `offline.html`.

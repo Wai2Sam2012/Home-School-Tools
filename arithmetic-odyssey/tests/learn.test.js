@@ -187,7 +187,7 @@ test('the recorded flag sounds in the game are small and credited', () => {
 
 test('the dinosaur and truck themes each have their recorded flag sounds', () => {
   assert.deepEqual(buildDinoStoryline(join(GAME_DIR, 'themes', 'dino')).storyline.sounds.flag, ['sounds/flag-1.mp3', 'sounds/flag-2.mp3', 'sounds/flag-3.mp3']);
-  assert.deepEqual(buildParksStoryline(join(GAME_DIR, 'themes', 'national-parks')).storyline.sounds.flag, ['sounds/flag-1.mp3', 'sounds/flag-2.mp3']);
+  assert.deepEqual(buildParksStoryline(join(GAME_DIR, 'themes', 'national-parks')).storyline.sounds.flag, ['sounds/flag-1.mp3', 'sounds/flag-2.mp3', 'sounds/flag-3.mp3', 'sounds/flag-4.mp3']);
 });
 
 test('a flag sound is picked at random, never the same one twice in a row', () => {
