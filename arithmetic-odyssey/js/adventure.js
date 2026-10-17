@@ -166,7 +166,7 @@ export function storyText(storyline, event, pick = Math.random) {
     case 'milestone':
       return storyline.milestones?.[(event.number - 1) % storyline.milestones.length] ?? '';
     case 'detour-start':
-      return (storyline.detours?.[(event.number - 1) % storyline.detours.length] ?? 'Detour! Solve {count} problems.').replace(/\{count\}/g, String(event.length));
+      return (storyline.detours?.[(event.number - 1) % storyline.detours.length] ?? 'Wandering off the trail! Solve {count} problems.').replace(/\{count\}/g, String(event.length));
     case 'detour-cleared':
       return choose(storyline.detourCleared);
     case 'setback':

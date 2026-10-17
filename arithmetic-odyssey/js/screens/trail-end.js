@@ -78,7 +78,7 @@ export function trailEndScreen(ctx, result = {}) {
         h('dl', { class: 'summary' },
           row('Questions answered', stats.answered),
           row('Right answers', stats.correct),
-          row('Detours', stats.detours),
+          row('Wanderings', stats.detours),
           row('Sent back to a flag', stats.setbacks),
           row('Thinking time', formatDuration(stats.thinkingMs ?? 0)),
           row('Tips used', stats.tips ?? 0),

@@ -27,10 +27,10 @@
   "detourCleared": [
     "Back on the road! Nice driving.",
     "You did it! The road is clear again.",
-    "Detour done! Let's keep rolling."
+    "Wandering done! Let's keep rolling."
   ],
   "setback": [
-    "That was a bumpy detour! Let's drive back to the last flag and try again. You can do it!",
+    "That was a bumpy wander! Let's drive back to the last flag and try again. You can do it!",
     "No problem! Every driver takes a wrong turn sometimes. Back to the last flag we go!"
   ],
   "kidFacts": {

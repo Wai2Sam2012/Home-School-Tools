@@ -67,7 +67,7 @@ export function adventureScreen(ctx) {
   const feedback = h('p', { class: 'feedback', role: 'status' });
   const detourCount = h('p', { class: 'detour-count' });
   const repeat = h('button', { type: 'button', class: 'round-button repeat-button', 'aria-label': 'Read the question again', onclick: () => repeatQuestion() }, '🔊');
-  // 💡 A counting tip (addition and subtraction): the question drawn with blocks,
+  // 🙏 A counting tip (addition and subtraction): the question drawn with blocks,
   // over the trail map. Each question's tip counts once in the trip's "tips used".
   const tipCard = createTipCard();
   const tipButton = createTipButton(() => showTip());
@@ -176,7 +176,8 @@ export function adventureScreen(ctx) {
   function showQuestion(intro = '', afterMs = 0) {
     // The detour counter changes with the question, not while the last answer is still shown.
     detourCount.hidden = state.mode !== 'detour';
-    if (state.detour) detourCount.textContent = `Detour question ${state.detour.asked + 1} of ${state.detourLength}`;
+    // Players call a detour "wandering" (the code keeps the word detour).
+    if (state.detour) detourCount.textContent = `Wandering question ${state.detour.asked + 1} of ${state.detourLength}`;
     question.textContent = `${state.problem.text} = ?`;
     question.classList.remove('wrong-answer');
     feedback.textContent = '';
@@ -216,7 +217,7 @@ export function adventureScreen(ctx) {
     const detourStart = events.find((e) => e.type === 'detour-start');
     const cleared = events.find((e) => e.type === 'detour-cleared');
     const setback = events.find((e) => e.type === 'setback');
-    const lines = storyline ?? { milestones: [], detours: [], detourCleared: ['Detour done! Back on the trail.'], setback: ["Back to the last flag. You can do it!"] };
+    const lines = storyline ?? { milestones: [], detours: [], detourCleared: ['Wandering done! Back on the trail.'], setback: ["Back to the last flag. You can do it!"] };
     let line = '';
     let wait = 0; // how long the sound effect lasts; the voice waits for it
     if (milestone) {
@@ -376,7 +377,7 @@ export function adventureScreen(ctx) {
 
   if (!state.problem) save(withNextProblem(state));
   let opening = 'Welcome back! Keep going.';
-  if (state.mode === 'detour') opening = 'You are on a detour. Answer the questions to get back on the trail!';
+  if (state.mode === 'detour') opening = 'You are wandering off the trail. Answer the questions to get back on it!';
   else if (state.step === 0 && state.stats.answered === 0) opening = 'Off we go! Answer to move along the trail.';
   setStory(`${state.mode === 'detour' ? '🚧' : theme.icon} ${opening}`, state.mode === 'detour' ? 'detour' : 'cleared');
   showMap();

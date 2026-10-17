@@ -57,7 +57,7 @@ export function statsScreen(ctx) {
           h('td', {}, formatDuration(e.thinkingMs)),
           h('td', {}, String(e.tips ?? 0)),
           h('td', { class: 'score-ops' }, e.operations))))),
-      h('p', { class: 'note' }, 'Most right answers wins; then the shortest thinking time; then the fewest tips (💡).'),
+      h('p', { class: 'note' }, 'Most right answers wins; then the shortest thinking time; then the fewest tips (🙏).'),
     );
   }
   showBoard();

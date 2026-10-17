@@ -26,8 +26,8 @@ export function settingsScreen(ctx) {
   const update = (changes) => ctx.profiles.updateSettings(player.id, changes);
 
   const detourValue = h('output', { class: 'stepper-value', 'aria-live': 'polite' });
-  const minus = h('button', { type: 'button', class: 'round-button', 'aria-label': 'Fewer detour questions', onclick: () => changeDetour(-1) }, '−');
-  const plus = h('button', { type: 'button', class: 'round-button', 'aria-label': 'More detour questions', onclick: () => changeDetour(1) }, '+');
+  const minus = h('button', { type: 'button', class: 'round-button', 'aria-label': 'Fewer wandering questions', onclick: () => changeDetour(-1) }, '−');
+  const plus = h('button', { type: 'button', class: 'round-button', 'aria-label': 'More wandering questions', onclick: () => changeDetour(1) }, '+');
   function showDetour() {
     detourValue.textContent = String(player.settings.detourLength);
     minus.disabled = player.settings.detourLength <= DETOUR_MIN;
@@ -261,9 +261,9 @@ export function settingsScreen(ctx) {
           onChange: (adventureLength) => update({ adventureLength }),
         }),
         h('p', { class: 'note' }, 'Questions to reach the end of the trail.'),
-        h('h2', {}, 'Detour length'),
-        h('div', { class: 'stepper', role: 'group', 'aria-label': 'Detour length' }, minus, detourValue, plus),
-        h('p', { class: 'note' }, `Questions in each detour (${DETOUR_MIN} to ${DETOUR_MAX}).`),
+        h('h2', {}, 'Wandering length'),
+        h('div', { class: 'stepper', role: 'group', 'aria-label': 'Wandering length' }, minus, detourValue, plus),
+        h('p', { class: 'note' }, `Questions each time a player wanders off the trail after a wrong answer (${DETOUR_MIN} to ${DETOUR_MAX}).`),
       ),
       h('section', { class: 'panel' },
         h('h2', {}, 'Saving and backup'),

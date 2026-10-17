@@ -27,10 +27,10 @@
   "detourCleared": [
     "You did it! Back on the trail.",
     "Great work! The path is clear again.",
-    "Detour done! Let's keep exploring."
+    "Wandering done! Let's keep exploring."
   ],
   "setback": [
-    "Uh-oh, that detour was tricky! Let's go back to the last flag and try again. You can do it!",
+    "Uh-oh, that wandering was tricky! Let's go back to the last flag and try again. You can do it!",
     "No problem! Explorers sometimes take the long way. Back to the last flag we go!"
   ],
   "kidFacts": {

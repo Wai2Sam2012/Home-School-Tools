@@ -525,6 +525,12 @@ Every stage ends with its tests passing, the site republished, and a short repor
 
 **0.6.3:** two more Off-Roading flag sounds, both CC0: a dirt bike passing and jumping a ramp ("motorcycle dirt bike motocross pass by medium speed and jump dirt ramp1.wav" by kyles) and a motorbike pulling away ("motorbike crm 250 cc onboard ride pullaway.wav" by martian), cleaned up the same way (4.8 s each). Off-Roading now picks from 4 flag sounds, Dino Tour from 3.
 
+**0.6.3 (also):**
+- **Counting tips** (🙏) for addition and subtraction: the question drawn with counting blocks over the trail map (`tipSvg()` in `js/blocks.js`, `js/tip-card.js`); each question's tip counts once in the trip's tips used. Learn from Incorrect has them too, not counted.
+- **High scores** now rank by the most right answers (as a share of all answers; a trip with more wandering questions isn't favoured), then the shortest thinking time, then the fewest tips. (This replaces "fewest setbacks first".)
+- The block badge sits on the last square (right end lying down, bottom standing up); the 3 block is a lighter pink.
+- Detours are called **wandering** wherever players see or hear it ("Wandering question 1 of 3", Wandering length, Wanderings on Trail's End); the code still says detour.
+
 ### Stage 7: Offline app (PWA)
 
 **Build:** `manifest.json`, the iPad tags, the icons, `sw.js` with the generated file list, update handling and `offline.html`.

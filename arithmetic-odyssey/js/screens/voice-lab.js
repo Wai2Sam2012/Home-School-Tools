@@ -11,8 +11,8 @@ import { choiceRow, h, topBar } from '../ui.js?v=0.6.3';
 const SOUND_NAMES = {
   right: 'Right answer (ding)',
   wrong: 'Wrong answer',
-  detour: 'Detour starts',
-  cleared: 'Detour cleared',
+  detour: 'Wandering starts',
+  cleared: 'Back from wandering',
   setback: 'Back to a flag',
   milestone: 'Flag (no theme sound)',
   finish: "Trail's End",

@@ -50,7 +50,7 @@ export function learnScreen(ctx) {
   const question = h('p', { class: 'question', 'aria-live': 'polite' });
   const feedback = h('p', { class: 'feedback', role: 'status' });
   const repeat = h('button', { type: 'button', class: 'round-button repeat-button', 'aria-label': 'Read the question again', onclick: () => repeatQuestion() }, '🔊');
-  // 💡 The same counting tip as in the adventure (practice: tips are not counted).
+  // 🙏 The same counting tip as in the adventure (practice: tips are not counted).
   const tipCard = createTipCard();
   const tipButton = createTipButton(() => {
     if (!busy && !state.done) tipCard.show(currentProblem(state));
