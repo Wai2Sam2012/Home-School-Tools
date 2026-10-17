@@ -13,6 +13,7 @@ import { PREFIX, formatBytes } from './storage.js?v=0.7.0';
 
 const OFFLINE_PREFIX = 'arithmetic-odyssey-';
 const OFFLINE_LIST = 'offline-file-list.json';
+const PICTURE_CACHE = 'arithmetic-odyssey-sticker-pictures';
 // Safari and Chrome let each address keep about 5 MB in localStorage.
 export const LOCAL_STORAGE_LIMIT = 5 * 1024 * 1024;
 
@@ -44,10 +45,24 @@ export function savedDataReport(storage, players = []) {
   return report;
 }
 
-/** The offline copy: { copies, files, bytes } from each saved copy's file list (no file is read). */
+/**
+ * The offline copy: { copies, complete, files, bytes } from each saved copy's
+ * file list, and { pictures, pictureBytes } for the sticker pictures saved as
+ * they were collected (from the size saved with each). No file is read.
+ */
 export async function offlineCopyReport(cacheStorage = globalThis.caches) {
   if (!cacheStorage) return null;
-  const names = (await cacheStorage.keys()).filter((n) => n.startsWith(OFFLINE_PREFIX));
+  const all = await cacheStorage.keys();
+  let pictures = 0;
+  let pictureBytes = 0;
+  if (all.includes(PICTURE_CACHE)) {
+    const cache = await cacheStorage.open(PICTURE_CACHE);
+    for (const request of await cache.keys()) {
+      pictures += 1;
+      pictureBytes += Number((await cache.match(request))?.headers.get('X-AO-Size')) || 0;
+    }
+  }
+  const names = all.filter((n) => n.startsWith(OFFLINE_PREFIX) && n !== PICTURE_CACHE);
   let files = 0;
   let bytes = 0;
   let complete = 0;
@@ -64,7 +79,7 @@ export async function offlineCopyReport(cacheStorage = globalThis.caches) {
       files += entries; // a copy still being saved: count what is there so far
     }
   }
-  return { copies: names.length, complete, files, bytes };
+  return { copies: names.length, complete, files, bytes, pictures, pictureBytes };
 }
 
 /** The browser's own numbers: { usage, quota, persisted } (null where not reported). */
@@ -105,6 +120,7 @@ export async function measureAll({ storage, players, sounds = 0 } = {}) {
       : offline.copies === 0
         ? 'not saved yet'
         : `${offline.files} files, ${formatBytes(offline.bytes)}${offline.complete < offline.copies ? ` (${offline.copies - offline.complete} copy still saving)` : ''}${offline.complete > 1 ? `, ${offline.complete} versions kept` : ''}`;
+    lines['Sticker pictures saved'] = offline ? `${offline.pictures} pictures, ${formatBytes(offline.pictureBytes)} (collected stickers and next stops)` : 'not supported here';
   } catch (error) {
     lines['Offline copy'] = `unavailable (${error.message})`;
   }

@@ -1411,6 +1411,40 @@ h1:focus {
   height: 100%;
 }
 
+/* A sticker picture not saved yet, with no internet: the drawing and a note. */
+.waiting {
+  position: relative;
+}
+
+.waiting-note {
+  position: absolute;
+  right: 6px;
+  bottom: 6px;
+  left: 6px;
+  margin: 0;
+  padding: 6px 10px;
+  border-radius: 10px;
+  background: rgba(255, 255, 255, 0.92);
+  color: var(--text);
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1.25;
+  text-align: center;
+}
+
+.tile-picture .waiting-note {
+  right: 3px;
+  bottom: 3px;
+  left: 3px;
+  padding: 2px 4px;
+  font-size: 11px;
+}
+
+/* The trail map's small goal picture has no room for words: just the drawing. */
+.goal-picture .waiting-note {
+  display: none;
+}
+
 /* ------------------------------------------------------------ dialogs */
 
 .overlay {

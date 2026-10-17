@@ -9,7 +9,15 @@
 //                     game opens (never in the middle of an adventure)
 //   - 'unsupported'   this browser or address can't save the game
 //
+// Sticker pictures: the game is saved with each theme's first sticker only.
+// The pictures of every sticker a player has collected, and of each player's
+// next stop, are saved when there is internet (picturesToSave(),
+// savePictures()); until then the game shows a drawing that says it is
+// waiting for the internet (js/art.js).
+//
 // container is navigator.serviceWorker (replaced in tests).
+
+import { nextSticker, pictureUrl } from './storyline.js?v=0.7.0';
 
 export const OFFLINE_TEXT = Object.freeze({
   checking: 'Checking offline play…',
@@ -32,6 +40,32 @@ export function offlineMessage(state) {
 }
 
 const UPDATE_CHECK_MS = 30 * 60 * 1000;
+const TAKE_OVER_WAIT_MS = 4000;
+const RELOAD_KEY = 'ao.offline.reloaded';
+
+/**
+ * The sticker pictures the players need saved: for each theme, every sticker
+ * a player has collected and each player's next stop. storylines is
+ * { theme: storyline } (a missing theme is skipped). Returns addresses.
+ */
+export function picturesToSave(storylines, players) {
+  const urls = new Set();
+  for (const [theme, storyline] of Object.entries(storylines)) {
+    if (!storyline) continue;
+    for (const player of players) {
+      const owned = new Set(player.collected?.[theme] ?? []);
+      const next = nextSticker(storyline, [...owned]);
+      for (const sticker of storyline.stickers) {
+        if (!owned.has(sticker.id) && sticker !== next) continue;
+        for (const picture of sticker.pictures ?? []) urls.add(pictureUrl(theme, picture));
+      }
+    }
+  }
+  return [...urls];
+}
+
+/** Tells pictures on screen to try again (after the internet comes back, or pictures were saved). */
+export const PICTURES_SAVED_EVENT = 'ao-pictures-saved';
 
 /**
  * Starts offline play. canApplyUpdate() says whether a waiting update may
@@ -44,9 +78,26 @@ export function createOffline({
   canApplyUpdate = () => false,
   reload = () => globalThis.location.reload(),
   now = () => Date.now(),
+  setTimer = (fn, ms) => setTimeout(fn, ms),
+  session = (() => { try { return globalThis.sessionStorage; } catch { return null; } })(),
 } = {}) {
+  // The fallback reload happens at most once a minute, so a stuck update can never keep reloading the game.
+  const reloadedRecently = () => {
+    try {
+      return now() - Number(session?.getItem(RELOAD_KEY) || 0) < 60000;
+    } catch {
+      return false;
+    }
+  };
+  const markReload = () => {
+    try {
+      session?.setItem(RELOAD_KEY, String(now()));
+    } catch {
+      // No session storage: the once-a-minute guard just isn't kept.
+    }
+  };
   const listeners = new Set();
-  let state = { status: 'checking', done: 0, total: 0, failedCount: 0, failed: [], version: '' };
+  let state = { status: 'checking', done: 0, total: 0, failedCount: 0, failed: [], version: '', pictures: null };
   let registration = null;
   let takingOver = false;
   let lastCheck = 0;
@@ -93,12 +144,23 @@ export function createOffline({
     }
   }
 
-  /** A waiting version takes over and the page reloads (only when canApplyUpdate() allows it). */
+  /**
+   * A waiting version takes over and the page reloads. While it does, state
+   * has applying: true, and the game starts nothing new (a download started
+   * now can hold up the switch). If the switch hasn't happened within a few
+   * seconds, the page reloads anyway, once (that stops anything in flight).
+   */
   function applyUpdate() {
     const waiting = registration?.waiting;
     if (!waiting || takingOver) return false;
     takingOver = true;
+    set({ applying: true });
     waiting.postMessage({ type: 'take-over' });
+    setTimer(() => {
+      if (reloadedRecently()) return;
+      markReload();
+      reload();
+    }, TAKE_OVER_WAIT_MS);
     return true;
   }
 
@@ -109,8 +171,9 @@ export function createOffline({
     worker.addEventListener('statechange', () => {
       if (worker.state === 'installed') {
         if (registration.active) {
-          set({ status: 'update-ready' });
+          // Switch first (if allowed), so nothing new starts while it does.
           if (canApplyUpdate()) applyUpdate();
+          set({ status: 'update-ready' });
         }
       } else if (worker.state === 'activated') {
         checkActive();
@@ -128,6 +191,10 @@ export function createOffline({
     if (data.type === 'progress') set({ done: data.done, total: data.total });
     else if (data.type === 'failed') set({ failedCount: data.count, failed: data.failed ?? [], ...(savingAgain ? { status: 'failed' } : {}) });
     else if (data.type === 'saved' && savingAgain) checkActive();
+    else if (data.type === 'pictures') {
+      set({ pictures: { wanted: data.wanted, saved: data.saved, failed: data.failed } });
+      if (data.saved > 0) globalThis.dispatchEvent?.(new Event(PICTURES_SAVED_EVENT));
+    }
   }
 
   /** Looks for a new version now and then, or now if force (only downloads; never switches mid-game). */
@@ -145,7 +212,10 @@ export function createOffline({
     }
     container.addEventListener('message', onMessage);
     container.addEventListener('controllerchange', () => {
-      if (takingOver) reload();
+      if (takingOver) {
+        markReload();
+        reload();
+      }
     });
     try {
       // updateViaCache 'none': always ask the server for a new sw.js (GitHub Pages lets browsers keep files for 10 minutes).
@@ -158,13 +228,24 @@ export function createOffline({
     registration.addEventListener('updatefound', () => follow(registration.installing));
     if (registration.installing) follow(registration.installing);
     if (registration.waiting && registration.active) {
-      set({ status: 'update-ready' });
       // The game was just opened: the waiting version takes over before anyone starts playing.
       if (canApplyUpdate()) applyUpdate();
+      set({ status: 'update-ready' });
       return state;
     }
     if (registration.active) await checkActive();
     return state;
+  }
+
+  /**
+   * Asks for sticker pictures to be saved (the ones not saved yet). Returns
+   * false when it can't now (no internet, or offline play isn't working).
+   */
+  function savePictures(urls) {
+    const worker = registration?.active;
+    if (!worker || !urls.length || globalThis.navigator?.onLine === false) return false;
+    worker.postMessage({ type: 'save-pictures', urls });
+    return true;
   }
 
   /** Removes the offline app and its saved copy (debug panel, for testing). Saved players are not touched. */
@@ -187,6 +268,7 @@ export function createOffline({
   return {
     start,
     remove,
+    savePictures,
     applyUpdate,
     checkForUpdate,
     state: () => state,

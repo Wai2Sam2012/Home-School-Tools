@@ -37,7 +37,7 @@ export function albumScreen(ctx, { theme = 'dino' } = {}) {
           'aria-label': have ? `${s.number}. ${s.name}` : `Sticker ${s.number}, locked`,
           onclick: () => (have ? showSticker(theme, s) : flash(status, `Keep exploring to unlock sticker ${s.number}!`)),
         },
-        have ? stickerPicture(theme, s, 0, { className: 'tile-picture' }) : h('div', { class: 'tile-picture' }, placeholderArt(theme, s, { locked: true })),
+        have ? stickerPicture(theme, s, 0, { className: 'tile-picture', short: true }) : h('div', { class: 'tile-picture' }, placeholderArt(theme, s, { locked: true })),
         h('span', { class: `tile-name${nameSize(have ? s.name : '')}` }, have ? s.name : `#${s.number}`),
         s === upNext ? h('span', { class: 'tile-badge' }, 'Next!') : null);
       });

@@ -151,7 +151,7 @@ export function settingsScreen(ctx) {
     offlineDetail.textContent = state.status === 'unsupported'
       ? 'Open the game from its https:// address in Safari, then tap Share › Add to Home Screen.'
       : state.bytes
-        ? `${state.total} files, ${formatBytes(state.bytes)}, saved on this iPad (version ${String(state.version).split('-')[0]}). The game checks for updates when it opens with internet.`
+        ? `${state.total} files, ${formatBytes(state.bytes)}, saved on this iPad (version ${String(state.version).split('-')[0]}), with each theme's first sticker. Other stickers' pictures are saved when they are collected, and each player's next stop ahead of time, whenever there is internet. The game checks for updates when it opens with internet.`
         : 'The game saves itself on this iPad the first time it opens with internet.';
     offlineUpdate.hidden = state.status !== 'update-ready';
   }

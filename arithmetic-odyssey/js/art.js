@@ -1,8 +1,17 @@
 // Drawn pictures used when a sticker has no picture yet, or a picture fails
 // to load, so the game never shows a broken image (test T2.6).
+//
+// Sticker pictures are saved on the iPad as stickers are collected (with
+// internet; js/offline.js). One that isn't saved yet and can't be downloaded
+// shows the drawing with "Waiting to connect to the internet to get the
+// pictures", and tries again when the internet comes back or it is saved.
 
 import { h } from './ui.js?v=0.7.0';
 import { pictureUrl } from './storyline.js?v=0.7.0';
+import { PICTURES_SAVED_EVENT } from './offline.js?v=0.7.0';
+
+export const WAITING_TEXT = 'Waiting to connect to the internet to get the pictures';
+export const WAITING_SHORT = 'Waiting for internet';
 
 const COLORS = ['#7fb069', '#e08e45', '#5b8e7d', '#c8553d', '#6c8ead', '#d4a017', '#8e6c88', '#4f9d69'];
 
@@ -45,9 +54,11 @@ export function placeholderArt(theme, sticker, { locked = false } = {}) {
 
 /**
  * A sticker's picture: the picture at index (wrapping around), or the drawn
- * placeholder if there is none or it fails to load.
+ * placeholder if there is none. If it can't load (not saved yet and no
+ * internet), the placeholder says it is waiting for the internet (short:
+ * fewer words, for small tiles) and the picture is tried again later.
  */
-export function stickerPicture(theme, sticker, index = 0, { className = 'sticker-picture' } = {}) {
+export function stickerPicture(theme, sticker, index = 0, { className = 'sticker-picture', short = false } = {}) {
   const box = h('div', { class: className });
   const pictures = sticker.pictures ?? [];
   if (pictures.length === 0) {
@@ -55,17 +66,20 @@ export function stickerPicture(theme, sticker, index = 0, { className = 'sticker
     box.classList.add('no-picture');
     return box;
   }
-  const img = h('img', {
-    src: pictureUrl(theme, pictures[((index % pictures.length) + pictures.length) % pictures.length]),
-    alt: sticker.name,
-    loading: 'lazy',
-    decoding: 'async',
-    draggable: false,
-  });
-  img.addEventListener('error', () => {
-    img.replaceWith(placeholderArt(theme, sticker));
-    box.classList.add('no-picture');
-  }, { once: true });
-  box.append(img);
+  const src = pictureUrl(theme, pictures[((index % pictures.length) + pictures.length) % pictures.length]);
+  function load() {
+    const img = h('img', { src, alt: sticker.name, loading: 'lazy', decoding: 'async', draggable: false });
+    img.addEventListener('load', () => box.classList.remove('no-picture', 'waiting'), { once: true });
+    img.addEventListener('error', () => {
+      img.replaceWith(placeholderArt(theme, sticker), h('p', { class: 'waiting-note', role: 'status' }, short ? `📶 ${WAITING_SHORT}` : `📶 ${WAITING_TEXT}`));
+      box.classList.add('no-picture', 'waiting');
+      // Try again when the internet comes back or the picture has been saved (if still on screen).
+      globalThis.addEventListener(PICTURES_SAVED_EVENT, () => {
+        if (box.isConnected) box.replaceChildren(load());
+      }, { once: true });
+    }, { once: true });
+    return img;
+  }
+  box.append(load());
   return box;
 }

@@ -13,12 +13,12 @@ import { fileURLToPath } from 'node:url';
 import { Script } from 'node:vm';
 
 import {
-  APP_FILES, OFFLINE_BUDGET_BYTES, buildServiceWorker, listOfflineFiles, offlineVersion, readVersion, storylineText,
+  APP_FILES, OFFLINE_BUDGET_BYTES, buildServiceWorker, listOfflineFiles, listStickerPictures, offlineVersion, readVersion, storylineText,
 } from '../tools/build-offline.mjs';
 import { AVATARS, AVATAR_COLORS, avatarDrawingUrl, avatarUrl } from '../js/avatars.js';
 import { pictureUrl } from '../js/storyline.js';
 import { THEMES } from '../js/settings.js';
-import { createOffline, offlineMessage } from '../js/offline.js';
+import { createOffline, offlineMessage, picturesToSave } from '../js/offline.js';
 import { LOCAL_STORAGE_LIMIT, memoryReport, offlineCopyReport, savedDataReport } from '../js/storage-report.js';
 import { memoryStorage } from '../js/storage.js';
 
@@ -31,12 +31,14 @@ const VERSION = readVersion();
 const folderOf = (theme) => THEMES[theme].folder.split('/')[1];
 const storylines = Object.fromEntries(Object.keys(THEMES).map((t) => [folderOf(t), storylineText(folderOf(t))]));
 const FILES = listOfflineFiles(GAME, { version: VERSION, storylines });
+const PICTURES = listStickerPictures(GAME, { version: VERSION, storylines });
 const urls = new Set(FILES.map((f) => f.url));
+const later = new Set(PICTURES.map((f) => f.url));
 
 // ---------------------------------------------------------------- T7.1 the file list
 
 test('T7.1 every file in the list exists, with its real size and fingerprint', () => {
-  for (const f of FILES) {
+  for (const f of [...FILES, ...PICTURES]) {
     if (f.path.endsWith('storyline.json')) continue; // built from the theme files; checked below
     const bytes = readFileSync(join(GAME, f.path));
     assert.equal(f.size, bytes.length, f.path);
@@ -47,6 +49,7 @@ test('T7.1 every file in the list exists, with its real size and fingerprint', (
     assert.equal(f.size, Buffer.byteLength(text), `${theme} storyline`);
   }
   assert.equal(urls.size, FILES.length, 'no file is listed twice');
+  assert.equal(new Set([...urls, ...later]).size, FILES.length + PICTURES.length, 'no picture is in both lists');
 });
 
 test('T7.1 every file the game needs is in the list, at the address the game asks for', () => {
@@ -73,12 +76,16 @@ test('T7.1 every file the game needs is in the list, at the address the game ask
     assert.ok(urls.has(avatarDrawingUrl(a.id)), avatarDrawingUrl(a.id));
     for (let c = 1; c <= AVATAR_COLORS[a.id].length; c++) assert.ok(urls.has(avatarUrl(a.id, c)), avatarUrl(a.id, c));
   }
-  // Each theme's story file and every picture and sound it uses, encoded the way the game asks for them.
+  // Each theme's story file and sounds and its first sticker's pictures are saved with the game;
+  // every other sticker picture is in the second list, saved when needed. Encoded the way the game asks for them.
   for (const [theme, info] of Object.entries(THEMES)) {
     const { storyline } = storylines[folderOf(theme)];
     assert.ok(urls.has(`${info.folder}storyline.json`), `${theme} story file`);
-    for (const p of storyline.stickers.flatMap((s) => s.pictures)) assert.ok(urls.has(pictureUrl(theme, p)), pictureUrl(theme, p));
     for (const p of Object.values(storyline.sounds ?? {}).flat()) assert.ok(urls.has(pictureUrl(theme, p)), pictureUrl(theme, p));
+    const [first, ...rest] = storyline.stickers;
+    assert.ok(first.pictures.length > 0, `${theme}: the first sticker has pictures`);
+    for (const p of first.pictures) assert.ok(urls.has(pictureUrl(theme, p)), `${theme} first sticker: ${p}`);
+    for (const p of rest.flatMap((x) => x.pictures)) assert.ok(later.has(pictureUrl(theme, p)), `${theme}: ${p} is saved when needed`);
   }
   // The manifest's icons.
   for (const icon of JSON.parse(read('manifest.json')).icons) assert.ok(urls.has(icon.src), icon.src);
@@ -98,20 +105,23 @@ test('T7.1 a picture named in a story file but missing stops the build (instead 
   assert.throws(() => listOfflineFiles(GAME, { version: VERSION, storylines: broken }), /missing\.jpg is in the story file but missing/);
 });
 
-test('the offline copy fits the budget (both themes are saved)', () => {
-  const total = FILES.reduce((n, f) => n + f.size, 0);
-  assert.ok(total < OFFLINE_BUDGET_BYTES, `${(total / 1e6).toFixed(1)} MB is over the budget; save only the theme being played`);
+test('the game saved at first is small; even with every sticker collected it fits the budget', () => {
+  const first = FILES.reduce((n, f) => n + f.size, 0);
+  const all = first + PICTURES.reduce((n, f) => n + f.size, 0);
+  assert.ok(first < 10 * 1024 * 1024, `${(first / 1e6).toFixed(1)} MB saved at first`);
+  assert.ok(all < OFFLINE_BUDGET_BYTES, `${(all / 1e6).toFixed(1)} MB with every sticker is over the budget`);
 });
 
 // ---------------------------------------------------------------- sw.js
 
 test('sw.js is built with the version and every file, and is valid JavaScript', () => {
-  const sw = buildServiceWorker(GAME, { version: VERSION, files: FILES });
+  const sw = buildServiceWorker(GAME, { version: VERSION, files: FILES, pictures: PICTURES });
   assert.doesNotThrow(() => new Script(sw, { filename: 'sw.js' }));
   assert.ok(!sw.includes('/* VERSION */') && !sw.includes('/* FILES */'), 'placeholders filled in');
   assert.match(sw, new RegExp(`const VERSION = "${VERSION.replace(/\./g, '\\.')}-[0-9a-f]{16}";`));
   const listed = [...sw.matchAll(/^ {2}\["([^"]+)", (\d+), "([0-9a-f]{16})"\],$/gm)];
-  assert.equal(listed.length, FILES.length);
+  assert.equal(listed.length, FILES.length + PICTURES.length, 'both lists');
+  assert.match(sw, /const PICTURES = \[\n {2}\[/, 'the sticker pictures list is filled in');
   assert.ok(sw.includes('["index.html", '), 'the page is saved');
 });
 
@@ -126,7 +136,7 @@ test('a new version is saved under a new name only when a file changes', () => {
 test('the service worker only touches this game: its own saved copies, inside its own folder', () => {
   const template = read('tools/sw-template.js');
   assert.match(template, /const PREFIX = 'arithmetic-odyssey-';/);
-  assert.match(template, /name\.startsWith\(PREFIX\) && name !== CACHE\) await caches\.delete\(name\)/, 'deletes only its own old copies');
+  assert.match(template, /name\.startsWith\(PREFIX\) && name !== CACHE && name !== PICTURE_CACHE\) await caches\.delete\(name\)/, 'deletes only its own old copies, and keeps saved sticker pictures');
   assert.match(template, /if \(!url\.href\.startsWith\(self\.registration\.scope\)\) return;/, 'leaves other pages alone');
   // It takes over only when the page asks (on the start screen, or "Update now"): one skipWaiting, in that message.
   assert.equal(template.split('skipWaiting()').length - 1, 1);
@@ -253,7 +263,7 @@ test('T7.4 an update downloads in the background and waits; it never takes over 
   const b = fakeBrowser({ active: true });
   let reloads = 0;
   let onStart = false;
-  const offline = createOffline({ container: b.container, secure: true, canApplyUpdate: () => onStart, reload: () => { reloads += 1; } });
+  const offline = createOffline({ container: b.container, secure: true, canApplyUpdate: () => onStart, reload: () => { reloads += 1; }, setTimer: () => {} });
   await offline.start();
   assert.equal(offline.state().status, 'ready');
   const next = b.newWorker();
@@ -277,17 +287,48 @@ test('T7.4 an update downloads in the background and waits; it never takes over 
 test('T7.4 opening the game with an update waiting applies it on the start screen, before anyone plays', async () => {
   const b = fakeBrowser({ active: true, waiting: true });
   let reloads = 0;
-  const offline = createOffline({ container: b.container, secure: true, canApplyUpdate: () => true, reload: () => { reloads += 1; } });
+  const offline = createOffline({ container: b.container, secure: true, canApplyUpdate: () => true, reload: () => { reloads += 1; }, setTimer: () => {}, session: null });
   await offline.start();
   assert.deepEqual(b.reg.waiting.posted, ['take-over']);
   b.container.controllerChange();
   assert.equal(reloads, 1);
   // Not on the start screen (for example the game was left on an adventure): it only says so.
   const c = fakeBrowser({ active: true, waiting: true });
-  const later = createOffline({ container: c.container, secure: true, canApplyUpdate: () => false });
+  const later = createOffline({ container: c.container, secure: true, canApplyUpdate: () => false, setTimer: () => {} });
   await later.start();
   assert.equal(later.state().status, 'update-ready');
   assert.deepEqual(c.reg.waiting.posted, []);
+});
+
+test('while an update switches in, the game starts nothing new; if the switch stalls it reloads once, never in a loop', async () => {
+  const session = new Map();
+  const fakeSession = { getItem: (k) => session.get(k) ?? null, setItem: (k, v) => session.set(k, v) };
+  let clock = 1_000_000;
+  let timer = null;
+  let reloads = 0;
+  const open = (b) => createOffline({
+    container: b.container, secure: true, canApplyUpdate: () => true, reload: () => { reloads += 1; },
+    setTimer: (fn) => { timer = fn; }, session: fakeSession, now: () => clock,
+  });
+  const b = fakeBrowser({ active: true, waiting: true });
+  const offline = open(b);
+  const seen = [];
+  offline.onChange((s) => seen.push(s.applying === true));
+  await offline.start();
+  assert.equal(offline.state().applying, true);
+  assert.ok(seen.every(Boolean), 'every change after start says it is switching (so pictures are not saved meanwhile)');
+  timer(); // the switch didn't happen in time
+  assert.equal(reloads, 1, 'reloads once anyway');
+  // The reloaded game finds the update still waiting: it tries again, but doesn't reload again within a minute.
+  const again = open(fakeBrowser({ active: true, waiting: true }));
+  await again.start();
+  timer();
+  assert.equal(reloads, 1, 'no reload loop');
+  clock += 61_000;
+  const later = open(fakeBrowser({ active: true, waiting: true }));
+  await later.start();
+  timer();
+  assert.equal(reloads, 2, 'a minute later it may try once more');
 });
 
 test('an update that fails to download leaves the saved game working', async () => {
@@ -338,6 +379,53 @@ test('the status in words', () => {
   assert.equal(offlineMessage({ status: 'nonsense' }), '');
 });
 
+// ---------------------------------------------------------------- sticker pictures saved when needed
+
+const story = (ids) => ({ stickers: ids.map((id, i) => ({ id, number: i + 1, pictures: [`pictures/${id}/a b.jpg`, `pictures/${id}/2.jpg`] })) });
+
+test('the pictures to save: every collected sticker and each player\'s next stop, for every player', () => {
+  const storylines = { dino: story(['eo', 'herr', 'coel', 'plat']), parks: story(['denali', 'kenai']), missing: null };
+  const players = [
+    { collected: { dino: ['eo', 'herr'], parks: [] } },
+    { collected: { dino: ['eo'] } }, // no parks list at all (an old save)
+  ];
+  const urls = picturesToSave(storylines, players);
+  assert.deepEqual(urls.filter((u) => u.startsWith('themes/dino/')).sort(), [
+    'themes/dino/pictures/coel/2.jpg', 'themes/dino/pictures/coel/a%20b.jpg', // first player's next stop
+    'themes/dino/pictures/eo/2.jpg', 'themes/dino/pictures/eo/a%20b.jpg',
+    'themes/dino/pictures/herr/2.jpg', 'themes/dino/pictures/herr/a%20b.jpg', // collected, and the second player's next stop
+  ]);
+  assert.deepEqual(urls.filter((u) => u.startsWith('themes/national-parks/')).sort(), [
+    'themes/national-parks/pictures/denali/2.jpg', 'themes/national-parks/pictures/denali/a%20b.jpg',
+  ], 'nobody collected a park yet: only the next stop');
+  assert.equal(new Set(urls).size, urls.length, 'each picture once');
+  // Everything collected: no next stop.
+  assert.equal(picturesToSave({ parks: story(['denali']) }, [{ collected: { parks: ['denali'] } }]).length, 2);
+  assert.deepEqual(picturesToSave({}, players), []);
+});
+
+test('pictures are asked for only when offline play works and there is internet', async () => {
+  const offline = createOffline({ container: undefined, secure: true });
+  await offline.start();
+  assert.equal(offline.savePictures(['themes/dino/x.jpg']), false, 'offline play unsupported');
+  const b = fakeBrowser({ active: true });
+  const working = createOffline({ container: b.container, secure: true });
+  await working.start();
+  assert.equal(working.savePictures([]), false, 'nothing to save');
+  assert.equal(working.savePictures(['themes/dino/x.jpg']), true);
+  assert.deepEqual(b.reg.active.posted, ['status', 'save-pictures']);
+  b.container.message({ type: 'pictures', wanted: 4, saved: 3, failed: 1 });
+  assert.deepEqual(working.state().pictures, { wanted: 4, saved: 3, failed: 1 });
+});
+
+test('the service worker keeps saved sticker pictures across updates, and checks each one', () => {
+  const template = read('tools/sw-template.js');
+  assert.match(template, /const PICTURE_CACHE = `\$\{PREFIX\}sticker-pictures`;/);
+  assert.match(template, /PICTURE_INFO\.get\(url\)\?\.hash !== saved\?\.headers\.get\('X-AO-Hash'\)\) await pictures\.delete\(request\)/, 'a changed or removed picture is dropped');
+  assert.match(template, /filter\(\(url\) => PICTURE_INFO\.has\(url\)\)/, 'only pictures in its list are saved');
+  assert.match(template, /await download\(url, size, hash\)/, 'checked like every other file');
+});
+
 // ---------------------------------------------------------------- storage and memory report
 
 test('saved data is measured per player, with other tools on the same address counted separately', () => {
@@ -373,8 +461,14 @@ test('the offline copy is measured from its saved file list, without reading the
     keys: async () => [1, 2, 3],
     match: async () => (complete ? { json: async () => list } : undefined),
   });
-  const stores = { 'arithmetic-odyssey-0.7.0-x': cache(true), 'arithmetic-odyssey-0.7.1-y': cache(false), 'other-tool': cache(true) };
+  const pictures = {
+    keys: async () => ['a', 'b'],
+    match: async (r) => ({ headers: { get: (h) => (h === 'X-AO-Size' ? (r === 'a' ? '150000' : '250000') : null) } }),
+  };
+  const stores = {
+    'arithmetic-odyssey-0.7.0-x': cache(true), 'arithmetic-odyssey-0.7.1-y': cache(false), 'arithmetic-odyssey-sticker-pictures': pictures, 'other-tool': cache(true),
+  };
   const fakeCaches = { keys: async () => Object.keys(stores), open: async (n) => stores[n] };
-  assert.deepEqual(await offlineCopyReport(fakeCaches), { copies: 2, complete: 1, files: 2 + 3, bytes: 17000 });
+  assert.deepEqual(await offlineCopyReport(fakeCaches), { copies: 2, complete: 1, files: 2 + 3, bytes: 17000, pictures: 2, pictureBytes: 400000 });
   assert.equal(await offlineCopyReport(null), null);
 });

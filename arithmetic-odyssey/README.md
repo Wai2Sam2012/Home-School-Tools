@@ -39,7 +39,7 @@ Each theme keeps all of its resources (facts, story text, pictures, sounds and t
 | 4. The adventure | Done: the trail map with a flag every 10 steps, detours after a wrong answer (called **wandering** in the game: "Wandering question 1 of 3"), going back to the last flag when a whole detour is missed, Resume Adventure, and Trail's End with the new sticker, a slideshow of its pictures and a trip summary. |
 | 5. Sound, voice and timer | Done: sound effects, questions and story moments read aloud with a Repeat button, the thinking timer (shown on Trail's End), and a "Tap to continue" screen when the iPad pauses sound. Grown-ups can turn the voice and the sound effects on or off in Settings, choose the voice and its speed (tap a voice to hear it), and see which voice is used. |
 | 6. Saving, stats, high scores and backup | Done (0.6.0): players, settings, stickers and the adventure in progress are saved on the iPad and survive closing the game; Need More Practice and high scores in My Stats; Back up and Restore (with undo) in Grown-up Settings. See [Saving and backup](#saving-and-backup). **0.6.1:** Learn from Incorrect, and recorded flag sounds. **0.6.2:** three dinosaur roars and two truck engines, picked at random at each flag. **0.6.3:** 🙏 Help (counting blocks) for addition and subtraction (high scores also weigh Help used), two dirt bike flag sounds, detours are called "wandering", and the answer is typed straight into the question. **0.6.4:** the dinosaur theme is called Dinosaur Adventure; the title no longer covers Back on narrow screens; the 80 player picture colors are ready for Stage 7. **0.6.5:** players choose a picture and one of its 5 options (numbered 1 to 5), and can change it by tapping their picture on Home. |
-| 7. Offline app | Done (0.7.0): the game saves itself on the iPad (both themes, about 22 MB) and plays with no internet; **Add to Home Screen** makes it a full-screen app called **Arithmetic Odyssey**; updates download in the background and apply the next time the game opens. See [Playing offline](#playing-offline). The debug panel shows how much is stored and the memory used. |
+| 7. Offline app | Done (0.7.0): the game saves itself on the iPad (about 4 MB: everything it needs, with each theme's first sticker) and plays with no internet; other stickers' pictures are saved as they are collected (and each player's next stop ahead of time). **Add to Home Screen** makes it a full-screen app called **Arithmetic Odyssey**; updates download in the background and apply the next time the game opens. See [Playing offline](#playing-offline). The debug panel shows how much is stored and the memory used. |
 | 8. Release and iPad acceptance | Not started |
 
 ## Running the tests
@@ -51,7 +51,7 @@ cd arithmetic-odyssey
 node --test
 ```
 
-You should see `# fail 0` (235 tests in version 0.7.0). Each test name starts with its ID from the test plan in [GAME-PLAN.md](GAME-PLAN.md) where it has one, for example `T1.3`.
+You should see `# fail 0` (239 tests in version 0.7.0). Each test name starts with its ID from the test plan in [GAME-PLAN.md](GAME-PLAN.md) where it has one, for example `T1.3`.
 
 ## Testing in a browser on your PC
 
@@ -71,11 +71,11 @@ The debug panel sits in the top-right corner; **Hide** folds it away. Besides th
 
 **Storage and memory** (in the debug panel, measured when it opens and with **Measure storage and memory**):
 - **Saved game data:** the size of the players' saves, in total and for each player, against the browser's limit of about 5 MB. Other tools on the same github.io address share that limit, so their data is shown too.
-- **Offline copy:** how many files are saved for offline play and their size.
+- **Offline copy:** how many files are saved for offline play and their size; **Sticker pictures saved:** the collected stickers' and next stops' pictures saved so far.
 - **Browser storage used:** the browser's own count of everything the game stores, out of what it allows, and whether it is **kept when the iPad is short of space**.
 - **Memory (JavaScript):** only Chrome and Edge report it (on the PC). Safari on the iPad never does, so the panel also shows what the page holds right now: its elements, pictures and loaded sounds.
 
-The panel also has **Offline: check for an update now**, **apply a waiting update now** and **delete the saved copy** (players are kept).
+The panel also has **Offline: check for an update now**, **apply a waiting update now**, **save the sticker pictures now** and **delete the saved copy** (players are kept).
 
 **The offline copy while you work on the game.** The game plays from its saved copy, so after changing a file: restart the server (it rebuilds `sw.js`), then open the game and reload once. The new version takes over on the start screen. Or use **Offline: delete the saved copy** in the debug panel.
 
@@ -94,11 +94,16 @@ The **Actions** tab shows each run; a green tick means it published. Tests, tool
 
 ## Playing offline
 
-The game saves itself on the iPad the first time it opens with internet: every screen, both themes' pictures and sounds, and all the player pictures (about 22 MB). The start screen shows **Saving the game for offline play… 45%**, then **✓ Ready to play offline**. From then on it plays with no internet, even after the iPad restarts.
+The game saves itself on the iPad the first time it opens with internet: every screen, all 80 player pictures, the sounds and story files, and the pictures of each theme's **first sticker** (about 4 MB). The start screen shows **Saving the game for offline play… 45%**, then **✓ Ready to play offline**. From then on it plays with no internet, even after the iPad restarts.
+
+**Sticker pictures are saved as they are collected,** so the saved game only grows as stickers are won (all of them together are about 18 MB today):
+- When a player collects a sticker with internet, its pictures are saved, so the Sticker Album shows them offline later.
+- Each player's **next stop** (the sticker shown on the trip planner and at the end of the trail) is saved ahead of time, so the next adventure's goal shows offline too.
+- A sticker collected **without internet** shows its drawing with **📶 Waiting to connect to the internet to get the pictures** (on the small album tiles: **📶 Waiting for internet**). When the internet comes back, its pictures are saved and appear by themselves.
 
 **Install it as an app (best):** open the game's address in Safari, tap **Share › Add to Home Screen**, then open it from its icon (**Arithmetic Odyssey**; the iPad may shorten a long name under the icon). It opens full screen, like an app. Open it once with internet so it saves itself; the Home Screen app keeps its own saved copy and its own players (separate from the Safari tab).
 
-**Updates:** when a new version is published, the game downloads it in the background the next time it opens with internet (only the files that changed). It never switches in the middle of an adventure: the start screen says **Update ready: it will apply next time you open the game**, and the next time the game opens it switches before anyone plays. **Update now** (on the start screen, or in Grown-up Settings › Offline play) switches straight away; an adventure in progress is kept.
+**Updates:** when a new version is published, the game downloads it in the background the next time it opens with internet (only the files that changed; saved sticker pictures are kept). It never switches in the middle of an adventure: the start screen says **Update ready: it will apply next time you open the game**, and the next time the game opens it switches before anyone plays. **Update now** (on the start screen, or in Grown-up Settings › Offline play) switches straight away; an adventure in progress is kept.
 
 **If something didn't save:** the start screen says some files couldn't be saved and **Ready to play offline** doesn't appear. The game still plays online; the next time it opens with internet it saves the rest (only what is missing).
 

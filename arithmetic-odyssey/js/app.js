@@ -13,7 +13,7 @@ import { collectNext, loadStoryline, pictureUrl } from './storyline.js?v=0.7.0';
 import { h } from './ui.js?v=0.7.0';
 import { startScreen } from './screens/start.js?v=0.7.0';
 import { newPlayerScreen, playerPictureScreen, profilesScreen } from './screens/profiles.js?v=0.7.0';
-import { createOffline } from './offline.js?v=0.7.0';
+import { PICTURES_SAVED_EVENT, createOffline, picturesToSave } from './offline.js?v=0.7.0';
 import { homeScreen } from './screens/home.js?v=0.7.0';
 import { setupScreen } from './screens/setup.js?v=0.7.0';
 import { adventureScreen } from './screens/adventure.js?v=0.7.0';
@@ -48,6 +48,7 @@ const storylines = new Map();
 const flagRecordings = new Map(); // theme -> its loaded recordings (themes/<theme>/sounds/flag-1.mp3, ...)
 const lastFlag = new Map(); // theme -> the recording played last time
 let current = { name: null, params: {}, leave: [] };
+let lastPictureSave = 0;
 
 // Saving problems (damaged data set aside, storage full or unavailable) are
 // listed in Settings and shown once in a short message.
@@ -186,6 +187,8 @@ const ctx = {
     root.dataset.screen = name;
     root.scrollTop = 0;
     page.querySelector('h1')?.focus({ preventScroll: true });
+    // Screens with stickers: save their pictures if there is internet (Trail's End: a sticker was just won).
+    if (['home', 'setup', 'trailEnd', 'album'].includes(name)) ctx.savePictures({ force: name === 'trailEnd' });
   },
 
   /** Offline play (js/offline.js): saving the game on the iPad, and updates. */
@@ -193,6 +196,22 @@ const ctx = {
     // A new version takes over only on the start screen, so no adventure is interrupted.
     canApplyUpdate: () => current.name === 'start',
   }),
+
+  /**
+   * Saves the sticker pictures the players need (collected stickers and next
+   * stops) while there is internet. Cheap to call often: pictures already
+   * saved are skipped, and it runs at most every 5 seconds unless forced.
+   */
+  async savePictures({ force = false } = {}) {
+    if (ctx.offline.state().applying) return false;
+    const now = Date.now();
+    if (!force && now - lastPictureSave < 5000) return false;
+    lastPictureSave = now;
+    const loaded = {};
+    for (const theme of Object.keys(THEMES)) loaded[theme] = await ctx.getStoryline(theme).catch(() => null);
+    if (ctx.offline.state().applying) return false; // an update started switching in meanwhile
+    return ctx.offline.savePictures(picturesToSave(loaded, ctx.profiles.list()));
+  },
 
   /** Draws the current screen again (used after debug actions). */
   refresh() {
@@ -258,7 +277,7 @@ function addDebugTools() {
   // Offline play, storage and memory (measured in the background; "Measure" updates them).
   addDebugInfo('Offline play', () => `${ctx.offline.message() || 'starting'} [${ctx.offline.state().status}]`);
   let measured = {};
-  const STORAGE_ROWS = ['Saved game data', 'Saved data by player', "Other tools' saved data here", 'Offline copy', 'Browser storage used',
+  const STORAGE_ROWS = ['Saved game data', 'Saved data by player', "Other tools' saved data here", 'Offline copy', 'Sticker pictures saved', 'Browser storage used',
     'Kept when the iPad is short of space', 'Memory (JavaScript)', 'Page right now', 'Measured at'];
   for (const label of STORAGE_ROWS) addDebugInfo(label, () => measured[label] ?? 'measuring…');
   async function measure() {
@@ -274,6 +293,9 @@ function addDebugTools() {
   }
   addDebugAction('Measure storage and memory', measure);
   addDebugAction('Offline: check for an update now', () => (ctx.offline.checkForUpdate({ force: true }) ? 'Checking for a new version…' : 'Not possible right now (no internet or offline play is unavailable).'));
+  addDebugAction('Offline: save the sticker pictures now', async () => ((await ctx.savePictures({ force: true }))
+    ? 'Saving the pictures of collected stickers and next stops (only ones not saved yet).'
+    : 'Not possible right now (no internet, or offline play is not working).'));
   addDebugAction('Offline: delete the saved copy', async () => {
     const removed = await ctx.offline.remove();
     return `Deleted ${removed} saved ${removed === 1 ? 'copy' : 'copies'} and the offline app. Players are kept. Reload to save it again.`;
@@ -344,6 +366,18 @@ if (isDebugOn()) {
 }
 ctx.show('start');
 ctx.offline.start();
+
+// Sticker pictures: save the ones the players need whenever the game is ready
+// offline, the internet comes back, or a screen with stickers opens.
+ctx.offline.onChange((state) => {
+  // Not while an update is switching in (the page is about to reload).
+  if (!state.applying && ['ready', 'update-saving', 'update-ready'].includes(state.status)) ctx.savePictures();
+});
+globalThis.addEventListener('online', () => {
+  ctx.savePictures({ force: true });
+  // Pictures waiting for the internet try again.
+  globalThis.dispatchEvent(new Event(PICTURES_SAVED_EVENT));
+});
 
 // Tells the loading check in index.html that the scripts ran.
 document.documentElement.dataset.ready = '1';
