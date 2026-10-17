@@ -47,3 +47,27 @@ export function avatarIcon(id, { className = 'avatar-icon', title = '' } = {}) {
   img.draggable = false;
   return img;
 }
+
+/**
+ * The five colors of each picture, in the order players will see them (color 1
+ * first). Each is a file in images/avatars/<id>/<color>.png. Players choose a
+ * color in Stage 7 (see GAME-PLAN.md); until then the game shows the drawings above.
+ */
+export const AVATAR_COLORS = Object.freeze({
+  longneck: ['green', 'blue', 'brown', 'purple', 'teal'],
+  triceratops: ['green', 'blue', 'brown', 'purple', 'gold'],
+  trex: ['green', 'blue', 'orange', 'purple', 'olive'],
+  mosasaur: ['blue', 'teal', 'gray', 'purple', 'green'],
+  pterosaur: ['orange', 'green', 'blue', 'red', 'purple'],
+  pickup: ['red', 'blue', 'black', 'white', 'green'],
+  monstertruck: ['red', 'blue', 'green', 'purple', 'yellow'],
+  dirtbike: ['red', 'blue', 'green', 'orange', 'yellow'],
+  suv: ['white', 'black', 'blue', 'red', 'green'],
+  atv: ['red', 'blue', 'green', 'yellow', 'purple'],
+  robot: ['white', 'red', 'teal', 'yellow', 'green'],
+  rocket: ['red', 'blue', 'teal', 'black', 'purple'],
+  butterfly: ['orange', 'blue', 'pink', 'purple', 'green'],
+  unicorn: ['pink', 'blue', 'rainbow', 'lavender', 'whitegold'],
+  dog: ['golden', 'black', 'brownwhite', 'husky', 'white'],
+  cat: ['orange', 'gray', 'black', 'lightbrown', 'calico'],
+});

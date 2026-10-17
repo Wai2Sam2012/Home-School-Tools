@@ -529,9 +529,13 @@ Every stage ends with its tests passing, the site republished, and a short repor
 - **Help** (🙏, counting blocks) for addition and subtraction: the question drawn with counting blocks in place of the trail map (`tipSvg()` in `js/blocks.js`, `js/tip-card.js`); each question's Help counts once in the trip's "Help used". Learn from Incorrect has it too, not counted.
 - **High scores** now rank by the most right answers (as a share of all answers; a trip with more wandering questions isn't favoured), then the shortest thinking time, then the least Help. (This replaces "fewest setbacks first".)
 - **Layout:** the answer box above the keypad is gone; typed digits show in orange in the question in place of the ?. The 🙏 Help button sits in front of the question on an upright iPad and under it on a sideways one; the Help picture takes the place of the trail map and story while open, so it can be bigger.
-- **Theme name:** "Dino Tour" is now called **Dinosaur Adventure** (the theme button, the top bar, Trail's End and the docs), with new story text from the author in `themes/dino/game-text.json`.
 - The block badge sits on the last square (right end lying down, bottom standing up); the 3 block is a lighter pink.
 - Detours are called **wandering** wherever players see or hear it ("Wandering question 1 of 3", Wandering length, Wanderings on Trail's End); the code still says detour.
+
+**0.6.4:**
+- **Theme name:** "Dino Tour" is now called **Dinosaur Adventure** (the theme button, the top bar, Trail's End and the docs), with new story text from the author in `themes/dino/game-text.json` (0.6.3 had the text; 0.6.4 the name).
+- **Top bar:** a long title no longer covers the Back button on a narrow screen. The empty right side gives way first and the title wraps; on the iPad the title stays centered.
+- **Player picture colors:** the 80 pictures (16 characters, 5 colors each) are cut from the author's catalog and saved in `images/avatars/<id>/<color>.png`, ready for Stage 7 (see below).
 
 ### Stage 7: Offline app (PWA)
 
@@ -566,14 +570,14 @@ Every stage ends with its tests passing, the site republished, and a short repor
 | Mosasaur (`mosasaur`) | blue, teal, gray, purple, green |
 | Pickup truck (`pickup`) | red, blue, black, white, green |
 
-- **Files:** `images/avatars/<id>/<color>.png`, for example `images/avatars/cat/gray.png`. Each is square with a transparent background, made smaller from the 512 × 512 originals to 256 × 256 (about 2–3 MB for all 80, so they can be saved for offline play). Every picture faces right, toward the finish on the trail map; any that face left are flipped when they are made smaller. The originals are not kept in the repository.
+- **Files (done in 0.6.4):** `images/avatars/<id>/<color>.png`, for example `images/avatars/cat/gray.png`, and the color order in `AVATAR_COLORS` in `js/avatars.js`. They were cut from the author's catalog sheet: each is a 256 × 256 PNG with a see-through background, about 15 KB (1.2 MB for all 80, so they can be saved for offline play). Every picture faces right, toward the finish on the trail map; the T. rex, pterosaur, unicorn and dirt bike faced left in the catalog and were flipped. The catalog sheet is not kept in the repository. On the sheet each character was only about 120 pixels across, so the pictures are a little soft when shown large; the 512 × 512 originals can replace them later with the same file names.
 - **Choosing:** on the new-player and edit-player screens, tap a picture, then one of 5 color dots under it. The choice shows straight away.
 - **Saving:** the player keeps their picture `id` and adds a `color` (1–5). Players saved before this, and backups from older versions, get color 1. The game falls back to the drawn picture (the current `.svg`) if a picture file is missing.
 - **Credits:** where the pictures came from goes in `images/avatars/README.md`.
 
 | ID | Test | Kind |
 |---|---|---|
-| T7.6 | Every picture has 5 color files; each is square, about 256 × 256, under 100 KB, and in the offline file list | Automated |
+| T7.6 | Every picture has 5 color files; each is a 256 × 256 PNG with a see-through background, under 100 KB (done in 0.6.4, `tests/avatars.test.js`), and in the offline file list | Automated |
 | T7.7 | A player's color is saved, survives a reload, is kept in a backup, and an old save or backup without one reads as color 1; a damaged color reads as 1 | Automated |
 | T7.8 | Choosing a picture and a color on the new-player and edit-player screens shows that color on Home, the trail map and My Stats | PC |
 | T7.9 | Every picture faces right on the trail map, and the color dots are easy to tap on the iPad | iPad |
