@@ -86,7 +86,13 @@ export function adventureScreen(ctx) {
   // 🙏 Help (addition and subtraction): the question drawn with counting blocks.
   // Each question's Help counts once in the trip's "Help used".
   // While the tip is open it takes the place of the trail map and the story, so it can be bigger.
-  const tipCard = createTipCard({ onToggle: (open) => page?.classList.toggle('tip-open', open) });
+  // The size is fitted again straight away, so the screen never shows a frame that is too tall.
+  const tipCard = createTipCard({
+    onToggle: (open) => {
+      page?.classList.toggle('tip-open', open);
+      fitNow();
+    },
+  });
   // Help in front of the question (upright screen) and under it (wide screen); style.css shows one.
   const tipButtons = [createTipButton(() => showTip(), { place: 'front' }), createTipButton(() => showTip(), { place: 'below' })];
   function showTip() {
@@ -393,19 +399,21 @@ export function adventureScreen(ctx) {
   // and step down to more compact sizes until it fits; if even the smallest
   // doesn't fit, let it scroll (see style.css).
   let fitFrame = 0;
+  function fitNow() {
+    cancelAnimationFrame(fitFrame);
+    const app = page?.parentElement;
+    if (!app) return;
+    const tooTall = () => app.scrollHeight > app.clientHeight + 1;
+    app.classList.remove('fit-scroll');
+    const levels = ['big', '0', '1', '2', '3'];
+    let level = 0;
+    page.dataset.fit = levels[0];
+    while (tooTall() && level < levels.length - 1) page.dataset.fit = levels[++level];
+    app.classList.toggle('fit-scroll', tooTall());
+  }
   function fit() {
     cancelAnimationFrame(fitFrame);
-    fitFrame = requestAnimationFrame(() => {
-      const app = page?.parentElement;
-      if (!app) return;
-      const tooTall = () => app.scrollHeight > app.clientHeight + 1;
-      app.classList.remove('fit-scroll');
-      const levels = ['big', '0', '1', '2', '3'];
-      let level = 0;
-      page.dataset.fit = levels[0];
-      while (tooTall() && level < levels.length - 1) page.dataset.fit = levels[++level];
-      app.classList.toggle('fit-scroll', tooTall());
-    });
+    fitFrame = requestAnimationFrame(fitNow);
   }
   const resizes = new ResizeObserver(fit);
   window.addEventListener('resize', fit);
