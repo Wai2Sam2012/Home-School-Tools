@@ -2,6 +2,10 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
+  <!-- Security policy: only the game's own files run, and the three small
+       scripts on this page (by their fingerprints). Set by tools/csp.mjs;
+       tests/security.test.js checks it matches. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'self' 'sha256-sWdJYqgpvzp1jokGNfEr3aYAdviC07WRIuTTLnUYAEg=' 'sha256-/FhZYeGpBKsxJ5vqb5YyfQG1EOjqamzwhmrzyWO41Kc=' 'sha256-1oUpgnUfsf/+hN1uwC/mtEDfhM3FEyokAmwWIDO5sl8='; style-src 'self'; img-src 'self'; media-src 'self'; connect-src 'self'; manifest-src 'self'; worker-src 'self'; object-src 'none'; base-uri 'none'; form-action 'none'">
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#1f6f5c">
   <title>Arithmetic Odyssey</title>
@@ -14,7 +18,7 @@
   <meta name="mobile-web-app-capable" content="yes">
   <meta name="apple-mobile-web-app-title" content="Arithmetic Odyssey">
   <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <link rel="stylesheet" href="css/style.css?v=0.7.0">
+  <link rel="stylesheet" href="css/style.css?v=0.7.1">
   <script>
     // Collects errors while the game starts, so the loading check below can
     // show what went wrong (there are no developer tools on an iPad).
@@ -26,10 +30,18 @@
     window.addEventListener('unhandledrejection', function (event) {
       window.aoLoadErrors.push(String(event.reason && event.reason.message || event.reason));
     });
+    // A game file that couldn't be downloaded (seen while capturing, as script errors don't bubble).
+    window.addEventListener('error', function (event) {
+      if (event.target && event.target.tagName === 'SCRIPT') window.aoLoadErrors.push('A game file could not be downloaded.');
+    }, true);
+    // Anything the security policy below blocked (shown with ?debug=1 and on the loading check).
+    document.addEventListener('securitypolicyviolation', function (event) {
+      window.aoLoadErrors.push('Blocked by the security policy: ' + event.violatedDirective + ' ' + (event.blockedURI || 'inline'));
+    });
   </script>
   <!-- The ?v= tags give each version new addresses, so the browser never mixes
        cached files from two versions. Set them with tools/set-version.mjs. -->
-  <script type="module" src="js/app.js?v=0.7.0" onerror="window.aoLoadErrors.push('A game file could not be downloaded.')"></script>
+  <script type="module" src="js/app.js?v=0.7.1"></script>
 </head>
 <body>
   <!-- js/app.js replaces this with the game's screens. -->

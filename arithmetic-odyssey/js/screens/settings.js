@@ -2,12 +2,12 @@
 // detour length, saving, offline play, backup and restore, and deleting the
 // player.
 
-import { ADVENTURE_LENGTHS, DETOUR_MAX, DETOUR_MIN, stepDetourLength } from '../settings.js?v=0.7.0';
-import { bestVersions, chooseVoice, isFunVoice, voiceId, voiceQuality } from '../speech.js?v=0.7.0';
-import { playerIcon } from '../avatars.js?v=0.7.0';
-import { canUndoRestore, makeBackup, parseBackup, restoreBackup, saveBackupFile, undoRestore } from '../backup.js?v=0.7.0';
-import { formatBytes } from '../storage.js?v=0.7.0';
-import { choiceDialog, choiceRow, confirmDialog, h, topBar } from '../ui.js?v=0.7.0';
+import { COLOR_THEMES, COLOR_THEME_LABELS, ADVENTURE_LENGTHS, DETOUR_MAX, DETOUR_MIN, stepDetourLength } from '../settings.js?v=0.7.1';
+import { bestVersions, chooseVoice, isFunVoice, voiceId, voiceQuality } from '../speech.js?v=0.7.1';
+import { playerIcon } from '../avatars.js?v=0.7.1';
+import { MAX_BACKUP_FILE_BYTES, canUndoRestore, makeBackup, parseBackup, restoreBackup, saveBackupFile, undoRestore } from '../backup.js?v=0.7.1';
+import { formatBytes } from '../storage.js?v=0.7.1';
+import { choiceDialog, choiceRow, confirmDialog, h, topBar } from '../ui.js?v=0.7.1';
 
 const REGIONS = { US: 'US', GB: 'UK', AU: 'Australia', IE: 'Ireland', IN: 'India', ZA: 'South Africa', NZ: 'New Zealand', CA: 'Canada', SG: 'Singapore' };
 const SAMPLE = 'Hi! What is 7 times 8?';
@@ -180,6 +180,10 @@ export function settingsScreen(ctx) {
     const file = fileInput.files?.[0];
     fileInput.value = '';
     if (!file) return;
+    if (file.size > MAX_BACKUP_FILE_BYTES) {
+      backupStatus.textContent = 'That file is too big to be an Arithmetic Odyssey backup.';
+      return;
+    }
     const parsed = parseBackup(await file.text().catch(() => ''));
     if (!parsed.ok) {
       backupStatus.textContent = parsed.error;
@@ -244,6 +248,21 @@ export function settingsScreen(ctx) {
     topBar('Grown-up Settings', () => ctx.show('home')),
     h('p', { class: 'lead settings-for' }, 'Settings for ', playerIcon(player, { className: 'avatar-icon inline' }), ` ${player.name}`),
     h('div', { class: 'settings-layout' },
+      h('section', { class: 'panel colors-panel' },
+        h('h2', {}, 'Colors'),
+        choiceRow({
+          label: 'Colors',
+          className: 'colors-row',
+          value: player.settings.colors,
+          options: COLOR_THEMES.map((c) => ({ value: c, label: COLOR_THEME_LABELS[c] })),
+          onChange: (colors) => {
+            ctx.profiles.updateSettings(player.id, { colors });
+            ctx.applyColors(colors);
+            ctx.profiles.setLastColors(colors);
+          },
+        }),
+        h('p', { class: 'note' }, `The colors of the whole game for ${player.name}. High contrast is the easiest to read; Dark is gentle in a dim room.`),
+      ),
       h('section', { class: 'panel' },
         h('h2', {}, 'Questions'),
         choiceRow({

@@ -136,6 +136,20 @@ $MaxPathLength = 250
 # Helpers
 # ---------------------------------------------------------------------------
 
+function Protect-CsvRow {
+    # A copy of a row whose text can't run as a formula when the CSV is opened
+    # in Excel: a cell starting with = + - @ (from a web page or Commons) gets
+    # a leading apostrophe.
+    param($Row)
+    $copy = [ordered]@{}
+    foreach ($prop in $Row.PSObject.Properties) {
+        $value = $prop.Value
+        if ($value -is [string] -and $value -match '^[=+\-@\t\r]') { $value = "'" + $value }
+        $copy[$prop.Name] = $value
+    }
+    return [pscustomobject]$copy
+}
+
 function Get-HttpStatusCode {
     param($ErrorRecord)
     try {
@@ -278,7 +292,14 @@ function Get-ImageUrl {
             $originalUri = $null
             if ([uri]::TryCreate([string]$original, [UriKind]::Absolute, [ref]$originalUri)) { $primary = $originalUri }
         }
-        if ($primary.Scheme -ne 'http' -and $primary.Scheme -ne 'https') { continue }
+        # Pictures are only downloaded over https: an http address is moved to https.
+        if ($primary.Scheme -eq 'http') {
+            $secure = New-Object System.UriBuilder $primary
+            $secure.Scheme = 'https'
+            $secure.Port = -1
+            $primary = $secure.Uri
+        }
+        if ($primary.Scheme -ne 'https') { continue }
         $ext = [System.IO.Path]::GetExtension($primary.AbsolutePath).ToLowerInvariant()
         if ($ImageExtensions -notcontains $ext) { continue }
         if (-not $AllowExternal -and -not (Test-SiteHost $primary $SiteHost)) { continue }
@@ -599,7 +620,7 @@ foreach ($page in $pages) {
 }
 
 try {
-    $log | Export-Csv -LiteralPath $logPath -NoTypeInformation -Encoding UTF8
+    $log | ForEach-Object { Protect-CsvRow $_ } | Export-Csv -LiteralPath $logPath -NoTypeInformation -Encoding UTF8
     Write-Host "Log written to $logPath"
 } catch {
     Write-Warning "Could not write the log to ${logPath}: $($_.Exception.Message)"

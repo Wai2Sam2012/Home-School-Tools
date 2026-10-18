@@ -8,17 +8,17 @@
 // Submit. It pauses while Repeat is reading and while the game is in the
 // background. The keypad works the whole time; nothing waits on speech.
 
-import { answerProblem, jumpTo, milestoneSteps, storyText, unlockSticker, useTip, withNextProblem } from '../adventure.js?v=0.7.0';
-import { hasTip } from '../blocks.js?v=0.7.0';
-import { createTipButton, createTipCard, showTipButtons } from '../tip-card.js?v=0.7.0';
-import { stickerPicture } from '../art.js?v=0.7.0';
-import { playerIcon } from '../avatars.js?v=0.7.0';
-import { createDetourRoad, loopProgress } from '../detour-road.js?v=0.7.0';
-import { createKeypad } from '../keypad.js?v=0.7.0';
-import { THEMES } from '../settings.js?v=0.7.0';
-import { createThinkingTimer } from '../timer.js?v=0.7.0';
-import { nextSticker } from '../storyline.js?v=0.7.0';
-import { h, topBar } from '../ui.js?v=0.7.0';
+import { answerProblem, jumpTo, milestoneSteps, storyText, unlockSticker, useTip, withNextProblem } from '../adventure.js?v=0.7.1';
+import { hasTip } from '../blocks.js?v=0.7.1';
+import { createTipButton, createTipCard, showTipButtons } from '../tip-card.js?v=0.7.1';
+import { stickerPicture } from '../art.js?v=0.7.1';
+import { playerIcon } from '../avatars.js?v=0.7.1';
+import { createDetourRoad, loopProgress } from '../detour-road.js?v=0.7.1';
+import { createKeypad } from '../keypad.js?v=0.7.1';
+import { THEMES } from '../settings.js?v=0.7.1';
+import { createThinkingTimer } from '../timer.js?v=0.7.1';
+import { nextSticker } from '../storyline.js?v=0.7.1';
+import { h, topBar } from '../ui.js?v=0.7.1';
 
 const PRAISE = ['Correct!', 'Great job!', 'You got it!', 'Awesome!', 'Nice work!'];
 // A right answer moves on by itself; after a wrong one the game waits for
@@ -211,16 +211,36 @@ export function adventureScreen(ctx) {
     else startTimer(); // text only: timing starts when the question is shown
   }
 
+  // The finished trip is recorded (sticker, high score, history) as soon as
+  // the last answer is right, not when Trail's End opens a moment later, so
+  // leaving or closing the game in between never loses it.
+  let finishing = null;
+  function recordFinish() {
+    finishing ??= (async () => {
+      let error = null;
+      try {
+        storyline ??= await ctx.getStoryline(state.theme);
+      } catch (e) {
+        error = e;
+      }
+      if (error) {
+        // No sticker list: keep the score and history anyway.
+        const result = ctx.profiles.finishAdventure(player.id, state, { collected: player.collected[state.theme] ?? [], stickerId: null });
+        return { result, error };
+      }
+      const { sticker, collected } = unlockSticker(storyline, player.collected[state.theme]);
+      return { result: ctx.profiles.finishAdventure(player.id, state, { collected, stickerId: sticker?.id ?? null }), error: null };
+    })();
+    return finishing;
+  }
+
   async function finish() {
-    try {
-      storyline ??= await ctx.getStoryline(state.theme);
-    } catch (error) {
-      setStory(`You reached the end, but the sticker list could not be loaded: ${error.message}`, 'setback');
+    const { result, error } = await recordFinish();
+    if (error) {
+      setStory(`You reached the end! Your score is saved, but the sticker list could not be loaded: ${error.message}`, 'setback');
       return;
     }
     ctx.sound('finish');
-    const { sticker, collected } = unlockSticker(storyline, player.collected[state.theme]);
-    const result = ctx.profiles.finishAdventure(player.id, state, { collected, stickerId: sticker?.id ?? null });
     ctx.show('trailEnd', result);
   }
 
@@ -277,6 +297,7 @@ export function adventureScreen(ctx) {
     showTipButtons(tipButtons, false);
     const problem = state.problem;
     save(next);
+    if (events.some((e) => e.type === 'finished')) recordFinish();
     keypad.setEnabled(false);
     question.replaceChildren(`${problem.text} = `, h('span', { class: 'typed' }, value));
     // A wrong answer: the player's answer in red, crossed out, and the right

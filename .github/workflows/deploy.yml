@@ -26,6 +26,9 @@ jobs:
     steps:
       - name: Check out the repository
         uses: actions/checkout@v5
+        with:
+          # Nothing here pushes, so the token isn't kept in the checkout.
+          persist-credentials: false
 
       - name: Set up Node.js
         uses: actions/setup-node@v5

@@ -151,6 +151,20 @@ $MaxBytesForGame = 400KB
 # Helpers
 # ---------------------------------------------------------------------------
 
+function Protect-CsvRow {
+    # A copy of a row whose text can't run as a formula when the CSV is opened
+    # in Excel: a cell starting with = + - @ (from a web page or Commons) gets
+    # a leading apostrophe.
+    param($Row)
+    $copy = [ordered]@{}
+    foreach ($prop in $Row.PSObject.Properties) {
+        $value = $prop.Value
+        if ($value -is [string] -and $value -match '^[=+\-@\t\r]') { $value = "'" + $value }
+        $copy[$prop.Name] = $value
+    }
+    return [pscustomobject]$copy
+}
+
 function Get-Prop {
     # Reads a property that may be missing (Set-StrictMode would otherwise stop the script).
     param($Object, [string]$Name)
@@ -307,6 +321,10 @@ function Find-CommonsPicture {
         $download = [string](Get-Prop $info 'thumburl')
         if ([string]::IsNullOrWhiteSpace($download)) { $download = [string](Get-Prop $info 'url') }
         if ([string]::IsNullOrWhiteSpace($download)) { continue }
+        # Only pictures from Wikimedia's own picture server, over https.
+        $downloadUri = $null
+        if (-not [uri]::TryCreate($download, [UriKind]::Absolute, [ref]$downloadUri)) { continue }
+        if ($downloadUri.Scheme -ne 'https' -or $downloadUri.Host -ne 'upload.wikimedia.org') { continue }
         $meta = Get-Prop $info 'extmetadata'
         $found.Add([pscustomobject]@{
             Title      = $title
@@ -656,7 +674,7 @@ foreach ($p in $parks) {
 }
 
 try {
-    $log | Export-Csv -LiteralPath $logPath -NoTypeInformation -Encoding UTF8
+    $log | ForEach-Object { Protect-CsvRow $_ } | Export-Csv -LiteralPath $logPath -NoTypeInformation -Encoding UTF8
     Write-Host "Log written to $logPath"
 } catch {
     Write-Warning "Could not write the log to ${logPath}: $($_.Exception.Message)"
@@ -664,7 +682,7 @@ try {
 
 if (-not $ListOnly -and $credits.Count -gt 0) {
     try {
-        $credits | Export-Csv -LiteralPath $creditsPath -NoTypeInformation -Encoding UTF8
+        $credits | ForEach-Object { Protect-CsvRow $_ } | Export-Csv -LiteralPath $creditsPath -NoTypeInformation -Encoding UTF8
         # Table lines for CREDITS.md: copy the lines for the pictures you keep.
         $lines = New-Object System.Collections.Generic.List[string]
         $lines.Add('| Picture file | National park | Source | License or permission |')

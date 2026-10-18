@@ -122,6 +122,19 @@ function Send-Text {
     Send-Response $Response $Status 'text/html; charset=utf-8' ([System.Text.Encoding]::UTF8.GetBytes($html)) $HeadOnly
 }
 
+function Test-PrivatePath {
+    # True for paths the server never sends: hidden folders and files (.git,
+    # .github, ...), downloaded-pictures (third-party art), and player
+    # backups (*-backup-*.json, which hold children's names).
+    param([string]$UrlPath)
+    foreach ($segment in ([uri]::UnescapeDataString($UrlPath) -split '[\\/]')) {
+        if ($segment.StartsWith('.') -and $segment -ne '.' -and $segment -ne '..') { return $true }
+        if ($segment -eq 'downloaded-pictures') { return $true }
+        if ($segment -match '-backup-.*\.json$') { return $true }
+    }
+    return $false
+}
+
 function Invoke-Request {
     param($Context, [string]$RootPath)
     $request = $Context.Request
@@ -130,9 +143,21 @@ function Invoke-Request {
     $status = 500
     try {
         $headOnly = $request.HttpMethod -eq 'HEAD'
+        # Only this computer may use the server (a request from the network
+        # that claims to be for "localhost" is refused).
+        if (-not $request.IsLocal) {
+            $status = 403
+            Send-Text $response 403 'Forbidden.' $false
+            return
+        }
         if ($request.HttpMethod -ne 'GET' -and -not $headOnly) {
             $status = 405
             Send-Text $response 405 'Only GET and HEAD are supported.' $false
+            return
+        }
+        if (Test-PrivatePath $urlPath) {
+            $status = 404
+            Send-Text $response 404 'Not found.' $headOnly
             return
         }
         $path = Resolve-RequestPath $RootPath $urlPath
@@ -146,7 +171,8 @@ function Invoke-Request {
                 # Folders must end with "/" so the page's relative links
                 # (css/style.css, js/app.js) point inside the folder.
                 $status = 301
-                $response.Headers['Location'] = $urlPath + '/' + $request.Url.Query
+                # Always a path on this server ("//other.site" would send the browser elsewhere).
+                $response.Headers['Location'] = '/' + $urlPath.TrimStart('/') + '/' + $request.Url.Query
                 Send-Text $response 301 'Moved.' $headOnly
                 return
             }

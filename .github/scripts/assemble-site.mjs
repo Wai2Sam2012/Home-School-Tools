@@ -20,8 +20,12 @@ export const EXCLUDED_FILES = new Set(['package.json', 'package-lock.json']);
 // Pages that must be in the published site.
 export const REQUIRED_FILES = ['index.html', 'arithmetic-odyssey/index.html'];
 
+// Never published, even by mistake: player backups (children's names), which git also ignores.
+export const PRIVATE_FILE = /-backup-.*\.json$/i;
+
 function isExcluded(name, isFolder) {
   if (name.startsWith('.')) return true; // .git, .github, .gitignore, .DS_Store …
+  if (!isFolder && PRIVATE_FILE.test(name)) return true;
   return isFolder ? EXCLUDED_FOLDERS.has(name) : EXCLUDED_FILES.has(name);
 }
 

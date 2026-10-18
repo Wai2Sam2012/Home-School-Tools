@@ -15,9 +15,41 @@
   --ok: #1f7a3a;
   --error: #b3261e;
   --notice: #fff4cc;
+  /* More colors, so each color theme below can set them all. */
+  --surface-2: #f3eee5;
+  --on-accent: #ffffff;
+  --accent-edge: #17594a;
+  --accent-shadow: #134a3d;
+  --accent-wash: rgba(31, 111, 92, 0.3);
+  --error-edge: #8c1d17;
+  --error-shadow: #6e1712;
+  --ok-soft: #e7f6ec;
+  --focus: #3a6ea5;
+  --gold: #d4a017;
+  --gold-edge: #b8890f;
+  --typed: #e8730c;
+  --milestone: #fff1c2;
+  --setback-soft: #fde2dc;
+  --detour-text: #9a5a1c;
+  --trail-a: #cdbf9f;
+  --trail-b: #e3d8bf;
+  --tip-cell: #e3effa;
+  --tip-cell-alt: #fff1cc;
+  --tip-cell-line: #1f4e99;
+  --veil: rgba(253, 248, 239, 0.85);
+  --note-bg: rgba(255, 255, 255, 0.92);
+  --overlay: rgba(30, 30, 30, 0.55);
+  --toast-bg: #2b2b2b;
+  --toast-text: #ffffff;
   --radius: 20px;
   --button-height: 72px;
   color-scheme: light;
+}
+
+/* Hidden means hidden, whatever display a class gives (a hidden .big-button
+   showed anyway: "Update now" and "Undo the last restore" in Settings). */
+[hidden] {
+  display: none !important;
 }
 
 * {
@@ -88,7 +120,7 @@ button:disabled {
 }
 
 :focus-visible {
-  outline: 4px solid #3a6ea5;
+  outline: 4px solid var(--focus);
   outline-offset: 3px;
 }
 
@@ -224,17 +256,17 @@ h1:focus {
 }
 
 .big-button.primary {
-  border-color: #17594a;
+  border-color: var(--accent-edge);
   background: var(--accent);
-  box-shadow: 0 5px 0 #134a3d;
-  color: #fff;
+  box-shadow: 0 5px 0 var(--accent-shadow);
+  color: var(--on-accent);
 }
 
 .big-button.danger {
-  border-color: #8c1d17;
+  border-color: var(--error-edge);
   background: var(--error);
-  box-shadow: 0 5px 0 #6e1712;
-  color: #fff;
+  box-shadow: 0 5px 0 var(--error-shadow);
+  color: var(--on-accent);
 }
 
 .big-button.quiet {
@@ -339,7 +371,7 @@ h1:focus {
 .hold-fill {
   position: absolute;
   inset: 0;
-  background: rgba(31, 111, 92, 0.3);
+  background: var(--accent-wash);
   transform: scaleX(0);
   transform-origin: left center;
 }
@@ -601,7 +633,7 @@ h1:focus {
 
 .color-choice[aria-pressed="true"] .color-number {
   background: var(--accent);
-  color: #fff;
+  color: var(--on-accent);
 }
 
 .color-choice[aria-pressed="true"] {
@@ -808,7 +840,7 @@ h1:focus {
 /* After a wrong answer: the question with the right answer, in green. */
 .answer-display.correct-answer {
   border-color: var(--ok);
-  background: #e7f6ec;
+  background: var(--ok-soft);
   color: var(--ok);
   font-size: clamp(30px, 4.5vw, 44px);
   white-space: nowrap;
@@ -835,7 +867,7 @@ h1:focus {
   align-items: center;
   justify-content: center;
   border-radius: 16px;
-  background: rgba(253, 248, 239, 0.85);
+  background: var(--veil);
 }
 
 .got-it-cover[hidden] {
@@ -866,7 +898,7 @@ h1:focus {
 }
 
 .key-back {
-  background: #f3eee5;
+  background: var(--surface-2);
 }
 
 .key-icon {
@@ -877,16 +909,22 @@ h1:focus {
 }
 
 .key-submit {
-  border-color: #17594a;
+  border-color: var(--accent-edge);
   background: var(--accent);
-  box-shadow: 0 4px 0 #134a3d;
-  color: #fff;
+  box-shadow: 0 4px 0 var(--accent-shadow);
+  color: var(--on-accent);
 }
 
 /* ------------------------------------------------------------ adventure */
 
-.home-grid.has-trip {
+.home-grid:not(.has-trip) {
+  /* Start Adventure across the top; Sticker Album, My Stats and Learn from Incorrect under it. */
   grid-template-columns: repeat(3, 1fr);
+}
+
+.home-grid.has-trip {
+  /* Resume across the top; New Adventure, Album, Stats and Learn from Incorrect two by two. */
+  grid-template-columns: repeat(2, 1fr);
 }
 
 .home-grid.has-trip .home-adventure {
@@ -932,7 +970,7 @@ h1:focus {
   left: 24px;
   height: 18px;
   border-radius: 999px;
-  background: repeating-linear-gradient(90deg, #cdbf9f 0 14px, #e3d8bf 14px 24px);
+  background: repeating-linear-gradient(90deg, var(--trail-a) 0 14px, var(--trail-b) 14px 24px);
 }
 
 .trail-fill {
@@ -1064,7 +1102,7 @@ h1:focus {
 }
 
 .story.milestone {
-  background: #fff1c2;
+  background: var(--milestone);
   animation: pop 0.4s ease;
 }
 
@@ -1078,7 +1116,7 @@ h1:focus {
 }
 
 .story.setback {
-  background: #fde2dc;
+  background: var(--setback-soft);
 }
 
 @keyframes pop {
@@ -1173,7 +1211,7 @@ h1:focus {
 
 .detour-count {
   margin: 0;
-  color: #9a5a1c;
+  color: var(--detour-text);
   font-weight: 700;
 }
 
@@ -1346,7 +1384,7 @@ h1:focus {
 
 .sticker-tile.locked {
   border-color: var(--line);
-  background: #f3eee5;
+  background: var(--surface-2);
 }
 
 .sticker-tile.up-next {
@@ -1382,7 +1420,7 @@ h1:focus {
   padding: 2px 10px;
   border-radius: 999px;
   background: var(--accent);
-  color: #fff;
+  color: var(--on-accent);
   font-size: 15px;
   font-weight: 700;
 }
@@ -1393,7 +1431,7 @@ h1:focus {
 .detail-picture {
   overflow: hidden;
   border-radius: 12px;
-  background: #f3eee5;
+  background: var(--surface-2);
 }
 
 .tile-picture img,
@@ -1424,7 +1462,7 @@ h1:focus {
   margin: 0;
   padding: 6px 10px;
   border-radius: 10px;
-  background: rgba(255, 255, 255, 0.92);
+  background: var(--note-bg);
   color: var(--text);
   font-size: 16px;
   font-weight: 600;
@@ -1455,7 +1493,7 @@ h1:focus {
   align-items: center;
   justify-content: center;
   padding: max(16px, env(safe-area-inset-top)) 16px max(16px, env(safe-area-inset-bottom));
-  background: rgba(30, 30, 30, 0.55);
+  background: var(--overlay);
 }
 
 .dialog {
@@ -1640,15 +1678,16 @@ h1:focus {
   }
 
   .home-grid.has-trip {
-    grid-template-columns: 1.4fr 1fr 1fr 1fr;
+    grid-template-columns: 1.3fr repeat(4, 1fr);
   }
 
   .home-grid.has-trip .home-adventure {
     grid-column: auto;
   }
 
-  .home-grid {
-    grid-template-columns: 1.4fr 1fr 1fr;
+  .home-grid,
+  .home-grid:not(.has-trip) {
+    grid-template-columns: 1.4fr 1fr 1fr 1fr;
   }
 
   .home-adventure {
@@ -1675,6 +1714,7 @@ h1:focus {
   }
 
   .home-grid,
+  .home-grid:not(.has-trip),
   .home-grid.has-trip {
     grid-template-columns: 1fr;
   }
@@ -1825,9 +1865,9 @@ h1:focus {
   margin: 0 auto;
   padding: 14px 18px;
   border-radius: 14px;
-  background: #2b2b2b;
+  background: var(--toast-bg);
   box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
-  color: #fff;
+  color: var(--toast-text);
   font-size: 18px;
   text-align: center;
 }
@@ -1859,7 +1899,7 @@ h1:focus {
   margin: 0 0 12px;
   padding: 10px 14px;
   border-radius: 14px;
-  background: #fff1c2;
+  background: var(--milestone);
   font-size: 22px;
   font-weight: 700;
   text-align: center;
@@ -1963,7 +2003,7 @@ h1:focus {
 
 .learn-chip.learned {
   border-color: var(--ok);
-  background: #e7f6ec;
+  background: var(--ok-soft);
   color: var(--ok);
 }
 
@@ -1972,7 +2012,7 @@ h1:focus {
 }
 
 .learn-stars {
-  color: #d4a017;
+  color: var(--gold);
   letter-spacing: 1px;
 }
 
@@ -2001,8 +2041,8 @@ h1:focus {
 .tip-button {
   min-height: 60px;
   padding: 6px 30px;
-  border-color: #d4a017;
-  box-shadow: 0 5px 0 #b8890f;
+  border-color: var(--gold);
+  box-shadow: 0 5px 0 var(--gold-edge);
   font-size: 28px;
 }
 
@@ -2050,7 +2090,7 @@ h1:focus {
   flex-direction: column;
   gap: 4px;
   padding: 8px 52px 8px 16px;
-  border: 3px solid #d4a017;
+  border: 3px solid var(--gold);
   border-radius: var(--radius);
   background: var(--surface);
   color: var(--text);
@@ -2085,6 +2125,16 @@ h1:focus {
   height: 100%;
 }
 
+/* Help for × and ÷: the boxes to work out (area model, split division). */
+.tip-cell {
+  fill: var(--tip-cell);
+  stroke: var(--tip-cell-line);
+}
+
+.tip-cell-1 {
+  fill: var(--tip-cell-alt);
+}
+
 /* Open in place of the map, the window grows with its picture: as wide as
    the screen allows, up to about a third of the screen's height. */
 .adventure-screen.tip-open .tip-picture-box > svg,
@@ -2116,7 +2166,7 @@ h1:focus {
 
 /* What the player types replaces the "?" in the question, in orange. */
 .question .typed {
-  color: #e8730c;
+  color: var(--typed);
 }
 
 .question.right-answer .typed {
@@ -2139,7 +2189,7 @@ h1:focus {
   max-width: 100%;
   border: 3px solid var(--ok);
   border-radius: 16px;
-  background: #e7f6ec;
+  background: var(--ok-soft);
   color: var(--ok);
   font-size: clamp(30px, 5vw, 46px);
   font-weight: 800;
@@ -2152,3 +2202,204 @@ h1:focus {
   display: none;
 }
 
+
+/* ------------------------------------------------------------ color themes */
+
+/* Chosen per player in Grown-up Settings (js/settings.js COLOR_THEMES; app.js
+   sets data-colors on the page). Classic is the colors at the top of this
+   file. Each theme sets every color, so the screens never mix two themes. */
+
+:root[data-colors="contrast"] {
+  /* High contrast: black on white, strong outlines, deep colors. */
+  --bg: #ffffff;
+  --surface: #ffffff;
+  --surface-2: #eeeeee;
+  --text: #000000;
+  --muted: #1f1f1f;
+  --line: #000000;
+  --accent: #00563f;
+  --accent-soft: #c8f0e1;
+  --accent-edge: #002e22;
+  --accent-shadow: #001a13;
+  --accent-wash: rgba(0, 86, 63, 0.35);
+  --on-accent: #ffffff;
+  --dino: #dff3d2;
+  --dino-edge: #2e6b14;
+  --truck: #ffe1bd;
+  --truck-edge: #8f4300;
+  --ok: #00661f;
+  --ok-soft: #cdf3d7;
+  --error: #a30000;
+  --error-edge: #5c0000;
+  --error-shadow: #3d0000;
+  --notice: #ffe680;
+  --focus: #0033cc;
+  --gold: #7a5600;
+  --gold-edge: #4d3600;
+  --typed: #b03a00;
+  --milestone: #ffe680;
+  --setback-soft: #ffd0c4;
+  --detour-text: #6b2f00;
+  --trail-a: #6b5a3a;
+  --trail-b: #c9b98f;
+  --tip-cell: #d3e7ff;
+  --tip-cell-alt: #ffe9a3;
+  --tip-cell-line: #000000;
+  --veil: rgba(255, 255, 255, 0.9);
+  --note-bg: rgba(255, 255, 255, 0.96);
+  --overlay: rgba(0, 0, 0, 0.7);
+  --toast-bg: #000000;
+  --toast-text: #ffffff;
+}
+
+:root[data-colors="soft"] {
+  /* Soft: calmer, lighter colors that are still easy to read. */
+  --bg: #f5f7f6;
+  --surface: #ffffff;
+  --surface-2: #edf0ee;
+  --text: #3a4044;
+  --muted: #6a7277;
+  --line: #dce2df;
+  --accent: #3b7d6c;
+  --accent-soft: #e4f1ec;
+  --accent-edge: #2f6657;
+  --accent-shadow: #285548;
+  --accent-wash: rgba(59, 125, 108, 0.25);
+  --on-accent: #ffffff;
+  --dino: #edf6e8;
+  --dino-edge: #9cc28a;
+  --truck: #fdf0df;
+  --truck-edge: #e3a874;
+  --ok: #2e7a4a;
+  --ok-soft: #e9f5ed;
+  --error: #b04a40;
+  --error-edge: #8e3a32;
+  --error-shadow: #742f29;
+  --notice: #fdf6dc;
+  --focus: #5a85b5;
+  --gold: #d1ab4f;
+  --gold-edge: #b08e3c;
+  --typed: #d9772f;
+  --milestone: #fbf3d9;
+  --setback-soft: #f9e6e1;
+  --detour-text: #9a6a3c;
+  --trail-a: #d8cfb9;
+  --trail-b: #ebe5d6;
+  --tip-cell: #e9f2fa;
+  --tip-cell-alt: #fdf5dc;
+  --tip-cell-line: #5a7fae;
+  --veil: rgba(245, 247, 246, 0.85);
+  --note-bg: rgba(255, 255, 255, 0.92);
+  --overlay: rgba(40, 45, 48, 0.45);
+  --toast-bg: #3a4044;
+  --toast-text: #ffffff;
+}
+
+:root[data-colors="warm"] {
+  /* Warm: creams, terracotta and honey. */
+  --bg: #fff3e3;
+  --surface: #fffaf3;
+  --surface-2: #f6e6d1;
+  --text: #3b2a1e;
+  --muted: #7a6150;
+  --line: #ead3b8;
+  --accent: #b4532a;
+  --accent-soft: #fbe2d3;
+  --accent-edge: #8e3f1f;
+  --accent-shadow: #6e3017;
+  --accent-wash: rgba(180, 83, 42, 0.3);
+  --on-accent: #ffffff;
+  --dino: #f3edd0;
+  --dino-edge: #a8973f;
+  --truck: #fde1c0;
+  --truck-edge: #d37a33;
+  --ok: #42701f;
+  --ok-soft: #edf3db;
+  --error: #b0261e;
+  --error-edge: #8a1d16;
+  --error-shadow: #6a1611;
+  --notice: #fde9b8;
+  --focus: #9a4a1f;
+  --gold: #d99a1a;
+  --gold-edge: #b07c12;
+  --typed: #cf5410;
+  --milestone: #fde6ad;
+  --setback-soft: #fad7ca;
+  --detour-text: #8f4a14;
+  --trail-a: #d6b48a;
+  --trail-b: #ecd4b2;
+  --tip-cell: #fde6d3;
+  --tip-cell-alt: #fff0c2;
+  --tip-cell-line: #8e3f1f;
+  --veil: rgba(255, 243, 227, 0.85);
+  --note-bg: rgba(255, 250, 243, 0.94);
+  --overlay: rgba(59, 42, 30, 0.55);
+  --toast-bg: #3b2a1e;
+  --toast-text: #fffaf3;
+}
+
+:root[data-colors="dark"] {
+  /* Dark: light text on dark grey, for a dim room. */
+  color-scheme: dark;
+  --bg: #14181b;
+  --surface: #1f2529;
+  --surface-2: #2a3136;
+  --text: #eef1f2;
+  --muted: #aab4b9;
+  --line: #3b454b;
+  --accent: #2e9c7c;
+  --accent-soft: #1f3b33;
+  --accent-edge: #237a61;
+  --accent-shadow: #185444;
+  --accent-wash: rgba(46, 156, 124, 0.35);
+  --on-accent: #ffffff;
+  --dino: #1d2e1f;
+  --dino-edge: #6f9f5a;
+  --truck: #352718;
+  --truck-edge: #c98042;
+  --ok: #5cc98a;
+  --ok-soft: #1c3a28;
+  --error: #ec5f56;
+  --error-edge: #b33e37;
+  --error-shadow: #85302a;
+  --notice: #3a3420;
+  --focus: #7fb2ff;
+  --gold: #e0b84a;
+  --gold-edge: #a8862a;
+  --typed: #ffa04d;
+  --milestone: #3b3318;
+  --setback-soft: #3d2420;
+  --detour-text: #f0b070;
+  --trail-a: #6b5d43;
+  --trail-b: #463d2e;
+  --tip-cell: #1f3550;
+  --tip-cell-alt: #3b3318;
+  --tip-cell-line: #8fb3e0;
+  --veil: rgba(20, 24, 27, 0.85);
+  --note-bg: rgba(31, 37, 41, 0.94);
+  --overlay: rgba(0, 0, 0, 0.65);
+  --toast-bg: #eef1f2;
+  --toast-text: #14181b;
+}
+
+/* In Settings, each color choice shows a little sample of its colors. */
+.colors-row .choice::before {
+  content: "";
+  display: block;
+  width: 100%;
+  height: 22px;
+  margin-bottom: 6px;
+  border: 2px solid rgba(0, 0, 0, 0.25);
+  border-radius: 8px;
+}
+
+.colors-row .choice[data-value="contrast"]::before { background: linear-gradient(90deg, #ffffff 0 34%, #000000 34% 67%, #00563f 67%); }
+.colors-row .choice[data-value="soft"]::before { background: linear-gradient(90deg, #f5f7f6 0 34%, #3a4044 34% 67%, #3b7d6c 67%); }
+.colors-row .choice[data-value="classic"]::before { background: linear-gradient(90deg, #fdf8ef 0 34%, #2b2b2b 34% 67%, #1f6f5c 67%); }
+.colors-row .choice[data-value="warm"]::before { background: linear-gradient(90deg, #fff3e3 0 34%, #3b2a1e 34% 67%, #b4532a 67%); }
+.colors-row .choice[data-value="dark"]::before { background: linear-gradient(90deg, #14181b 0 34%, #eef1f2 34% 67%, #2e9c7c 67%); }
+
+/* Dark: the drawn sticker pictures (light cards) are dimmed a little, so they don't glare. */
+:root[data-colors="dark"] .sticker-art {
+  filter: brightness(0.8);
+}

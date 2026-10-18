@@ -225,6 +225,8 @@ test('offline play is "unsupported" without service workers or a secure address'
   const { container } = fakeBrowser();
   assert.equal((await createOffline({ container, secure: false }).start()).status, 'unsupported');
   assert.equal(container.registered, null, 'nothing registered');
+  const silent = { ...container, register: async () => undefined };
+  assert.equal((await createOffline({ container: silent, secure: true }).start()).status, 'unsupported', 'a blocked registration that returns nothing');
   const refusing = { ...container, register: async () => { throw new Error('denied'); } };
   assert.equal((await createOffline({ container: refusing, secure: true }).start()).status, 'unsupported');
 });

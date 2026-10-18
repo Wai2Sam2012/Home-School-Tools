@@ -334,14 +334,14 @@ test('the score order: the most right answers, then less time, then fewer tips, 
   assert.equal(worse.rank, 0, 'a score below the top 10 is not added');
 });
 
-test('Need More Practice: most-missed problems first, then the slowest', () => {
+test('Need More Practice: the problems missed in the most recent game first, then older ones, then slow ones', () => {
   const games = [
     { missed: { '7×8': 2, '9+6': 1 }, slow: { '7×8': 9000, '12−5': 8000, '2+2': 1000 } },
     { missed: { '7×8': 1, '6×6': 1 }, slow: { '6×6': 12000, '11+9': 6000 } },
   ];
   const list = needMorePractice(games);
   assert.deepEqual(list.map((p) => p.text), ['7 × 8', '6 × 6', '9 + 6', '12 − 5', '11 + 9']);
-  assert.deepEqual(list[0], { key: '7×8', text: '7 × 8', missed: 3, slowMs: 9000 });
+  assert.deepEqual(list[0], { key: '7×8', text: '7 × 8', missed: 3, slowMs: 9000, learned: false });
   assert.ok(!list.some((p) => p.key === '2+2'), `a quick problem (under ${SLOW_MS} ms) is not listed`);
   assert.equal(needMorePractice([]).length, 0);
   // Only the last 10 games count.

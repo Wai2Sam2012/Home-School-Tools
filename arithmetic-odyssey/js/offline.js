@@ -17,7 +17,7 @@
 //
 // container is navigator.serviceWorker (replaced in tests).
 
-import { nextSticker, pictureUrl } from './storyline.js?v=0.7.0';
+import { nextSticker, pictureUrl } from './storyline.js?v=0.7.1';
 
 export const OFFLINE_TEXT = Object.freeze({
   checking: 'Checking offline play…',
@@ -222,6 +222,11 @@ export function createOffline({
       registration = await container.register('sw.js', { scope: './', updateViaCache: 'none' });
     } catch (error) {
       set({ status: 'unsupported', error: error.message });
+      return state;
+    }
+    if (!registration) {
+      // Some browsers (or settings) block it without saying so.
+      set({ status: 'unsupported' });
       return state;
     }
     lastCheck = now();

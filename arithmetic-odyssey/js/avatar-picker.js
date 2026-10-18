@@ -4,8 +4,8 @@
 // still tell a screen reader what they are. Used on the New player screen and
 // when a player changes their picture.
 
-import { AVATARS, COLOR_COUNT, avatarIcon, avatarInfo, avatarLabel, checkColor } from './avatars.js?v=0.7.0';
-import { h } from './ui.js?v=0.7.0';
+import { AVATARS, COLOR_COUNT, avatarIcon, avatarInfo, avatarLabel, checkColor } from './avatars.js?v=0.7.1';
+import { h } from './ui.js?v=0.7.1';
 
 /**
  * Returns { el, value() } where value() is { avatar, color }. The pictures

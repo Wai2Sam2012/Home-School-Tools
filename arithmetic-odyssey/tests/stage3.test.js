@@ -178,7 +178,7 @@ test(`there can be up to ${MAX_PROFILES} players`, () => {
 test('changing settings and setup keeps them valid', () => {
   const store = createProfileStore();
   const p = store.add('Cy', AVATARS[0]);
-  assert.deepEqual(store.updateSettings(p.id, { adventureLength: 60, voice: false }), { voice: false, sound: true, voiceId: '', speed: 'normal', adventureLength: 60, detourLength: 3 });
+  assert.deepEqual(store.updateSettings(p.id, { adventureLength: 60, voice: false }), { voice: false, sound: true, voiceId: '', speed: 'normal', adventureLength: 60, detourLength: 3, colors: 'classic' });
   assert.equal(store.updateSettings(p.id, { adventureLength: 55 }).adventureLength, 20, 'an invalid length goes back to the default');
   assert.deepEqual(store.updateSetup(p.id, { operations: ['×', '+'], difficulty: 'advanced' }).operations, ['+', '×'], 'kept in + − × ÷ order');
 });
@@ -188,9 +188,10 @@ test('settings are fixed up if they are missing or damaged', () => {
   assert.deepEqual(normalizeSettings(undefined), DEFAULT_SETTINGS);
   assert.deepEqual(normalizeSettings({ voice: 'yes', adventureLength: '40', detourLength: 11 }), DEFAULT_SETTINGS);
   assert.deepEqual(
-    normalizeSettings({ voice: false, sound: false, voiceId: 'com.apple.voice.enhanced.en-US.Ava', speed: 'slower', adventureLength: 100, detourLength: 10 }),
-    { voice: false, sound: false, voiceId: 'com.apple.voice.enhanced.en-US.Ava', speed: 'slower', adventureLength: 100, detourLength: 10 },
+    normalizeSettings({ voice: false, sound: false, voiceId: 'com.apple.voice.enhanced.en-US.Ava', speed: 'slower', adventureLength: 100, detourLength: 10, colors: 'dark' }),
+    { voice: false, sound: false, voiceId: 'com.apple.voice.enhanced.en-US.Ava', speed: 'slower', adventureLength: 100, detourLength: 10, colors: 'dark' },
   );
+  for (const bad of ['purple', '', 42, null, '__proto__', 'constructor']) assert.equal(normalizeSettings({ colors: bad }).colors, 'classic', `colors ${String(bad)}`);
   assert.equal(normalizeSettings({ speed: 'fast' }).speed, 'normal');
   assert.equal(normalizeSettings({ voiceId: 42 }).voiceId, '', 'a damaged voice choice goes back to automatic');
   assert.equal(normalizeSettings({ sound: 'off' }).sound, true, 'sound is on unless it is turned off');

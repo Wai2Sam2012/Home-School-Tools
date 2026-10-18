@@ -1,11 +1,12 @@
-// 7. Stats: Need More Practice (from the last 10 games, with Learn from
-// Incorrect to practise them) and the high-score boards, one for each
-// adventure length and difficulty (GAME-PLAN.md 1.11).
+// 7. Stats: Need More Practice (the last 20 problems answered wrong in the
+// last 10 games; Learn from Incorrect, on Home, practises them) and the
+// high-score boards, one for each adventure length and difficulty
+// (GAME-PLAN.md 1.11).
 
-import { PRACTICE_SIZE, boardKey, needMorePractice } from '../scores.js?v=0.7.0';
-import { ADVENTURE_LENGTHS, DIFFICULTY_LABELS, THEMES } from '../settings.js?v=0.7.0';
-import { formatDuration } from '../timer.js?v=0.7.0';
-import { choiceRow, h, topBar } from '../ui.js?v=0.7.0';
+import { PRACTICE_SIZE, boardKey, needMorePractice } from '../scores.js?v=0.7.1';
+import { ADVENTURE_LENGTHS, DIFFICULTY_LABELS, THEMES } from '../settings.js?v=0.7.1';
+import { formatDuration } from '../timer.js?v=0.7.1';
+import { choiceRow, h, topBar } from '../ui.js?v=0.7.1';
 
 /** "Oct 17" */
 function shortDate(iso) {
@@ -24,11 +25,12 @@ export function statsScreen(ctx) {
     practicePanel = h('p', { class: 'empty-note' }, 'Nothing to practise: no missed or slow problems in your last games. Great work! 🌟');
   } else {
     practicePanel = h('ol', { class: 'practice-list' }, practice.map((p) =>
-      h('li', { class: 'practice-item' },
+      h('li', { class: `practice-item${p.learned ? ' learned' : ''}` },
         h('span', { class: 'practice-problem' }, p.text),
-        h('span', { class: 'practice-why' }, p.missed
-          ? `missed ${p.missed === 1 ? 'once' : `${p.missed} times`}`
-          : `took ${formatDuration(p.slowMs)}`))));
+        h('span', { class: 'practice-why' }, [
+          p.missed ? `missed ${p.missed === 1 ? 'once' : `${p.missed} times`}` : `took ${formatDuration(p.slowMs)}`,
+          p.learned ? ' · ✓ learned' : '',
+        ].join('')))));
   }
 
   // ---- High scores: pick a length and a difficulty
@@ -69,11 +71,7 @@ export function statsScreen(ctx) {
         h('h2', {}, 'Need More Practice'),
         player.history.length ? h('p', { class: 'note' }, `From your last ${player.history.length} ${player.history.length === 1 ? 'game' : 'games'}.`) : null,
         practicePanel,
-        practice.length
-          ? h('button', { type: 'button', class: 'big-button primary learn-button', onclick: () => ctx.show('learn') },
-            h('span', { class: 'button-icon', 'aria-hidden': 'true' }, '🎯'), 'Learn from Incorrect',
-            h('span', { class: 'button-detail' }, 'Practise these until you know them'))
-          : null,
+        practice.length ? h('p', { class: 'note' }, 'Practise them with 🎯 Learn from Incorrect on your Home screen.') : null,
       ),
       h('section', { class: 'panel' },
         h('h2', {}, 'High Scores'),

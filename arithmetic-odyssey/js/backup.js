@@ -4,13 +4,15 @@
 // of it is wrong; before it changes anything, the current data is kept so
 // the restore can be undone.
 
-import { KEYS } from './storage.js?v=0.7.0';
-import { MAX_PROFILES, checkActive, checkHistory, checkProfile } from './records.js?v=0.7.0';
+import { KEYS } from './storage.js?v=0.7.1';
+import { MAX_PROFILES, checkActive, checkHistory, checkProfile } from './records.js?v=0.7.1';
 
 export const BACKUP_FORMAT = 'arithmetic-odyssey-backup';
 export const BACKUP_SCHEMA = 1;
 // A backup bigger than this is not one of ours (a real one is a few KB per player).
 const MAX_BACKUP_CHARS = 2_000_000;
+// A file bigger than this isn't read at all (reading a huge file could stop the game).
+export const MAX_BACKUP_FILE_BYTES = 4 * 1024 * 1024;
 
 /** "arithmetic-odyssey-backup-2026-10-17.json" (the local date). */
 export function backupFileName(date = new Date()) {

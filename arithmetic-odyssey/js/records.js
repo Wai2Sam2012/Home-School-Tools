@@ -8,11 +8,11 @@
 //   ao.v1.history.<id>   the last 10 finished games
 //   ao.v1.active.<id>    the adventure in progress
 
-import { ADVENTURE_SCHEMA } from './adventure.js?v=0.7.0';
-import { AVATAR_IDS, checkColor } from './avatars.js?v=0.7.0';
-import { createProblemGenerator, restoreProblem } from './math.js?v=0.7.0';
-import { HISTORY_SIZE, BOARD_SIZE } from './scores.js?v=0.7.0';
-import { DEFAULT_SETTINGS, DEFAULT_SETUP, THEMES, normalizeSettings, normalizeSetup } from './settings.js?v=0.7.0';
+import { ADVENTURE_SCHEMA } from './adventure.js?v=0.7.1';
+import { AVATAR_IDS, checkColor } from './avatars.js?v=0.7.1';
+import { createProblemGenerator, restoreProblem } from './math.js?v=0.7.1';
+import { HISTORY_SIZE, BOARD_SIZE } from './scores.js?v=0.7.1';
+import { COLOR_THEMES, DEFAULT_SETTINGS, DEFAULT_SETUP, THEMES, isThemeId, normalizeSettings, normalizeSetup } from './settings.js?v=0.7.1';
 
 export const RECORD_SCHEMA = 1;
 export const MAX_PROFILES = 8;
@@ -91,6 +91,8 @@ export function checkIndex(data) {
     schema: RECORD_SCHEMA,
     profiles: profiles.slice(0, MAX_PROFILES),
     gamesSinceBackup: count(record.gamesSinceBackup),
+    // The colors of the last player (for the start screens, before anyone is chosen).
+    colors: COLOR_THEMES.includes(record.colors) ? record.colors : DEFAULT_SETTINGS.colors,
     lastBackupAt: isDate(record.lastBackupAt) ? record.lastBackupAt : null,
   };
 }
@@ -109,7 +111,7 @@ function checkScore(e) {
   if (!isObject(e) || !isDate(e.at) || !Number.isFinite(e.thinkingMs)) return null;
   return {
     at: e.at,
-    theme: THEMES[e.theme] ? e.theme : 'dino',
+    theme: isThemeId(e.theme) ? e.theme : 'dino',
     thinkingMs: count(e.thinkingMs),
     setbacks: count(e.setbacks),
     tips: count(e.tips),
@@ -141,7 +143,7 @@ function checkLearned(raw) {
 }
 
 function checkLastResult(raw) {
-  if (!isObject(raw) || !THEMES[raw.theme]) return null;
+  if (!isObject(raw) || !isThemeId(raw.theme)) return null;
   return {
     theme: raw.theme,
     length: count(raw.length),
@@ -183,7 +185,7 @@ function checkCounts(raw, limit) {
 }
 
 function checkGame(g) {
-  if (!isObject(g) || !isDate(g.at) || !THEMES[g.theme] || !Number.isInteger(g.length)) return null;
+  if (!isObject(g) || !isDate(g.at) || !isThemeId(g.theme) || !Number.isInteger(g.length)) return null;
   return {
     at: g.at,
     theme: g.theme,
@@ -227,7 +229,7 @@ function checkStats(raw) {
 export function checkAdventure(a) {
   if (!isObject(a)) fail('the adventure is missing');
   if (a.schema !== ADVENTURE_SCHEMA) fail(`unknown adventure schema ${a.schema}`);
-  if (!THEMES[a.theme]) fail(`unknown theme "${a.theme}"`);
+  if (!isThemeId(a.theme)) fail(`unknown theme "${a.theme}"`);
   if (!Number.isInteger(a.length) || a.length < 1 || a.length > 1000) fail('bad adventure length');
   if (!Number.isInteger(a.detourLength) || a.detourLength < 1 || a.detourLength > 50) fail('bad detour length');
   createProblemGenerator({ operations: a.operations, difficulty: a.difficulty }); // throws if they are not valid

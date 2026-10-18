@@ -132,7 +132,7 @@ Keep each theme's pictures under about 50 MB (the Dino theme with 3–5 pictures
 4. **Adventure**: the question, the progress map with milestones, the on-screen keypad, and detours.
 5. **Trail's End**: a summary, a rotating slideshow of the theme's pictures, and the new sticker added to the album.
 6. **Sticker Album**: all stickers for both themes, in order, with locked ones greyed out.
-7. **Stats**: Need More Practice and High Scores.
+7. **Stats**: Need More Practice and High Scores. (**Learn from Incorrect** opens from Home, next to Start Adventure, Sticker Album and My Stats, since 0.7.1.)
 8. **Settings** (grown-up area): voice or text only, adventure length, detour length, backup and restore, and delete profile. Put this behind a simple grown-up check: hold a button for 3 seconds.
 
 ### 1.7 Math rules
@@ -257,7 +257,7 @@ All data is small (well under 1 MB), so use `localStorage`, wrapped in `storage.
 
 **Need More Practice**
 
-For each profile, list the problems answered wrong most often over the last 10 games, with how many times each was missed; then, if there is room, the slowest problems (5 seconds or more).
+For each profile, list the last 20 problems answered wrong (newest game first; within a game, the most missed first), with how many times each was missed; then, if there is room, the slowest problems (5 seconds or more). Problems learned in Learn from Incorrect stay on the list, marked learned, until newer misses push them off (0.7.1; before that the list was the most missed over the last 10 games, and learned problems left it).
 
 **High scores**
 
@@ -326,6 +326,7 @@ For local testing, `arithmetic-odyssey/tools/Start-LocalServer.ps1` serves the w
 
 - All data stays on the device. Nothing is sent anywhere.
 - The repository is public, so never put player names, saves, backups or raw downloaded pictures in it.
+- **Security (0.7.1):** the pages carry a strict security policy (Content-Security-Policy): only the game's own files load, no other website can be reached, and the few scripts written in the page itself are allowed by their fingerprints (`tools/csp.mjs`). Saved data and backup files are only ever read as data and checked field by field (`js/records.js`); a backup file over 4 MB is refused before it is read. Names are shown as text, never as page code. The local server answers only the PC it runs on and never serves backups or hidden files; the picture downloaders only use https and protect their spreadsheets from formulas. The game shares the `wai2sam2012.github.io` address with any other site published from the same GitHub account, so only publish trusted pages there.
 
 ---
 
@@ -515,7 +516,7 @@ Every stage ends with its tests passing, the site republished, and a short repor
 
 **0.6.1 (added after Stage 6, asked for after trying it):**
 
-- **Learn from Incorrect** (`js/learn.js`, `js/screens/learn.js`), opened from My Stats: a practice round with the Need More Practice problems (up to 8). A problem is learned after 2 right answers in the round (a problem that was only slow must be answered within 5 seconds); a wrong answer resets its count and it comes back 2 questions later; the round stops when all are learned or after 4 questions per problem. No stickers or high scores. Learned problems are saved in the player's record (`learned`, the date each was learned, at most 200) and leave Need More Practice until a later game misses them (or is slow on them) again.
+- **Learn from Incorrect** (`js/learn.js`, `js/screens/learn.js`), opened from My Stats (changed in 0.7.1, see below): a practice round with the Need More Practice problems (up to 8). A problem is learned after 2 right answers in the round (a problem that was only slow must be answered within 5 seconds); a wrong answer resets its count and it comes back 2 questions later; the round stops when all are learned or after 4 questions per problem. No stickers or high scores. Learned problems are saved in the player's record (`learned`, the date each was learned, at most 200) and leave Need More Practice until a later game misses them (or is slow on them) again.
 - **Recorded flag sounds:** `themes/<theme>/sounds/flag.mp3` (or `.m4a`, `.wav`) plays at the flags instead of the made-up roar or engine; the story file lists it, the voice waits for it (at most 5 seconds since 0.6.2), it is evened out to about the voice's loudness, and it must be credited and at most 600 KB. The voice and sound tester has a button for each recording.
 - **The Uppbeat "T-Rex Roar"** (by Epic Stock Media) was looked into and not added: the free (Basic) license allows sounds inside web games but forbids sharing the original audio file, and every file in this public repository can be downloaded by anyone. A public domain (CC0) recording is the safe choice.
 
@@ -595,6 +596,23 @@ Every stage ends with its tests passing, the site republished, and a short repor
 | T7.7 | A player's color is saved, survives a reload, is kept in a backup, and an old save or backup without one reads as color 1; a damaged color reads as 1 (done in 0.6.5, `tests/avatars.test.js`) | Automated |
 | T7.8 | Choosing a picture and a color on the New player screen and from Home shows that color in the player list, on Home, in Settings and on the trail map (done in 0.6.5) | PC |
 | T7.9 | Every picture faces right on the trail map, and the colors are easy to tap on the iPad | iPad |
+
+### Stage 7.1 (0.7.1): fixes before Stage 8
+
+- **Help for × and ÷** (`tipKind()` in `js/blocks.js`): multiplication with a factor of 10 or less shows groups of dots to count (3 × 4: 3 groups of 4; more than 30 groups stand up in a grid); two 2-digit numbers show a box split into tens and ones. Division with an answer of 12 or less shows the dots shared into rows; a bigger answer shows the number split into an easy part and the rest (84 ÷ 4 = 80 ÷ 4 + 4 ÷ 4). The card's title says what to do (for example *"3 groups of 4: count them all"*).
+- **Learn from Incorrect** moved to Home (🎯, with how many problems are left to learn). It asks every unlearned problem on Need More Practice (up to 20) at the same time, in a random order, never the same one twice in a row while others are left. Each must be right **3** times; a wrong answer starts its count again. The round ends when all are learned, or after 6 questions per problem. If every problem is learned, the round practises them all again.
+- **Need More Practice** keeps the last 20 problems missed; learned ones stay, ticked, for looking over.
+- **Colors** (Settings, per player; the start screens use the last player's): High contrast, Soft, Classic, Warm and Dark. Every color is a CSS variable; `tests/themes.test.js` checks each choice sets them all and that text keeps a readable contrast (WCAG 4.5:1 for text, 3:1 for large text and edges).
+- **Security review** (see 1.14), and a confirm step on the debug panel's **remove the player's stickers**.
+- **Bugs fixed:** a trip finished just before leaving the screen (within about a second) was not recorded; buttons that should be hidden (for example Resume Adventure) could still show.
+
+| ID | Test | Kind |
+|---|---|---|
+| T7.10 | Help appears for every whole-number problem of each operation and draws the right kind of picture; invalid numbers get no Help (`tests/blocks.test.js`) | Automated |
+| T7.11 | Learn from Incorrect needs 3 right answers each, asks all problems in a random order, never repeats one while others are left, and stops after 6 tries each (`tests/learn.test.js`) | Automated |
+| T7.12 | Every color choice sets every color, and text stays readable (`tests/themes.test.js`) | Automated |
+| T7.13 | The pages' security policy matches them; no code runs text as code; a hostile backup file is cleaned and changes nothing else (`tests/security.test.js`) | Automated |
+| T7.14 | The five color choices look right on the iPad, upright and sideways, and Dark is comfortable at night | iPad |
 
 ### Stage 8: Release and iPad acceptance
 

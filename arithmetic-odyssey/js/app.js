@@ -1,28 +1,28 @@
 // Starts the game: keeps the players and story files, and switches between
 // screens. Each screen is a function in js/screens/ that builds its page.
 
-import { APP_VERSION } from './version.js?v=0.7.0';
-import { addDebugAction, addDebugInfo, isDebugOn, refreshDebugPanel, showDebugPanel } from './debug.js?v=0.7.0';
-import { measureAll } from './storage-report.js?v=0.7.0';
-import { audioSuspended, loadRecording, pickDifferent, playRecording, playSound, soundLength, unlockAudio } from './audio.js?v=0.7.0';
-import { AVATARS, createProfileStore } from './profiles.js?v=0.7.0';
-import { askToKeepData, createStorage, deviceStorage } from './storage.js?v=0.7.0';
-import { SPEECH_RATES, chooseVoice, createSpeaker, loadVoices } from './speech.js?v=0.7.0';
-import { THEMES } from './settings.js?v=0.7.0';
-import { collectNext, loadStoryline, pictureUrl } from './storyline.js?v=0.7.0';
-import { h } from './ui.js?v=0.7.0';
-import { startScreen } from './screens/start.js?v=0.7.0';
-import { newPlayerScreen, playerPictureScreen, profilesScreen } from './screens/profiles.js?v=0.7.0';
-import { PICTURES_SAVED_EVENT, createOffline, picturesToSave } from './offline.js?v=0.7.0';
-import { homeScreen } from './screens/home.js?v=0.7.0';
-import { setupScreen } from './screens/setup.js?v=0.7.0';
-import { adventureScreen } from './screens/adventure.js?v=0.7.0';
-import { trailEndScreen } from './screens/trail-end.js?v=0.7.0';
-import { albumScreen } from './screens/album.js?v=0.7.0';
-import { statsScreen } from './screens/stats.js?v=0.7.0';
-import { learnScreen } from './screens/learn.js?v=0.7.0';
-import { settingsScreen } from './screens/settings.js?v=0.7.0';
-import { voiceLabScreen } from './screens/voice-lab.js?v=0.7.0';
+import { APP_VERSION } from './version.js?v=0.7.1';
+import { addDebugAction, addDebugInfo, isDebugOn, refreshDebugPanel, showDebugPanel } from './debug.js?v=0.7.1';
+import { measureAll } from './storage-report.js?v=0.7.1';
+import { audioSuspended, loadRecording, pickDifferent, playRecording, playSound, soundLength, unlockAudio } from './audio.js?v=0.7.1';
+import { AVATARS, createProfileStore } from './profiles.js?v=0.7.1';
+import { askToKeepData, createStorage, deviceStorage } from './storage.js?v=0.7.1';
+import { SPEECH_RATES, chooseVoice, createSpeaker, loadVoices } from './speech.js?v=0.7.1';
+import { COLOR_THEMES, THEMES } from './settings.js?v=0.7.1';
+import { collectNext, loadStoryline, pictureUrl } from './storyline.js?v=0.7.1';
+import { h } from './ui.js?v=0.7.1';
+import { startScreen } from './screens/start.js?v=0.7.1';
+import { newPlayerScreen, playerPictureScreen, profilesScreen } from './screens/profiles.js?v=0.7.1';
+import { PICTURES_SAVED_EVENT, createOffline, picturesToSave } from './offline.js?v=0.7.1';
+import { homeScreen } from './screens/home.js?v=0.7.1';
+import { setupScreen } from './screens/setup.js?v=0.7.1';
+import { adventureScreen } from './screens/adventure.js?v=0.7.1';
+import { trailEndScreen } from './screens/trail-end.js?v=0.7.1';
+import { albumScreen } from './screens/album.js?v=0.7.1';
+import { statsScreen } from './screens/stats.js?v=0.7.1';
+import { learnScreen } from './screens/learn.js?v=0.7.1';
+import { settingsScreen } from './screens/settings.js?v=0.7.1';
+import { voiceLabScreen } from './screens/voice-lab.js?v=0.7.1';
 
 const SCREENS = {
   start: { build: startScreen },
@@ -176,6 +176,10 @@ const ctx = {
       screen = SCREENS.profiles;
     }
     current = { name, params, leave: [] };
+    // The color theme: the player's own, or before anyone is chosen, the last player's.
+    const player = ctx.profiles.active();
+    ctx.applyColors(player ? player.settings.colors : ctx.profiles.lastColors());
+    if (player) ctx.profiles.setLastColors(player.settings.colors);
     let page;
     try {
       page = screen.build(ctx, params);
@@ -189,6 +193,12 @@ const ctx = {
     page.querySelector('h1')?.focus({ preventScroll: true });
     // Screens with stickers: save their pictures if there is internet (Trail's End: a sticker was just won).
     if (['home', 'setup', 'trailEnd', 'album'].includes(name)) ctx.savePictures({ force: name === 'trailEnd' });
+  },
+
+  /** Sets the color theme of the whole game (css/style.css, [data-colors]). */
+  applyColors(colors) {
+    const name = COLOR_THEMES.includes(colors) ? colors : 'classic';
+    if (document.documentElement.dataset.colors !== name) document.documentElement.dataset.colors = name;
   },
 
   /** Offline play (js/offline.js): saving the game on the iPad, and updates. */
@@ -269,6 +279,8 @@ function addDebugTools() {
   addDebugAction("Remove the player's stickers", () => {
     const player = ctx.profiles.active();
     if (!player) return 'Choose a player first.';
+    // The browser's own box: the debug panel sits above the game's dialogs.
+    if (!globalThis.confirm(`Remove all of ${player.name}'s stickers? This can't be undone.`)) return 'Nothing removed.';
     for (const theme of Object.keys(player.collected)) ctx.profiles.setCollected(player.id, theme, []);
     ctx.refresh();
     return `Removed ${player.name}'s stickers.`;
