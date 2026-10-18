@@ -6,12 +6,20 @@
 //   Detour: detourLength questions, each answered once. At least one right
 //     clears it (back to the same step); all wrong goes back to the checkpoint.
 //   The trail ends at step `length`, and the next sticker is unlocked.
+//   A missed question comes back AGAIN_AFTER questions later (0.7.2).
 
-import { checkAnswer, createProblemGenerator } from './math.js?v=0.7.1';
-import { collectNext, nextSticker } from './storyline.js?v=0.7.1';
+import { checkAnswer, createProblemGenerator, isGiveaway, restoreProblem } from './math.js?v=0.7.2';
+import { collectNext, nextSticker } from './storyline.js?v=0.7.2';
 
 export const ADVENTURE_SCHEMA = 1;
 export const MILESTONE_EVERY = 10;
+// A missed question is asked again after this many other questions, once for each miss.
+// (wait counts down by one as each next question is picked; at 0 it is its turn).
+export const AGAIN_AFTER = 3;
+// At most this many missed questions wait to come back (the oldest are dropped).
+export const AGAIN_MAX = 5;
+// Praise for right answers in a row: at 5, 10, 15, ...
+export const STREAK_EVERY = 5;
 
 /** The milestone steps on a trail: 10, 20, ... (the last step is the destination, not a milestone). */
 export function milestoneSteps(length) {
@@ -45,21 +53,41 @@ export function startAdventure({ theme, length, detourLength, operations, diffic
     problem: null,
     lastKey: null,
     tipFor: null, // the problem whose counting tip has been shown (counted once per question)
+    isAgain: false, // the problem is one missed earlier in this trip, asked again
+    again: [], // missed problems waiting to come back: { op, a, b, wait }
+    sinceGiveaway: null, // questions since the last giveaway (js/math.js), null: none yet
+    streak: 0, // right answers in a row
     // missed: wrong answers per problem; times: the longest thinking time per problem (for Need More Practice).
-    stats: { answered: 0, correct: 0, detours: 0, setbacks: 0, thinkingMs: 0, tips: 0, missed: {}, times: {} },
+    stats: { answered: 0, correct: 0, detours: 0, setbacks: 0, thinkingMs: 0, tips: 0, bestStreak: 0, missed: {}, times: {} },
   };
 }
 
-/** Picks the next problem (never the same as the last one). */
+/**
+ * Picks the next problem: a missed one whose turn has come, or else a new one
+ * (never the same as the last one, and with giveaways limited, js/math.js).
+ */
 export function withNextProblem(state, random = Math.random) {
   if (state.mode === 'done') return state;
-  const problem = createProblemGenerator({
-    operations: state.operations,
-    difficulty: state.difficulty,
-    random,
-    lastKey: state.lastKey,
-  }).next();
-  return { ...state, problem, lastKey: problem.key, tipFor: null };
+  const waiting = (state.again ?? []).map((q) => ({ ...q, wait: q.wait - 1 }));
+  const due = waiting.findIndex((q) => q.wait <= 0 && `${q.a}${q.op}${q.b}` !== state.lastKey);
+  let problem = due === -1 ? null : restoreProblem(waiting[due]);
+  const again = due === -1 ? waiting : waiting.filter((_, i) => i !== due);
+  const isAgain = problem !== null;
+  let sinceGiveaway = state.sinceGiveaway ?? null;
+  if (problem) {
+    sinceGiveaway = isGiveaway(problem) ? 0 : sinceGiveaway === null ? null : sinceGiveaway + 1;
+  } else {
+    const generator = createProblemGenerator({
+      operations: state.operations,
+      difficulty: state.difficulty,
+      random,
+      lastKey: state.lastKey,
+      sinceGiveaway,
+    });
+    problem = generator.next();
+    sinceGiveaway = generator.sinceGiveaway();
+  }
+  return { ...state, problem, lastKey: problem.key, tipFor: null, isAgain, again, sinceGiveaway };
 }
 
 /** Counts a counting tip for the current question (once, however often it is opened). */
@@ -99,14 +127,21 @@ export function answerProblem(state, input, { thinkingMs = 0 } = {}) {
     times: { ...state.stats.times, [problem.key]: Math.max(state.stats.times?.[problem.key] ?? 0, ms) },
   };
   const events = [];
-  let next = { ...state, problem: null, stats };
+  let next = { ...state, problem: null, isAgain: false, stats };
 
   if (check.correct) {
     stats.correct += 1;
+    next.streak = (state.streak ?? 0) + 1;
+    stats.bestStreak = Math.max(stats.bestStreak ?? 0, next.streak);
     events.push({ type: 'right' });
+    if (next.streak % STREAK_EVERY === 0) events.push({ type: 'streak', count: next.streak });
   } else {
     // Every wrong answer counts for Need More Practice, on the trail or in a detour.
     stats.missed[problem.key] = (stats.missed[problem.key] ?? 0) + 1;
+    next.streak = 0;
+    // It comes back a few questions later (once, unless it is already waiting).
+    const waiting = (state.again ?? []).filter((q) => `${q.a}${q.op}${q.b}` !== problem.key);
+    next.again = [...waiting, { op: problem.op, a: problem.a, b: problem.b, wait: AGAIN_AFTER + 1 }].slice(-AGAIN_MAX);
     events.push({ type: 'wrong', answer: problem.answer });
   }
 

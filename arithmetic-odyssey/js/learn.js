@@ -9,8 +9,8 @@
 //   The round ends when every problem is learned, or after a few tries each
 //     (so it never goes on and on); unlearned problems stay on the list.
 
-import { checkAnswer, restoreProblem } from './math.js?v=0.7.1';
-import { PRACTICE_SIZE, SLOW_MS } from './scores.js?v=0.7.1';
+import { checkAnswer, restoreProblem } from './math.js?v=0.7.2';
+import { PRACTICE_SIZE, SLOW_MS } from './scores.js?v=0.7.2';
 
 export const LEARN_NEEDS = 3;
 export const LEARN_MAX_PROBLEMS = PRACTICE_SIZE;
@@ -33,7 +33,7 @@ export function problemFromKey(key) {
 
 /**
  * A new round from Need More Practice items ([{ key, missed, slowMs }]).
- * Returns null if there is nothing to practise. random is Math.random (or a
+ * Returns null if there is nothing to practice. random is Math.random (or a
  * seeded one in tests).
  */
 export function startLearning(practice, { max = LEARN_MAX_PROBLEMS, random = Math.random } = {}) {

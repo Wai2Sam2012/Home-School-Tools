@@ -40,7 +40,7 @@ Each theme keeps all of its resources (facts, story text, pictures, sounds and t
 | 4. The adventure | Done: the trail map with a flag every 10 steps, detours after a wrong answer (called **wandering** in the game: "Wandering question 1 of 3"), going back to the last flag when a whole detour is missed, Resume Adventure, and Trail's End with the new sticker, a slideshow of its pictures and a trip summary. |
 | 5. Sound, voice and timer | Done: sound effects, questions and story moments read aloud with a Repeat button, the thinking timer (shown on Trail's End), and a "Tap to continue" screen when the iPad pauses sound. Grown-ups can turn the voice and the sound effects on or off in Settings, choose the voice and its speed (tap a voice to hear it), and see which voice is used. |
 | 6. Saving, stats, high scores and backup | Done (0.6.0): players, settings, stickers and the adventure in progress are saved on the iPad and survive closing the game; Need More Practice and high scores in My Stats; Back up and Restore (with undo) in Grown-up Settings. See [Saving and backup](#saving-and-backup). **0.6.1:** Learn from Incorrect, and recorded flag sounds. **0.6.2:** three dinosaur roars and two truck engines, picked at random at each flag. **0.6.3:** 🙏 Help (counting blocks) for addition and subtraction (high scores also weigh Help used), two dirt bike flag sounds, detours are called "wandering", and the answer is typed straight into the question. **0.6.4:** the dinosaur theme is called Dinosaur Adventure; the title no longer covers Back on narrow screens; the 80 player picture colors are ready for Stage 7. **0.6.5:** players choose a picture and one of its 5 options (numbered 1 to 5), and can change it by tapping their picture on Home. |
-| 7. Offline app | Done (0.7.0): the game saves itself on the iPad (about 4 MB: everything it needs, with each theme's first sticker) and plays with no internet; other stickers' pictures are saved as they are collected (and each player's next stop ahead of time). **Add to Home Screen** makes it a full-screen app called **Arithmetic Odyssey**; updates download in the background and apply the next time the game opens. See [Playing offline](#playing-offline). The debug panel shows how much is stored and the memory used. **0.7.1:** 🙏 Help for multiplication (groups, or a box split into tens and ones) and division (sharing into groups, or splitting into easy parts); 🎯 Learn from Incorrect is on Home, asks every problem in a random order until each is right 3 times, and Need More Practice keeps the last 20 problems missed (learned ones are ticked); 5 color choices (High contrast, Soft, Classic, Warm, Dark) in Settings; a security review (a strict security policy on the pages, safer backup and local-server checks); two bug fixes (a trip finished just before leaving the screen is never lost; hidden buttons stay hidden). |
+| 7. Offline app | Done (0.7.0): the game saves itself on the iPad (about 4 MB: everything it needs, with each theme's first sticker) and plays with no internet; other stickers' pictures are saved as they are collected (and each player's next stop ahead of time). **Add to Home Screen** makes it a full-screen app called **Arithmetic Odyssey**; updates download in the background and apply the next time the game opens. See [Playing offline](#playing-offline). The debug panel shows how much is stored and the memory used. **0.7.1:** 🙏 Help for multiplication (groups, or a box split into tens and ones) and division (sharing into groups, or splitting into easy parts); 🎯 Learn from Incorrect is on Home, asks every problem in a random order until each is right 3 times, and Need More Practice keeps the last 20 problems missed (learned ones are ticked); 5 color choices (High contrast, Soft, Classic, Warm, Dark) in Settings; a security review (a strict security policy on the pages, safer backup and local-server checks); two bug fixes (a trip finished just before leaving the screen is never lost; hidden buttons stay hidden). **0.7.2:** subtraction Help shows "take away"; a missed question comes back 3 questions later; "5 in a row!" praise; fewer giveaway questions (by 1, or a number take away itself: at most one in 20 on Beginner, none on Intermediate and Advanced); Trail's End has confetti, % right, the longest streak and 🔊 Read to me (also on the album card); bigger keys and trail map; Trail's End fits without scrolling; Home shows the next stop and sticker counts; the album is in sections with counts; Settings is split into "Just for this player" and "Everyone on this iPad"; a deleted player can be brought back; the Grown-ups button takes two fingers; the publish workflow and picture downloaders are locked down further. |
 | 8. Release and iPad acceptance | Not started |
 
 ## Running the tests
@@ -52,7 +52,7 @@ cd arithmetic-odyssey
 node --test
 ```
 
-You should see `# fail 0` (271 tests in version 0.7.1). Each test name starts with its ID from the test plan in [GAME-PLAN.md](GAME-PLAN.md) where it has one, for example `T1.3`.
+You should see `# fail 0` (288 tests in version 0.7.2). Each test name starts with its ID from the test plan in [GAME-PLAN.md](GAME-PLAN.md) where it has one, for example `T1.3`.
 
 ## Testing in a browser on your PC
 
@@ -80,7 +80,7 @@ The panel also has **Offline: check for an update now**, **apply a waiting updat
 
 **The offline copy while you work on the game.** The game plays from its saved copy, so after changing a file: restart the server (it rebuilds `sw.js`), then open the game and reload once. The new version takes over on the start screen. Or use **Offline: delete the saved copy** in the debug panel.
 
-**Grown-up Settings** opens by holding the **Grown-ups** button on a player's home screen for 3 seconds. Deleting a player is there, so children can't do it by accident.
+**Grown-up Settings** opens by holding the **Grown-ups** button on a player's home screen for 3 seconds: with **two fingers at once** on the iPad (one finger only shows a hint), or with the mouse on a PC. The button doesn't say how, so children are less likely to find it. Settings is in two parts: **Just for** the player (colors, voice, sound, lengths, Delete) and **Everyone on this iPad** (saving, offline play, backup). Deleting a player is there, so children can't do it by accident; the last player deleted can be brought back with **Bring back** on the player list (the same two-finger hold).
 
 ## Publishing and testing on the iPad
 
@@ -90,6 +90,8 @@ Every push to the repository's `main` branch runs `.github/workflows/deploy.yml`
 - Game: `https://wai2sam2012.github.io/Home-School-Tools/arithmetic-odyssey/`
 
 **One-time setup:** in the repository on GitHub, open **Settings → Pages** and set **Build and deployment → Source** to **GitHub Actions**. Without this, the deploy step fails.
+
+The workflow can only read the repository while it builds and tests; only its last step, which runs no repository code, may publish. Each action it uses is pinned to an exact version (commit), so a changed tag can't change what runs; to update one, see the comment at the top of `deploy.yml`. `tests/security.test.js` checks both.
 
 The **Actions** tab shows each run; a green tick means it published. Tests, tools and `downloaded-pictures` are never published. To preview exactly what will be published, run `node .github/scripts/assemble-site.mjs` from the repository folder; it copies the site into `_site`.
 
@@ -119,8 +121,12 @@ The game saves itself on the iPad the first time it opens with internet: every s
 **My Stats.**
 - **Need More Practice:** the last 20 problems missed (newest game first), then ones that took 5 seconds or more. Problems learned in Learn from Incorrect stay on the list with a ✓, so they can be looked over; they leave it as newer misses push them off.
 - **High Scores:** one board for each adventure length and difficulty, top 10. The most right answers (as a share of all answers) win; then the shortest total thinking time; then the least 🙏 Help. A trip that went back to a flag still counts when it is finished.
-- **Help (🙏):** the Help button shows the question as a picture, in place of the trail map while it is open. Addition and subtraction: counting blocks (for 7 + 5: the 7 block, +, the 5 block, = and ?). Multiplication: groups of dots to count (3 × 4: 3 groups of 4), or for two 2-digit numbers a box split into tens and ones (23 × 14 = 20×10 + 20×4 + 3×10 + 3×4). Division: the dots shared into rows (12 ÷ 3), or for a bigger answer the number split into an easy part and the rest (84 ÷ 4 = 80 ÷ 4 + 4 ÷ 4). The button sits in front of the question when the iPad stands upright, and under it when the iPad lies sideways. Each question's Help counts once in the trip's "Help used".
+- **Help (🙏):** the Help button shows the question as a picture, in place of the trail map while it is open. Addition: counting blocks (for 7 + 5: the 7 block, +, the 5 block, = and ?). Subtraction: take away (for 9 − 5: 9 squares in rows of ten, the last 5 greyed and crossed out, so the 4 left are the answer). Multiplication: groups of dots to count (3 × 4: 3 groups of 4), or for two 2-digit numbers a box split into tens and ones (23 × 14 = 20×10 + 20×4 + 3×10 + 3×4). Division: the dots shared into rows (12 ÷ 3), or for a bigger answer the number split into an easy part and the rest (84 ÷ 4 = 80 ÷ 4 + 4 ÷ 4). The button sits in front of the question when the iPad stands upright, and under it when the iPad lies sideways. Each question's Help counts once in the trip's "Help used".
 - **Typing an answer:** the digits show in orange in the question, in place of the ?.
+- **A missed question comes back** 3 questions later in the same trip, with "🔁 One you missed. Try it again!" (once for each miss; at most 5 wait at a time).
+- **Streaks:** every 5 right answers in a row gets "🔥 5 in a row!" and a sparkle sound. Trail's End shows the trip's longest streak.
+- **Giveaway questions** (anything + − × ÷ by 1, or a number take away itself): Beginner has at most one in any 20 questions in a row; Intermediate and Advanced have none.
+- **Trail's End:** the new sticker pops in with confetti (none when the iPad's Reduce Motion is on), the trip as small tiles (% right, most in a row, wanderings, thinking time, Help used), and **🔊 Read to me**, which reads the sticker's name and facts aloud even with Voice off (tap again to stop). The album card has it too.
 - **🎯 Learn from Incorrect** (on Home, next to Start Adventure, Sticker Album and My Stats): a calm round with every problem on Need More Practice that isn't learned yet (up to 20; if all are learned, all of them again), with no trail or setbacks. The problems come in a random order, never the same one twice in a row while others are left. Each has to be answered right 3 times (a slow one, within 5 seconds); a wrong answer shows the right one and starts that problem's count again. The round ends when all are learned, or after 6 tries for each problem.
 - **Colors** (Settings): High contrast, Soft, Classic (the original), Warm or Dark. Each player keeps their own; the start screens use the last player's.
 
@@ -162,6 +168,12 @@ Most things can be changed without knowing much code. After a change, run the te
 | **Learn from Incorrect** | `LEARN_NEEDS` (right answers to learn a problem, 3), `TRIES_PER_PROBLEM` and `LEARN_MAX_PROBLEMS` at the top of `js/learn.js`; how many problems Need More Practice keeps: `PRACTICE_SIZE` in `js/scores.js` (20). |
 | **The color choices** | The colors are CSS variables at the top of `css/style.css` (`:root`), and each choice changes them in a `:root[data-colors="..."]` block below it; the names in `COLOR_THEMES` and `COLOR_THEME_LABELS` in `js/settings.js`. `tests/themes.test.js` checks every choice sets every color and that text stays readable (contrast). |
 | **The pages' security policy** | The `Content-Security-Policy` line in `index.html` and `offline.html` lets only the game's own files load. After changing a script or style written in either page, run `node tools/csp.mjs` (it fills in their fingerprints), or the browser blocks it. `tests/security.test.js` checks this. |
+| **Giveaway questions** | `isGiveaway()` (which problems count) and `GIVEAWAY_EVERY` (20) in `js/math.js`. |
+| **Missed questions asked again** | `AGAIN_AFTER` (3 other questions first) and `AGAIN_MAX` (5 waiting) at the top of `js/adventure.js`; the note in `js/screens/adventure.js` (`againNote`). |
+| **Streak praise** | `STREAK_EVERY` (5) in `js/adventure.js`; the words in `afterAnswer()` and `submit()` in `js/screens/adventure.js`; the sound `streak` in `js/audio.js`. |
+| **Trail's End confetti** | `CONFETTI_PIECES` and `CONFETTI_MS` in `js/screens/trail-end.js`; colours and fall in `css/style.css` (`.confetti`). |
+| **🔊 Read to me** | `js/read-aloud.js` (what is read: `stickerReading()`). |
+| **The grown-up hold** | `HOLD_MS` (3 seconds) and `HOLD_FINGERS` (2) in `js/hold.js`. |
 | **How high scores are ranked** | `compareScores()` in `js/scores.js`; the board size and history length (10) at the top of the same file. |
 | **When a problem counts as slow** in Need More Practice | `SLOW_MS` at the top of `js/scores.js` (5000 milliseconds). |
 | **The backup reminder** | `BACKUP_REMINDER_GAMES` at the top of `js/profiles.js` (5 adventures). |
@@ -225,7 +237,7 @@ themes/dino/downloaded-pictures/
 
 Right-clicking `Get-DinoPictures.ps1` and choosing **Run with PowerShell** also works, but that uses Windows PowerShell 5.1; the window waits for Enter before closing.
 
-**From a PowerShell window**, which also lets you pass options. Use `pwsh` for PowerShell 7 or `powershell.exe` for Windows PowerShell 5.1:
+**From a PowerShell window**, which also lets you pass options. The examples use `powershell` (Windows PowerShell 5.1, built into Windows); `pwsh` (PowerShell 7) works the same:
 
 ```powershell
 cd arithmetic-odyssey\tools
@@ -234,10 +246,10 @@ cd arithmetic-odyssey\tools
 Unblock-File .\Get-DinoPictures.ps1
 
 # 1. Try one dinosaur and only list what would be downloaded.
-pwsh -ExecutionPolicy Bypass -File .\Get-DinoPictures.ps1 -Dinosaur Eoraptor -ListOnly
+powershell -ExecutionPolicy Bypass -File .\Get-DinoPictures.ps1 -Dinosaur Eoraptor -ListOnly
 
 # 2. Download everything (about 60 pages; takes a while because it pauses 1 second between requests).
-pwsh -ExecutionPolicy Bypass -File .\Get-DinoPictures.ps1
+powershell -ExecutionPolicy Bypass -File .\Get-DinoPictures.ps1
 ```
 
 Useful options:
@@ -246,12 +258,14 @@ Useful options:
 - `-MaxImagesPerDinosaur 5`: at most 5 pictures each.
 - `-Force`: download again.
 - `-OutputPath D:\DinoPictures`: save somewhere else.
+- `-MaxPictureMB 10`: the largest picture to download (default 20 MB).
 
 Run `Get-Help .\Get-DinoPictures.ps1 -Full` for all of them.
 
 What happens when something goes wrong:
 
 - **Failures are logged, not fatal.** A page or picture that fails is logged in `download-log.csv` and the script carries on.
+- **Only real pictures are kept.** Downloads are https only. A download stops as soon as it is bigger than `-MaxPictureMB`. A file is kept only if the server says it is a picture and it starts like a JPEG, PNG, GIF or WebP, so a web page or program can never be saved under a picture's name. These refusals are not retried.
 - **Exit codes:**
   - `0`: everything succeeded.
   - `1`: something failed.
@@ -288,6 +302,7 @@ The folders are the same as the game's (see [PICTURES.md](themes/national-parks/
   - `-PicturesPerAttraction 3`: fewer pictures.
   - `-ParkPicturesOnly`: 5 photos of each park instead of 5 per attraction (about 315 photos instead of about 1,260).
   - `-Force`: download again.
+  - `-MaxPictureMB 10`: the largest picture to download (default 20 MB).
 - **What it keeps:** only JPEG and PNG landscape photos at least 800 pixels wide. It skips maps, logos, signs and diagrams. If an attraction has too few photos (for example "Sled dog kennels"), general photos of the park fill the gap.
 - **Size:** Commons sends copies 1024 pixels wide, the size the game uses, so most photos are 100 to 200 KB and already fit the game (at most 400 KB and 1600 pixels). The log marks any that are over 400 KB.
 - **Re-running resumes:** photos already downloaded are skipped and never downloaded twice. A photo that fails to download is replaced by the next one found.

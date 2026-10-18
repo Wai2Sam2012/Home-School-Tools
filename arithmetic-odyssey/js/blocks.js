@@ -124,14 +124,18 @@ export function hasTip(problem) {
 
 /**
  * Which picture a problem's tip uses:
- *   'blocks'  + and −: the problem drawn with blocks
+ *   'blocks'  +: the problem drawn with blocks
+ *   'takeaway' −: the first number as squares in rows of ten, with the
+ *             second number taken away (greyed and crossed out) from the
+ *             end, so the squares left are the answer (0.7.2)
  *   'groups'  × with a number up to 10 (4 groups of 23), and ÷ with an
  *             answer up to 12 (how many 7s make 56: rows of 7 to count)
  *   'area'    × of two 2-digit numbers: a box split into tens and ones
  *   'split'   ÷ with a bigger answer: 72 = 60 + 12, share each part
  */
 export function tipKind(problem) {
-  if (problem.op === '+' || problem.op === '−') return 'blocks';
+  if (problem.op === '+') return 'blocks';
+  if (problem.op === '−') return 'takeaway';
   if (problem.op === '×') return Math.min(problem.a, problem.b) <= 10 ? 'groups' : 'area';
   return problem.answer <= 12 ? 'groups' : 'split';
 }
@@ -140,6 +144,7 @@ export function tipKind(problem) {
 export function tipTitle(problem) {
   const kind = tipKind(problem);
   if (kind === 'blocks') return 'Count the blocks';
+  if (kind === 'takeaway') return `Take away ${problem.b}: count the blocks that are left`;
   if (problem.op === '×') {
     if (kind === 'groups') {
       const [few, each] = problem.a <= problem.b ? [problem.a, problem.b] : [problem.b, problem.a];
@@ -172,6 +177,7 @@ export function tipSvg(problem, { unit = 20 } = {}) {
   }
   if (kind === 'area') return areaSvg(problem.a, problem.b);
   if (kind === 'split') return splitSvg(problem.a, problem.b);
+  if (kind === 'takeaway') return takeAwaySvg(problem.a, problem.b, { unit });
   return addSubSvg(problem, { unit });
 }
 
@@ -247,6 +253,40 @@ function standingGroupsSvg(groups, each, { unit, label }) {
   const width = cols * groupW + (cols - 1) * space;
   const height = rows * groupH + (rows - 1) * gap;
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" class="tip-picture tip-groups" role="img" aria-label="${label}">${parts.join('')}</svg>`;
+}
+
+/**
+ * a − b as take away: a squares in rows of ten (a little gap after each five,
+ * to count by fives), the last b greyed and crossed out. Taking from the end
+ * leaves whole rows of ten at the top, so a big answer is quick to count.
+ */
+function takeAwaySvg(a, b, { unit }) {
+  const gap = Math.round(unit * 0.15);
+  const mid = Math.round(unit * 0.5);
+  const cols = Math.min(a, 10);
+  const rows = Math.ceil(a / 10);
+  const keep = a - b;
+  const radius = Math.round(unit * 0.15);
+  const line = Math.max(1, unit / 20);
+  const parts = [];
+  for (let i = 0; i < a; i++) {
+    const c = i % 10;
+    const x = c * (unit + gap) + (c >= 5 ? mid : 0);
+    const y = Math.floor(i / 10) * (unit + gap);
+    if (i < keep) {
+      parts.push(`<rect class="tip-keep" x="${x}" y="${y}" width="${unit}" height="${unit}" rx="${radius}" fill="#3fa34d" stroke="#2d7537" stroke-width="${line}"/>`);
+    } else {
+      const m = unit * 0.2;
+      parts.push(`<g class="tip-gone"><rect x="${x}" y="${y}" width="${unit}" height="${unit}" rx="${radius}" fill="#e4e0d8" stroke="#a39e94" stroke-width="${line}"/>`
+        + `<path d="M${x + m} ${y + m}L${x + unit - m} ${y + unit - m}M${x + unit - m} ${y + m}L${x + m} ${y + unit - m}" stroke="#d7263d" stroke-width="${Math.max(2, unit / 8)}" stroke-linecap="round"/></g>`);
+    }
+  }
+  // A margin, so the squares' outlines are not cut off at the edges.
+  const margin = line + 2;
+  const width = cols * (unit + gap) - gap + (cols > 5 ? mid : 0) + margin * 2;
+  const height = rows * (unit + gap) - gap + margin * 2;
+  const label = `${a} blocks, with ${b} taken away (crossed out)`;
+  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${-margin} ${-margin} ${width} ${height}" class="tip-picture tip-takeaway" role="img" aria-label="${label}">${parts.join('')}</svg>`;
 }
 
 /** A number split into tens and ones ([40, 7]; [30]; [8]). */

@@ -8,11 +8,11 @@
 //   ao.v1.history.<id>   the last 10 finished games
 //   ao.v1.active.<id>    the adventure in progress
 
-import { ADVENTURE_SCHEMA } from './adventure.js?v=0.7.1';
-import { AVATAR_IDS, checkColor } from './avatars.js?v=0.7.1';
-import { createProblemGenerator, restoreProblem } from './math.js?v=0.7.1';
-import { HISTORY_SIZE, BOARD_SIZE } from './scores.js?v=0.7.1';
-import { COLOR_THEMES, DEFAULT_SETTINGS, DEFAULT_SETUP, THEMES, isThemeId, normalizeSettings, normalizeSetup } from './settings.js?v=0.7.1';
+import { ADVENTURE_SCHEMA, AGAIN_AFTER, AGAIN_MAX } from './adventure.js?v=0.7.2';
+import { AVATAR_IDS, checkColor } from './avatars.js?v=0.7.2';
+import { createProblemGenerator, restoreProblem } from './math.js?v=0.7.2';
+import { HISTORY_SIZE, BOARD_SIZE } from './scores.js?v=0.7.2';
+import { COLOR_THEMES, DEFAULT_SETTINGS, DEFAULT_SETUP, THEMES, isThemeId, normalizeSettings, normalizeSetup } from './settings.js?v=0.7.2';
 
 export const RECORD_SCHEMA = 1;
 export const MAX_PROFILES = 8;
@@ -220,9 +220,20 @@ function checkStats(raw) {
     setbacks: count(s.setbacks),
     thinkingMs: count(s.thinkingMs),
     tips: count(s.tips),
+    bestStreak: count(s.bestStreak),
     missed: checkCounts(s.missed, 500),
     times: checkCounts(s.times, 500),
   };
+}
+
+/** Missed problems waiting to be asked again (saved before 0.7.2: none). */
+function checkAgain(raw) {
+  if (!Array.isArray(raw)) return [];
+  return raw.slice(-50).flatMap((q) => {
+    const problem = restoreProblem(q);
+    if (!problem || !Number.isInteger(q.wait)) return [];
+    return [{ op: problem.op, a: problem.a, b: problem.b, wait: Math.min(Math.max(q.wait, 0), AGAIN_AFTER + 1) }];
+  }).slice(-AGAIN_MAX);
 }
 
 /** Checks a saved adventure. Returns null for a finished one (nothing to resume). */
@@ -259,6 +270,10 @@ export function checkAdventure(a) {
     problem,
     lastKey: problem ? problem.key : (typeof a.lastKey === 'string' ? a.lastKey : null),
     tipFor: problem && a.tipFor === problem.key ? problem.key : null,
+    isAgain: Boolean(problem && a.isAgain === true),
+    again: checkAgain(a.again),
+    sinceGiveaway: Number.isInteger(a.sinceGiveaway) && a.sinceGiveaway >= 0 ? Math.min(a.sinceGiveaway, 1000) : null,
+    streak: count(a.streak),
     stats: checkStats(a.stats),
   };
 }

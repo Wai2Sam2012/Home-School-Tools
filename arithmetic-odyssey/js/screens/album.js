@@ -1,10 +1,17 @@
-// 6. Sticker Album: every sticker in order, with locked ones greyed out.
+// 6. Sticker Album: every sticker in order, with locked ones greyed out,
+// in sections (dinosaurs by period, parks by region) with a count each.
 // Tapping a collected sticker shows its pictures and facts.
 
-import { placeholderArt, stickerPicture } from '../art.js?v=0.7.1';
-import { THEMES } from '../settings.js?v=0.7.1';
-import { nextSticker } from '../storyline.js?v=0.7.1';
-import { choiceRow, flash, h, topBar } from '../ui.js?v=0.7.1';
+/** The section a sticker is in: its period (dinosaurs) or region (parks). */
+export function stickerSection(sticker) {
+  return sticker.period ?? sticker.region ?? '';
+}
+
+import { placeholderArt, stickerPicture } from '../art.js?v=0.7.2';
+import { readAloudButton, stickerReading } from '../read-aloud.js?v=0.7.2';
+import { THEMES } from '../settings.js?v=0.7.2';
+import { nextSticker } from '../storyline.js?v=0.7.2';
+import { choiceRow, flash, h, topBar } from '../ui.js?v=0.7.2';
 
 /** Long one-word names get a smaller size so they fit on one line ("Thecodontosaurus"). */
 function nameSize(name) {
@@ -16,7 +23,8 @@ function nameSize(name) {
 
 export function albumScreen(ctx, { theme = 'dino' } = {}) {
   const player = ctx.profiles.active();
-  const status = h('p', { class: 'status-line', role: 'status' });
+  // Floats at the bottom of the screen, so it is seen however far the album is scrolled.
+  const status = h('p', { class: 'status-line album-status', role: 'status' });
   const body = h('div', { class: 'album-body' }, h('p', {}, 'Loading stickers…'));
 
   async function showTheme() {
@@ -29,21 +37,30 @@ export function albumScreen(ctx, { theme = 'dino' } = {}) {
       const storyline = await ctx.getStoryline(theme);
       const owned = new Set(player.collected[theme]);
       const upNext = nextSticker(storyline, player.collected[theme]);
-      const tiles = storyline.stickers.map((s) => {
+      const tile = (s) => {
         const have = owned.has(s.id);
         return h('button', {
           type: 'button',
           class: `sticker-tile${have ? '' : ' locked'}${s === upNext ? ' up-next' : ''}`,
           'aria-label': have ? `${s.number}. ${s.name}` : `Sticker ${s.number}, locked`,
-          onclick: () => (have ? showSticker(theme, s) : flash(status, `Keep exploring to unlock sticker ${s.number}!`)),
+          onclick: () => (have ? showSticker(ctx, theme, s) : flash(status, `Keep exploring to unlock sticker ${s.number}!`)),
         },
         have ? stickerPicture(theme, s, 0, { className: 'tile-picture', short: true }) : h('div', { class: 'tile-picture' }, placeholderArt(theme, s, { locked: true })),
         h('span', { class: `tile-name${nameSize(have ? s.name : '')}` }, have ? s.name : `#${s.number}`),
         s === upNext ? h('span', { class: 'tile-badge' }, 'Next!') : null);
-      });
+      };
+      const sections = [];
+      for (const s of storyline.stickers) {
+        const name = stickerSection(s);
+        if (sections.at(-1)?.name !== name) sections.push({ name, stickers: [] });
+        sections.at(-1).stickers.push(s);
+      }
       body.replaceChildren(
         h('p', { class: 'lead' }, `${owned.size} of ${storyline.stickers.length} collected`),
-        h('div', { class: 'sticker-grid' }, tiles),
+        ...sections.map(({ name, stickers }) => h('section', { class: 'album-section' },
+          name ? h('h2', { class: 'album-section-title' }, name,
+            h('span', { class: 'album-section-count' }, `${stickers.filter((s) => owned.has(s.id)).length} of ${stickers.length}`)) : null,
+          h('div', { class: 'sticker-grid' }, stickers.map(tile)))),
       );
     } catch (error) {
       body.replaceChildren(h('p', { class: 'form-error' }, error.message));
@@ -73,7 +90,7 @@ export function albumScreen(ctx, { theme = 'dino' } = {}) {
 export const PICTURE_MS = 3000;
 
 /** A large card with the sticker's pictures (changing by themselves every few seconds) and facts. */
-function showSticker(theme, sticker) {
+function showSticker(ctx, theme, sticker) {
   let index = 0;
   let timer = 0;
   const total = sticker.pictures.length;
@@ -86,6 +103,7 @@ function showSticker(theme, sticker) {
   };
   const close = () => {
     clearInterval(timer);
+    ctx.speaker.cancel();
     overlay.remove();
     document.removeEventListener('keydown', onKey);
   };
@@ -105,6 +123,7 @@ function showSticker(theme, sticker) {
       dots,
       h('h2', {}, `${sticker.number}. ${sticker.name}`),
       h('ul', { class: 'detail-list' }, details.map((d) => h('li', {}, d))),
+      readAloudButton(ctx, ctx.profiles.active(), () => stickerReading(sticker)),
       h('ul', { class: 'fact-list' }, sticker.facts.map((f) => h('li', {}, f))),
       closeButton,
     ),

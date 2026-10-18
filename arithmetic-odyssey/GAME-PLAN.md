@@ -148,6 +148,7 @@ Keep each theme's pictures under about 50 MB (the Dino theme with 3–5 pictures
 - Division always gives a whole number: create it by picking the divisor and the answer, then multiply them to get the dividend. For Advanced, keep only results where the dividend has 3 digits. Never divide by 0.
 - Only use the operations the player selected, in the main trail and in detours.
 - Do not repeat the same problem twice in a row.
+- **Giveaways (0.7.2):** a problem with + − × ÷ by 1, or a number take away itself (answer 0), comes at most once in any 20 questions in a row on Beginner, and never on Intermediate or Advanced (`isGiveaway()`, `GIVEAWAY_EVERY` in `js/math.js`). The count is saved with the trip, so it carries on when a trip is resumed.
 - Answers are whole numbers typed on the on-screen keypad.
 
 ### 1.8 Adventure rules
@@ -600,7 +601,7 @@ Every stage ends with its tests passing, the site republished, and a short repor
 ### Stage 7.1 (0.7.1): fixes before Stage 8
 
 - **Help for × and ÷** (`tipKind()` in `js/blocks.js`): multiplication with a factor of 10 or less shows groups of dots to count (3 × 4: 3 groups of 4; more than 30 groups stand up in a grid); two 2-digit numbers show a box split into tens and ones. Division with an answer of 12 or less shows the dots shared into rows; a bigger answer shows the number split into an easy part and the rest (84 ÷ 4 = 80 ÷ 4 + 4 ÷ 4). The card's title says what to do (for example *"3 groups of 4: count them all"*).
-- **Learn from Incorrect** moved to Home (🎯, with how many problems are left to learn). It asks every unlearned problem on Need More Practice (up to 20) at the same time, in a random order, never the same one twice in a row while others are left. Each must be right **3** times; a wrong answer starts its count again. The round ends when all are learned, or after 6 questions per problem. If every problem is learned, the round practises them all again.
+- **Learn from Incorrect** moved to Home (🎯, with how many problems are left to learn). It asks every unlearned problem on Need More Practice (up to 20) at the same time, in a random order, never the same one twice in a row while others are left. Each must be right **3** times; a wrong answer starts its count again. The round ends when all are learned, or after 6 questions per problem. If every problem is learned, the round practices them all again.
 - **Need More Practice** keeps the last 20 problems missed; learned ones stay, ticked, for looking over.
 - **Colors** (Settings, per player; the start screens use the last player's): High contrast, Soft, Classic, Warm and Dark. Every color is a CSS variable; `tests/themes.test.js` checks each choice sets them all and that text keeps a readable contrast (WCAG 4.5:1 for text, 3:1 for large text and edges).
 - **Security review** (see 1.14), and a confirm step on the debug panel's **remove the player's stickers**.
@@ -613,6 +614,25 @@ Every stage ends with its tests passing, the site republished, and a short repor
 | T7.12 | Every color choice sets every color, and text stays readable (`tests/themes.test.js`) | Automated |
 | T7.13 | The pages' security policy matches them; no code runs text as code; a hostile backup file is cleaned and changes nothing else (`tests/security.test.js`) | Automated |
 | T7.14 | The five color choices look right on the iPad, upright and sideways, and Dark is comfortable at night | iPad |
+
+### Stage 7.2 (0.7.2): more fixes before Stage 8
+
+Chosen by the owner from the 0.7.1 review list:
+
+- **Learning:** subtraction Help is "take away" (the first number as squares in rows of ten, the second crossed out from the end, so the squares left are the answer); a missed question comes back 3 questions later (see Part 4, decision 2); 🔊 **Read to me** on Trail's End and the album card reads the sticker's name and facts, even with Voice off; Trail's End has confetti and a sticker "pop" (off with Reduce Motion), % right and the longest streak; "🔥 5 in a row!" every 5 right answers in a row; giveaways limited (see 1.7).
+- **Layout:** a new biggest size for the adventure screen, used whenever it fits (bigger keys, question and trail map); Trail's End fits every iPad without scrolling (the trip as small tiles); high-score filters stay on one row; Home shows the next stop's picture and each theme's sticker count, and its buttons keep their words on one line where they can; the Sticker Album is in sections (dinosaurs by period, parks by region) with a count each, and its "unlock" message floats at the bottom; the Help card's ✕ no longer covers the picture, and the Help button hides while it is open; the trip planner says "wandering", and the picture screen says "Pick a look".
+- **Grown-ups:** Settings is split into "Just for" the player and "Everyone on this iPad"; a copy of a deleted player is kept so a grown-up can **Bring back** the last one deleted from the player list (two-finger hold); the grown-up check takes two fingers (see Part 4, decision 3).
+- **Spelling:** "practice" everywhere (never "practise").
+- **Security:** the publish workflow's write permissions are only on the publishing job, and every action is pinned to a commit; the picture downloaders stop at `-MaxPictureMB` (20 MB), and keep a file only if the server calls it a picture and it starts like a JPEG, PNG, GIF or WebP.
+
+| ID | Test | Kind |
+|---|---|---|
+| T7.15 | Giveaways: at most one in any 20 on Beginner (also across a resumed trip), none on Intermediate or Advanced (`tests/stage72.test.js`) | Automated |
+| T7.16 | A missed question comes back after 3 others, survives a resume, and damaged saved entries are dropped; streaks at 5, 10, ... (`tests/stage72.test.js`) | Automated |
+| T7.17 | Bringing back a deleted player: once only, a taken name gets a number, a full list or a damaged copy changes nothing, no room for the copy asks again (`tests/stage72.test.js`) | Automated |
+| T7.18 | The downloaders refuse http, non-pictures, a missing type, and anything over the size limit (stopped mid-download, nothing kept); a 404 is not retried (PowerShell 7 against a local server; to repeat on Windows PowerShell 5.1) | PC |
+| T7.19 | Two fingers on the Grown-ups button for 3 seconds open Settings on the iPad; one finger doesn't | iPad |
+| T7.20 | 🔊 Read to me reads the sticker with the iPad's voice | iPad |
 
 ### Stage 8: Release and iPad acceptance
 
@@ -684,6 +704,6 @@ A good routine is to build and test each stage on the PC, push it, and then run 
 ### Still open (the agent uses the default)
 
 1. **Players' age or grade.** This affects reading level and voice speed. **Default:** ages 6–10.
-2. **The question missed on the main trail.** **Default:** not asked again in that adventure, but counted in Need More Practice. An alternative is to ask it again later in the same adventure.
-3. **Grown-up check.** **Default:** hold a button for 3 seconds to open Settings.
+2. **The question missed on the main trail.** **Decided (0.7.2):** asked again 3 questions later in the same trip, marked "One you missed. Try it again!", once for each miss (at most 5 waiting). It is still counted in Need More Practice.
+3. **Grown-up check.** **Decided (0.7.2):** hold the Grown-ups button for 3 seconds with two fingers at once on a touch screen (a mouse or keyboard on a PC still holds with one press). The button no longer says how; a one-finger touch shows a short hint.
 4. **Picture rights.** Both the repository and the website are public, so anyone can see and download the pictures. Choose pictures you are allowed to share; photos taken by National Park Service staff are generally free to reuse. Record each picture's source in `CREDITS.md` so any picture can be swapped out later if needed.

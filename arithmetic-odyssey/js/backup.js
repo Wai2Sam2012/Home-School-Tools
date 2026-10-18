@@ -4,8 +4,8 @@
 // of it is wrong; before it changes anything, the current data is kept so
 // the restore can be undone.
 
-import { KEYS } from './storage.js?v=0.7.1';
-import { MAX_PROFILES, checkActive, checkHistory, checkProfile } from './records.js?v=0.7.1';
+import { KEYS } from './storage.js?v=0.7.2';
+import { MAX_PROFILES, checkActive, checkHistory, checkProfile } from './records.js?v=0.7.2';
 
 export const BACKUP_FORMAT = 'arithmetic-odyssey-backup';
 export const BACKUP_SCHEMA = 1;
@@ -115,6 +115,39 @@ export function undoRestore(store) {
   const players = store.importPlayers(parsed.players, { replace: true });
   store.storage.remove(KEYS.undo);
   return players;
+}
+
+// ---------------------------------------------------------------- undoing Delete player (0.7.2)
+
+/**
+ * Keeps a copy of a player just before they are deleted (replacing any
+ * earlier copy), so undoDelete() can bring them back. Returns false if it
+ * could not be kept (the storage is full); the grown-up is then told the
+ * delete can't be undone.
+ */
+export function keepDeletedPlayer(store, id, { appVersion = '', date = new Date() } = {}) {
+  const player = store.exportPlayers().find((p) => p.profile.id === id);
+  if (!player) return false;
+  return store.storage.write(KEYS.deleted, { format: BACKUP_FORMAT, schema: BACKUP_SCHEMA, appVersion, exportedAt: date.toISOString(), players: [player] });
+}
+
+/** The deleted player that can be brought back, as { name, profile }, or null. A damaged copy counts as none. */
+export function deletedPlayer(store) {
+  const saved = store.storage.read(KEYS.deleted);
+  if (!saved) return null;
+  const parsed = parseBackup(JSON.stringify(saved));
+  if (!parsed.ok || parsed.players.length !== 1) return null;
+  return { name: parsed.players[0].profile.name, players: parsed.players };
+}
+
+/** Brings the last deleted player back (with a new name if theirs is taken now). Returns the player, or throws. */
+export function undoDelete(store) {
+  const deleted = deletedPlayer(store);
+  if (!deleted) throw new Error('There is no deleted player to bring back.');
+  if (!store.canAdd()) throw new Error('There are already as many players as there can be. Delete one first.');
+  const [player] = store.importPlayers(deleted.players);
+  store.storage.remove(KEYS.deleted);
+  return player;
 }
 
 /**

@@ -1,28 +1,28 @@
 // Starts the game: keeps the players and story files, and switches between
 // screens. Each screen is a function in js/screens/ that builds its page.
 
-import { APP_VERSION } from './version.js?v=0.7.1';
-import { addDebugAction, addDebugInfo, isDebugOn, refreshDebugPanel, showDebugPanel } from './debug.js?v=0.7.1';
-import { measureAll } from './storage-report.js?v=0.7.1';
-import { audioSuspended, loadRecording, pickDifferent, playRecording, playSound, soundLength, unlockAudio } from './audio.js?v=0.7.1';
-import { AVATARS, createProfileStore } from './profiles.js?v=0.7.1';
-import { askToKeepData, createStorage, deviceStorage } from './storage.js?v=0.7.1';
-import { SPEECH_RATES, chooseVoice, createSpeaker, loadVoices } from './speech.js?v=0.7.1';
-import { COLOR_THEMES, THEMES } from './settings.js?v=0.7.1';
-import { collectNext, loadStoryline, pictureUrl } from './storyline.js?v=0.7.1';
-import { h } from './ui.js?v=0.7.1';
-import { startScreen } from './screens/start.js?v=0.7.1';
-import { newPlayerScreen, playerPictureScreen, profilesScreen } from './screens/profiles.js?v=0.7.1';
-import { PICTURES_SAVED_EVENT, createOffline, picturesToSave } from './offline.js?v=0.7.1';
-import { homeScreen } from './screens/home.js?v=0.7.1';
-import { setupScreen } from './screens/setup.js?v=0.7.1';
-import { adventureScreen } from './screens/adventure.js?v=0.7.1';
-import { trailEndScreen } from './screens/trail-end.js?v=0.7.1';
-import { albumScreen } from './screens/album.js?v=0.7.1';
-import { statsScreen } from './screens/stats.js?v=0.7.1';
-import { learnScreen } from './screens/learn.js?v=0.7.1';
-import { settingsScreen } from './screens/settings.js?v=0.7.1';
-import { voiceLabScreen } from './screens/voice-lab.js?v=0.7.1';
+import { APP_VERSION } from './version.js?v=0.7.2';
+import { addDebugAction, addDebugInfo, isDebugOn, refreshDebugPanel, showDebugPanel } from './debug.js?v=0.7.2';
+import { measureAll } from './storage-report.js?v=0.7.2';
+import { audioSuspended, loadRecording, pickDifferent, playRecording, playSound, soundLength, unlockAudio } from './audio.js?v=0.7.2';
+import { AVATARS, createProfileStore } from './profiles.js?v=0.7.2';
+import { askToKeepData, createStorage, deviceStorage } from './storage.js?v=0.7.2';
+import { SPEECH_RATES, chooseVoice, createSpeaker, loadVoices } from './speech.js?v=0.7.2';
+import { COLOR_THEMES, THEMES } from './settings.js?v=0.7.2';
+import { collectNext, loadStoryline, pictureUrl } from './storyline.js?v=0.7.2';
+import { h } from './ui.js?v=0.7.2';
+import { startScreen } from './screens/start.js?v=0.7.2';
+import { newPlayerScreen, playerPictureScreen, profilesScreen } from './screens/profiles.js?v=0.7.2';
+import { PICTURES_SAVED_EVENT, createOffline, picturesToSave } from './offline.js?v=0.7.2';
+import { homeScreen } from './screens/home.js?v=0.7.2';
+import { setupScreen } from './screens/setup.js?v=0.7.2';
+import { adventureScreen } from './screens/adventure.js?v=0.7.2';
+import { trailEndScreen } from './screens/trail-end.js?v=0.7.2';
+import { albumScreen } from './screens/album.js?v=0.7.2';
+import { statsScreen } from './screens/stats.js?v=0.7.2';
+import { learnScreen } from './screens/learn.js?v=0.7.2';
+import { settingsScreen } from './screens/settings.js?v=0.7.2';
+import { voiceLabScreen } from './screens/voice-lab.js?v=0.7.2';
 
 const SCREENS = {
   start: { build: startScreen },
@@ -106,6 +106,17 @@ const ctx = {
     ctx.speaker.setVoice(chooseVoice(ctx.voices, { chosenId: player.settings.voiceId }));
     ctx.speaker.rate = SPEECH_RATES[player.settings.speed] ?? SPEECH_RATES.normal;
     return true;
+  },
+
+  /** True when something can be read aloud on request (🔊 Read to me), even with Voice off. */
+  canReadAloud: () => ctx.voiceState === 'ready',
+
+  /** Reads text aloud with the player's voice and speed (🔊 Read to me). Resolves when it ends. */
+  readAloud(player, text) {
+    if (!ctx.canReadAloud()) return Promise.resolve('unavailable');
+    ctx.speaker.setVoice(chooseVoice(ctx.voices, { chosenId: player?.settings.voiceId }));
+    ctx.speaker.rate = SPEECH_RATES[player?.settings.speed] ?? SPEECH_RATES.normal;
+    return ctx.speaker.speak(text);
   },
 
   /**

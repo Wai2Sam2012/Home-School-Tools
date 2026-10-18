@@ -2,6 +2,11 @@
 #
 # One-time setup: in the repository's Settings > Pages, set
 # "Build and deployment > Source" to "GitHub Actions".
+#
+# Each action is pinned to an exact commit (its version is in the comment),
+# so a changed tag can't change what runs. To update one, find the commit of
+# its new release (git ls-remote --tags https://github.com/actions/<name>)
+# and replace both.
 
 name: Deploy to GitHub Pages
 
@@ -10,10 +15,8 @@ on:
     branches: [main]
   workflow_dispatch: # also allows running it by hand from the Actions tab
 
-permissions:
-  contents: read
-  pages: write
-  id-token: write
+# Nothing by default; each job asks only for what it needs.
+permissions: {}
 
 # Only one deployment at a time; a newer push waits for the current one.
 concurrency:
@@ -23,15 +26,19 @@ concurrency:
 jobs:
   build:
     runs-on: ubuntu-latest
+    # Runs the repository's own scripts and tests, so it can only read.
+    permissions:
+      contents: read
+      pages: read # configure-pages reads the Pages settings
     steps:
       - name: Check out the repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@fbc6f3992d24b796d5a048ff273f7fcc4a7b6c09 # v5.1.0
         with:
           # Nothing here pushes, so the token isn't kept in the checkout.
           persist-credentials: false
 
       - name: Set up Node.js
-        uses: actions/setup-node@v5
+        uses: actions/setup-node@a0853c24544627f65ddf259abe73b1d18a591444 # v5.0.0
         with:
           node-version: lts/*
 
@@ -64,20 +71,24 @@ jobs:
         run: node .github/scripts/assemble-site.mjs _site
 
       - name: Configure GitHub Pages
-        uses: actions/configure-pages@v6
+        uses: actions/configure-pages@45bfe0192ca1faeb007ade9deae92b16b8254a0d # v6.0.0
 
       - name: Upload the site
-        uses: actions/upload-pages-artifact@v5
+        uses: actions/upload-pages-artifact@fc324d3547104276b827a68afc52ff2a11cc49c9 # v5.0.0
         with:
           path: _site
 
   deploy:
     needs: build
     runs-on: ubuntu-latest
+    # Only this job can publish; it runs no repository code.
+    permissions:
+      pages: write
+      id-token: write
     environment:
       name: github-pages
       url: ${{ steps.deployment.outputs.page_url }}
     steps:
       - name: Deploy to GitHub Pages
         id: deployment
-        uses: actions/deploy-pages@v5
+        uses: actions/deploy-pages@368f82528645a54fb793d4d04e342629a3f51346 # v5.0.1

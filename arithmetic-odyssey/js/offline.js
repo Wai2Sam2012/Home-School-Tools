@@ -17,7 +17,7 @@
 //
 // container is navigator.serviceWorker (replaced in tests).
 
-import { nextSticker, pictureUrl } from './storyline.js?v=0.7.1';
+import { nextSticker, pictureUrl } from './storyline.js?v=0.7.2';
 
 export const OFFLINE_TEXT = Object.freeze({
   checking: 'Checking offline play…',

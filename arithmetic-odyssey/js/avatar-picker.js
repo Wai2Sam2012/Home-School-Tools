@@ -4,8 +4,8 @@
 // still tell a screen reader what they are. Used on the New player screen and
 // when a player changes their picture.
 
-import { AVATARS, COLOR_COUNT, avatarIcon, avatarInfo, avatarLabel, checkColor } from './avatars.js?v=0.7.1';
-import { h } from './ui.js?v=0.7.1';
+import { AVATARS, COLOR_COUNT, avatarIcon, avatarInfo, avatarLabel, checkColor } from './avatars.js?v=0.7.2';
+import { h } from './ui.js?v=0.7.2';
 
 /**
  * Returns { el, value() } where value() is { avatar, color }. The pictures
@@ -41,7 +41,7 @@ export function createAvatarPicker({ avatar, color = 1, onChange = () => {} } = 
       },
     }));
 
-  const colorTitle = h('h2', { class: 'color-title' }, 'Pick 1 to 5');
+  const colorTitle = h('h2', { class: 'color-title' }, 'Pick a look');
 
   function update() {
     for (const b of pictureButtons) {

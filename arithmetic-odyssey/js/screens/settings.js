@@ -2,12 +2,12 @@
 // detour length, saving, offline play, backup and restore, and deleting the
 // player.
 
-import { COLOR_THEMES, COLOR_THEME_LABELS, ADVENTURE_LENGTHS, DETOUR_MAX, DETOUR_MIN, stepDetourLength } from '../settings.js?v=0.7.1';
-import { bestVersions, chooseVoice, isFunVoice, voiceId, voiceQuality } from '../speech.js?v=0.7.1';
-import { playerIcon } from '../avatars.js?v=0.7.1';
-import { MAX_BACKUP_FILE_BYTES, canUndoRestore, makeBackup, parseBackup, restoreBackup, saveBackupFile, undoRestore } from '../backup.js?v=0.7.1';
-import { formatBytes } from '../storage.js?v=0.7.1';
-import { choiceDialog, choiceRow, confirmDialog, h, topBar } from '../ui.js?v=0.7.1';
+import { COLOR_THEMES, COLOR_THEME_LABELS, ADVENTURE_LENGTHS, DETOUR_MAX, DETOUR_MIN, stepDetourLength } from '../settings.js?v=0.7.2';
+import { bestVersions, chooseVoice, isFunVoice, voiceId, voiceQuality } from '../speech.js?v=0.7.2';
+import { playerIcon } from '../avatars.js?v=0.7.2';
+import { MAX_BACKUP_FILE_BYTES, canUndoRestore, keepDeletedPlayer, makeBackup, parseBackup, restoreBackup, saveBackupFile, undoRestore } from '../backup.js?v=0.7.2';
+import { formatBytes } from '../storage.js?v=0.7.2';
+import { choiceDialog, choiceRow, confirmDialog, h, topBar } from '../ui.js?v=0.7.2';
 
 const REGIONS = { US: 'US', GB: 'UK', AU: 'Australia', IE: 'Ireland', IN: 'India', ZA: 'South Africa', NZ: 'New Zealand', CA: 'Canada', SG: 'Singapore' };
 const SAMPLE = 'Hi! What is 7 times 8?';
@@ -235,18 +235,31 @@ export function settingsScreen(ctx) {
   async function deletePlayer() {
     const yes = await confirmDialog({
       title: `Delete ${player.name}?`,
-      message: `${player.name}'s stickers, stats and high scores will be deleted. This can't be undone.`,
+      message: `${player.name}'s stickers, stats and high scores will be deleted. A copy is kept, so a grown-up can bring ${player.name} back from the player list (until another player is deleted).`,
       yes: 'Delete',
       danger: true,
     });
     if (!yes) return;
+    // The safety copy (0.7.2). If there is no room for it, say so and ask again.
+    if (!keepDeletedPlayer(store, player.id, { appVersion: ctx.version })) {
+      const anyway = await confirmDialog({
+        title: `Delete ${player.name} for good?`,
+        message: `There isn't room on this iPad to keep a copy, so this can't be undone. Make a backup first if you might want ${player.name} back.`,
+        yes: 'Delete for good',
+        danger: true,
+      });
+      if (!anyway) return;
+    }
     ctx.profiles.remove(player.id);
     ctx.show('profiles');
   }
 
   return h('main', { class: 'screen settings-screen' },
     topBar('Grown-up Settings', () => ctx.show('home')),
-    h('p', { class: 'lead settings-for' }, 'Settings for ', playerIcon(player, { className: 'avatar-icon inline' }), ` ${player.name}`),
+    // Two groups (0.7.2): what is only this player's, and what is shared by everyone on this iPad.
+    h('section', { class: 'settings-group', 'aria-labelledby': 'settings-player' },
+    h('h2', { class: 'settings-group-title', id: 'settings-player' }, 'Just for ', playerIcon(player, { className: 'avatar-icon inline' }), ` ${player.name}`),
+    h('p', { class: 'note' }, `These change the game for ${player.name} only. Each player has their own.`),
     h('div', { class: 'settings-layout' },
       h('section', { class: 'panel colors-panel' },
         h('h2', {}, 'Colors'),
@@ -303,6 +316,17 @@ export function settingsScreen(ctx) {
         h('p', { class: 'note' }, `Questions each time a player wanders off the trail after a wrong answer (${DETOUR_MIN} to ${DETOUR_MAX}).`),
       ),
       h('section', { class: 'panel' },
+        h('h2', {}, 'Player'),
+        h('button', { type: 'button', class: 'big-button danger', onclick: deletePlayer }, `Delete ${player.name}`),
+        h('p', { class: 'note' }, `Deletes ${player.name}'s stickers, stats and high scores from this iPad. The last player deleted can be brought back from the player list.`),
+      ),
+    ),
+    ),
+    h('section', { class: 'settings-group', 'aria-labelledby': 'settings-device' },
+    h('h2', { class: 'settings-group-title', id: 'settings-device' }, 'Everyone on this iPad'),
+    h('p', { class: 'note' }, 'These are shared by every player on this iPad.'),
+    h('div', { class: 'settings-layout' },
+      h('section', { class: 'panel' },
         h('h2', {}, 'Saving and backup'),
         savingInfo,
         h('h2', {}, 'Offline play'),
@@ -318,9 +342,8 @@ export function settingsScreen(ctx) {
         h('p', { class: 'note' }, 'A backup is one file with every player, their stickers, stats, high scores and settings.'),
         undoButton,
         backupStatus,
-        h('h2', {}, 'Player'),
-        h('button', { type: 'button', class: 'big-button danger', onclick: deletePlayer }, `Delete ${player.name}`),
       ),
+    ),
     ),
   );
 }

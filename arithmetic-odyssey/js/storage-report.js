@@ -9,7 +9,7 @@
 //   - Memory (JavaScript heap): only Chrome and Edge report it. Safari on the
 //     iPad doesn't, so the panel shows page elements and loaded sounds instead.
 
-import { PREFIX, formatBytes } from './storage.js?v=0.7.1';
+import { PREFIX, formatBytes } from './storage.js?v=0.7.2';
 
 const OFFLINE_PREFIX = 'arithmetic-odyssey-';
 const OFFLINE_LIST = 'offline-file-list.json';

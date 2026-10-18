@@ -8,7 +8,7 @@
 //   Need More Practice: the last 20 problems answered wrong in the last 10
 //     games, the most recent first, then (if there is room) slow ones. A
 //     problem learned in Learn from Incorrect stays on the list, marked
-//     learned, so it can still be practised; missing it again in a later game
+//     learned, so it can still be practiced; missing it again in a later game
 //     makes it "to learn" again.
 
 export const HISTORY_SIZE = 10;
@@ -16,7 +16,7 @@ export const BOARD_SIZE = 10;
 export const PRACTICE_SIZE = 20;
 // Only the slowest few problems of each game are kept in its summary.
 const SLOWEST_PER_GAME = 10;
-// A problem answered right counts as slow (worth practising) from this long.
+// A problem answered right counts as slow (worth practicing) from this long.
 export const SLOW_MS = 5000;
 
 /** The board for an adventure length and difficulty: "20|beginner". */
@@ -133,8 +133,8 @@ export function needMorePractice(games, size = PRACTICE_SIZE, learned = {}) {
   }));
 }
 
-/** What a Learn from Incorrect round practises: the problems not learned yet, or (if all are) every one again. */
-export function toPractise(list) {
+/** What a Learn from Incorrect round practices: the problems not learned yet, or (if all are) every one again. */
+export function toPractice(list) {
   const open = list.filter((p) => !p.learned);
   return open.length ? open : list;
 }

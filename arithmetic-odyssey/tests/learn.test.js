@@ -10,7 +10,7 @@ import { join } from 'node:path';
 import { LEARN_MAX_PROBLEMS, LEARN_NEEDS, TRIES_PER_PROBLEM, answerLearning, currentProblem, problemFromKey, startLearning } from '../js/learn.js';
 import { createProfileStore } from '../js/profiles.js';
 import { checkProfile } from '../js/records.js';
-import { PRACTICE_SIZE, SLOW_MS, needMorePractice, toPractise } from '../js/scores.js';
+import { PRACTICE_SIZE, SLOW_MS, needMorePractice, toPractice } from '../js/scores.js';
 import { KEYS, createStorage, memoryStorage } from '../js/storage.js';
 import { makeBackup, parseBackup } from '../js/backup.js';
 import { GAME_DIR, buildDinoStoryline, buildParksStoryline, findSounds, isCredited, parseCredits } from '../tools/build-storyline.mjs';
@@ -38,7 +38,7 @@ test('a round has every problem from the list at once (up to 20), in random orde
   assert.deepEqual(state.items.map((i) => i.key), keys, 'bad and repeated keys are skipped');
   assert.equal(LEARN_MAX_PROBLEMS, PRACTICE_SIZE);
   assert.equal(startLearning(Array.from({ length: 30 }, (_, i) => missed(`${i + 1}+1`))).items.length, 20);
-  assert.equal(startLearning([]), null, 'nothing to practise');
+  assert.equal(startLearning([]), null, 'nothing to practice');
   assert.equal(startLearning([missed('nope')]), null);
   // Over many rounds, any problem can come first.
   const firsts = new Set(Array.from({ length: 200 }, () => currentProblem(startLearning(keys.map((k) => missed(k)))).text));
@@ -150,13 +150,13 @@ test('a learned problem stays in Need More Practice (marked learned) until a lat
   const learned = { '7×8': '2026-10-03T00:00:00.000Z', '9×9': '2026-10-03T00:00:00.000Z' };
   const list = needMorePractice(games, 20, learned);
   assert.deepEqual(list.map((p) => [p.key, p.learned]), [['7×8', true], ['6×6', false], ['9×9', true]], 'still listed, most recent first');
-  assert.deepEqual(toPractise(list).map((p) => p.key), ['6×6'], 'the round practises the one not learned');
+  assert.deepEqual(toPractice(list).map((p) => p.key), ['6×6'], 'the round practices the one not learned');
   const later = [...games, { at: '2026-10-04T00:00:00.000Z', missed: { '7×8': 1 }, slow: {} }];
   const again = needMorePractice(later, 20, learned);
   assert.deepEqual(again.map((p) => [p.key, p.learned]), [['7×8', false], ['6×6', false], ['9×9', true]], 'missed again: to learn again');
-  // Everything learned: the round practises them all again.
+  // Everything learned: the round practices them all again.
   const allLearned = needMorePractice(games, 20, { ...learned, '6×6': '2026-10-03T00:00:00.000Z' });
-  assert.equal(toPractise(allLearned).length, 3);
+  assert.equal(toPractice(allLearned).length, 3);
 });
 
 test('Need More Practice keeps the last 20 problems answered wrong, newest first', () => {

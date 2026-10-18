@@ -346,6 +346,23 @@ h1:focus {
   content: none;
 }
 
+/* My Stats: each set of high-score filters stays on one row (0.7.2). */
+.stats-screen .choice-row {
+  flex-wrap: nowrap;
+  gap: 8px;
+}
+
+.stats-screen .choice {
+  flex: 1 1 0;
+  min-width: 0;
+  padding: 8px 4px;
+  font-size: clamp(16px, 2vw, 21px);
+}
+
+.stats-screen .choice[aria-pressed="true"] .choice-label::before {
+  content: none;
+}
+
 /* ------------------------------------------------------------ grown-up hold button */
 
 .hold-button {
@@ -366,6 +383,8 @@ h1:focus {
   -webkit-user-select: none;
   user-select: none;
   -webkit-touch-callout: none;
+  /* Two fingers on the button must not zoom or scroll the page. */
+  touch-action: none;
 }
 
 .hold-fill {
@@ -385,6 +404,10 @@ h1:focus {
   font-size: 15px;
   font-weight: 500;
   color: var(--muted);
+}
+
+.hold-hint:empty {
+  display: none;
 }
 
 .hold-button.holding {
@@ -716,6 +739,60 @@ h1:focus {
   font-size: 30px;
 }
 
+/* The smaller buttons put their picture above the words, so the words keep
+   to one line where they can (0.7.2). */
+.home-grid .big-button:not(.home-adventure) {
+  flex-direction: column;
+  gap: 4px;
+  min-height: 130px;
+  padding: 10px 12px;
+  font-size: 26px;
+  line-height: 1.15;
+}
+
+/* The next stop, between the greeting and the buttons (0.7.2). */
+.home-next {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  min-height: 100px;
+  margin: 12px auto 0;
+}
+
+.home-next-picture {
+  flex: none;
+  width: 260px;
+  height: 195px;
+  border: 3px solid var(--dino-edge);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.home-next-picture img,
+.home-next-picture svg {
+  display: block;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.home-next-title {
+  margin: 0 0 6px;
+  font-size: 28px;
+  font-weight: 700;
+}
+
+.home-counts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px 16px;
+  margin: 0;
+  color: var(--muted);
+  font-size: 20px;
+  font-weight: 600;
+}
+
 .home-adventure {
   grid-column: 1 / -1;
 }
@@ -725,6 +802,31 @@ h1:focus {
   flex-wrap: wrap;
   justify-content: space-between;
   gap: 16px;
+}
+
+/* Bring back the last deleted player (grown-ups, 0.7.2). */
+.bring-back {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 8px;
+  margin-top: 24px;
+}
+
+/* Grown-up Settings in two groups: this player, and everyone on this iPad (0.7.2). */
+.settings-group + .settings-group {
+  margin-top: 28px;
+}
+
+.settings-group-title {
+  margin: 8px 0 0;
+  padding-bottom: 6px;
+  border-bottom: 3px solid var(--line);
+  font-size: 28px;
+}
+
+.settings-group > .note {
+  margin: 6px 0 12px;
 }
 
 /* ------------------------------------------------------------ setup */
@@ -1119,6 +1221,12 @@ h1:focus {
   background: var(--setback-soft);
 }
 
+/* Right answers in a row (0.7.2). */
+.story.streak {
+  background: var(--milestone);
+  animation: pop 0.4s ease;
+}
+
 @keyframes pop {
   50% { transform: scale(1.04); }
 }
@@ -1215,6 +1323,13 @@ h1:focus {
   font-weight: 700;
 }
 
+/* A question missed earlier in the trip, asked again (0.7.2). */
+.again-note {
+  margin: 0;
+  color: var(--accent);
+  font-weight: 700;
+}
+
 /* The adventure screen also holds the trail map and story, so its question
    and keys are a little smaller than the practice-sized defaults. */
 .adventure-screen .question {
@@ -1236,6 +1351,73 @@ h1:focus {
 
 .theme-parks .goal-picture {
   border-color: var(--truck-edge);
+}
+
+/* 0.7.2: the biggest size, used whenever it fits (screens/adventure.js tries
+   it first): bigger keys, question and trail map, so a tall iPad has no
+   empty space under the keypad. */
+.adventure-screen[data-fit="big"] .keypad-area {
+  max-width: 600px;
+}
+
+.adventure-screen[data-fit="big"] .key {
+  height: clamp(88px, 11.5vh, 150px);
+  font-size: 52px;
+}
+
+.adventure-screen[data-fit="big"] .key-icon {
+  width: 56px;
+  height: 56px;
+}
+
+.adventure-screen[data-fit="big"] .question {
+  font-size: clamp(56px, 9vw, 112px);
+}
+
+.adventure-screen[data-fit="big"] .story {
+  font-size: 25px;
+}
+
+.adventure-screen[data-fit="big"] .trail-lane {
+  height: 132px;
+}
+
+.adventure-screen[data-fit="big"] .trail-track {
+  top: 56px;
+}
+
+.adventure-screen[data-fit="big"] .trail-traveler {
+  width: 68px;
+  height: 68px;
+}
+
+.adventure-screen[data-fit="big"] .trail-flag {
+  font-size: 34px;
+}
+
+.adventure-screen[data-fit="big"] .trail-finish {
+  min-width: 128px;
+}
+
+.adventure-screen[data-fit="big"] .trail-goal {
+  width: 120px;
+  height: 90px;
+  font-size: 60px;
+  line-height: 90px;
+}
+
+.adventure-screen[data-fit="big"] .trail-count {
+  font-size: 18px;
+}
+
+@media (orientation: landscape) and (min-width: 900px) {
+  .adventure-screen[data-fit="big"] .adventure-layout {
+    grid-template-columns: 1fr minmax(380px, 540px);
+  }
+
+  .adventure-screen[data-fit="big"] .key {
+    height: clamp(70px, 13vh, 130px);
+  }
 }
 
 /* Compact sizes for short windows, smallest last. */
@@ -1294,7 +1476,26 @@ h1:focus {
 /* ------------------------------------------------------------ trail's end */
 
 .trail-end-screen h1 {
-  font-size: clamp(40px, 6vw, 60px);
+  margin: 0 0 8px;
+  font-size: clamp(36px, 5vw, 56px);
+}
+
+/* Trail's End fits the iPad without scrolling (0.7.2): a smaller picture
+   when upright, and the trip summary as small tiles. */
+.trail-end-screen .slideshow {
+  height: min(26vh, 300px);
+}
+
+.sticker-heading {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: space-between;
+  gap: 4px 12px;
+}
+
+.sticker-heading h2 {
+  margin: 8px 0 0;
 }
 
 .trail-end-layout {
@@ -1332,21 +1533,96 @@ h1:focus {
   font-size: 20px;
 }
 
-.summary {
-  margin: 0 0 16px;
+/* 0.7.2: the new sticker pops in, with confetti falling over the screen
+   (both off with Reduce Motion, see prefers-reduced-motion below). */
+.trail-end-screen .slideshow {
+  animation: sticker-pop 0.8s cubic-bezier(0.2, 1.6, 0.4, 1);
 }
 
+@keyframes sticker-pop {
+  from { transform: scale(0.3) rotate(-8deg); opacity: 0; }
+  60% { opacity: 1; }
+}
+
+.confetti {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+  overflow: hidden;
+  pointer-events: none;
+}
+
+.confetti-piece {
+  position: absolute;
+  top: -20px;
+  left: var(--x);
+  width: 12px;
+  height: 18px;
+  border-radius: 3px;
+  background: var(--gold);
+  animation: confetti-fall 3s ease-in var(--delay) both;
+}
+
+.confetti-1 { background: var(--accent); }
+.confetti-2 { background: var(--error); }
+.confetti-3 { background: var(--truck-edge); width: 10px; height: 10px; border-radius: 50%; }
+.confetti-4 { background: var(--dino-edge); }
+
+@keyframes confetti-fall {
+  to { transform: translate(var(--drift), 110vh) rotate(var(--spin)); }
+}
+
+/* 🔊 Read to me (Trail's End and the album card). */
+.read-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 48px;
+  margin: 4px 0;
+  padding: 6px 16px;
+  border: 3px solid var(--accent);
+  border-radius: 999px;
+  background: var(--surface);
+  color: var(--accent);
+  font-size: 20px;
+  font-weight: 700;
+}
+
+.read-button[aria-pressed="true"] {
+  background: var(--accent);
+  color: var(--on-accent);
+}
+
+.summary {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 8px;
+  margin: 0 0 14px;
+}
+
+/* Each number in a small tile, its label under it. */
 .summary-row {
   display: flex;
-  justify-content: space-between;
-  padding: 6px 0;
-  border-bottom: 2px solid var(--line);
-  font-size: 22px;
+  flex-direction: column-reverse;
+  justify-content: flex-end;
+  padding: 6px 8px;
+  border: 2px solid var(--line);
+  border-radius: 12px;
+  text-align: center;
+}
+
+.summary-row dt {
+  color: var(--muted);
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.2;
 }
 
 .summary-row dd {
   margin: 0;
+  font-size: 24px;
   font-weight: 800;
+  white-space: nowrap;
 }
 
 .trail-end-buttons {
@@ -1361,6 +1637,46 @@ h1:focus {
 }
 
 /* ------------------------------------------------------------ sticker album */
+
+/* Sections with a count each (0.7.2). */
+.album-section-title {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 12px;
+  margin: 20px 0 0;
+  padding-bottom: 4px;
+  border-bottom: 3px solid var(--line);
+  font-size: 24px;
+}
+
+.album-section-count {
+  flex: none;
+  color: var(--muted);
+  font-size: 20px;
+}
+
+/* "Keep exploring to unlock sticker 12!" floats at the bottom of the screen. */
+.album-status {
+  position: fixed;
+  right: 16px;
+  bottom: calc(16px + env(safe-area-inset-bottom));
+  left: 16px;
+  z-index: 30;
+  max-width: 560px;
+  margin: 0 auto;
+  padding: 12px 18px;
+  border-radius: 14px;
+  background: var(--toast-bg);
+  color: var(--toast-text);
+  font-size: 20px;
+  font-weight: 700;
+  text-align: center;
+}
+
+.album-status:empty {
+  display: none;
+}
 
 .sticker-grid {
   display: grid;
@@ -1629,8 +1945,21 @@ h1:focus {
     height: min(42vh, 420px);
   }
 
+  .trail-end-screen .slideshow {
+    height: min(36vh, 360px);
+  }
+
+  .summary {
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  /* New adventure across the top; Sticker Album and Home under it. */
   .trail-end-buttons {
-    grid-template-columns: 1fr;
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .trail-end-buttons .primary {
+    grid-column: 1 / -1;
   }
 
   /* All 16 player pictures in two rows. */
@@ -1690,6 +2019,16 @@ h1:focus {
     grid-template-columns: 1.4fr 1fr 1fr 1fr;
   }
 
+  .home-next-picture {
+    width: 140px;
+    height: 105px;
+  }
+
+  .home-adventure {
+    flex-direction: column;
+    gap: 4px;
+  }
+
   .home-adventure {
     grid-column: auto;
   }
@@ -1703,6 +2042,19 @@ h1:focus {
 @media (max-width: 600px) {
   :root {
     --button-height: 60px;
+  }
+
+  .home-next-picture {
+    width: 120px;
+    height: 90px;
+  }
+
+  .home-next-title {
+    font-size: 20px;
+  }
+
+  .summary {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
   }
 
   .screen {
@@ -2089,7 +2441,7 @@ h1:focus {
   display: flex;
   flex-direction: column;
   gap: 4px;
-  padding: 8px 52px 8px 16px;
+  padding: 8px 12px 8px 16px;
   border: 3px solid var(--gold);
   border-radius: var(--radius);
   background: var(--surface);
@@ -2156,10 +2508,24 @@ h1:focus {
   min-height: 150px;
 }
 
+.tip-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
 .tip-close {
-  position: absolute;
-  top: 8px;
-  right: 8px;
+  flex: none;
+  width: 48px;
+  height: 48px;
+  font-size: 26px;
+}
+
+/* While Help is open its button hides (it would only open it again); the
+   space is kept so nothing moves. */
+.tip-open .tip-button {
+  visibility: hidden;
 }
 
 /* ------------------------------------------------------------ the answer in the question (0.6.3) */

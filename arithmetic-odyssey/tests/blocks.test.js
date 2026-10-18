@@ -169,6 +169,21 @@ test('bigger numbers use tens and the rest, standing up: 47 + 35', () => {
   const texts = [...svg.matchAll(/>([^<>]+)<\/text>/g)].map((m) => m[1]);
   assert.deepEqual(texts, ['10', '10', '10', '10', '7', '+', '10', '10', '10', '5', '=', '?']);
   assert.equal((svg.match(/width="20" height="20" /g) ?? []).length, 82);
-  const sub = tipSvg(problem('−', 12, 5));
-  assert.deepEqual([...sub.matchAll(/>([^<>]+)<\/text>/g)].map((m) => m[1]), ['10', '2', '−', '5', '=', '?']);
+});
+
+test('subtraction Help is take away: the first number, with the second crossed out from the end (0.7.2)', () => {
+  const count = (svg, cls) => (svg.match(new RegExp(`class="${cls}"`, 'g')) ?? []).length;
+  for (const [a, b] of [[9, 5], [12, 5], [7, 7], [93, 47], [99, 1], [10, 9]]) {
+    const svg = tipSvg(problem('−', a, b));
+    assert.equal(tipKind(problem('−', a, b)), 'takeaway');
+    assert.equal(count(svg, 'tip-keep'), a - b, `${a} − ${b}: squares left`);
+    assert.equal(count(svg, 'tip-gone'), b, `${a} − ${b}: crossed out`);
+    assert.match(svg, new RegExp(`aria-label="${a} blocks, with ${b} taken away`));
+    // The squares left come first, so whole rows of ten stay at the top.
+    const keep = svg.indexOf('tip-keep');
+    if (a > b) assert.ok(keep !== -1 && keep < svg.indexOf('tip-gone'));
+    assert.doesNotMatch(svg, /NaN|undefined/);
+  }
+  assert.equal(tipTitle(problem('−', 9, 5)), 'Take away 5: count the blocks that are left');
+  assert.equal(tipTitle(problem('+', 9, 5)), 'Count the blocks');
 });

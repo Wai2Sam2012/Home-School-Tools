@@ -190,6 +190,19 @@ test('the deploy workflow does not keep the GitHub token in the published checko
   assert.match(workflow, /persist-credentials:\s*false/);
 });
 
+test('the deploy workflow gives write access only to the publishing job, and pins every action', () => {
+  const workflow = readFileSync(join(GAME, '..', '.github', 'workflows', 'deploy.yml'), 'utf8');
+  assert.match(workflow, /^permissions: \{\}$/m);
+  const [, build, deploy] = workflow.split(/^ {2}(?:build|deploy):$/m);
+  assert.doesNotMatch(build, /: write/);
+  assert.match(deploy, /pages: write/);
+  assert.match(deploy, /id-token: write/);
+  assert.doesNotMatch(deploy, /run:/);
+  const uses = [...workflow.matchAll(/uses:\s*(\S+)/g)].map((m) => m[1]);
+  assert.ok(uses.length >= 5);
+  for (const action of uses) assert.match(action, /@[0-9a-f]{40}$/, `${action} is not pinned to a commit`);
+});
+
 test('the PowerShell tools are plain ASCII (Windows PowerShell 5.1 reads them correctly)', () => {
   for (const file of readdirSync(join(GAME, 'tools')).filter((f) => f.endsWith('.ps1'))) {
     const bytes = readFileSync(join(GAME, 'tools', file));
@@ -204,10 +217,15 @@ test('the local server only answers this computer and hides private files', () =
   assert.match(ps, /backup/);
 });
 
-test('the picture downloaders only use https and protect their spreadsheets', () => {
+test('the picture downloaders only use https, limit size and file type, and protect their spreadsheets', () => {
   for (const file of ['tools/Get-ParkPictures.ps1', 'tools/Get-DinoPictures.ps1']) {
     const ps = read(file);
     assert.match(ps, /Protect-CsvRow/, file);
     assert.match(ps, /'https'/, file);
+    // Size and file-type limits (tested with PowerShell against a local server, see GAME-PLAN.md).
+    assert.match(ps, /\[int\]\$MaxPictureMB = 20/, file);
+    assert.match(ps, /function Test-PictureBytes/, file);
+    assert.match(ps, /Get-LimitedPicture -Url \$Url/, file);
+    assert.doesNotMatch(ps, /RawContentStream/, file);
   }
 });

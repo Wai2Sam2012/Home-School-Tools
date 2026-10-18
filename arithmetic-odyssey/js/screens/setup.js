@@ -1,12 +1,12 @@
 // 3. Setup: theme, operations and difficulty, with the next sticker on the
 // trip ("Next stop: Eoraptor!").
 
-import { startAdventure, withNextProblem } from '../adventure.js?v=0.7.1';
-import { stickerPicture } from '../art.js?v=0.7.1';
-import { OPERATIONS } from '../math.js?v=0.7.1';
-import { DIFFICULTY_LABELS, THEMES, toggleOperation } from '../settings.js?v=0.7.1';
-import { nextSticker } from '../storyline.js?v=0.7.1';
-import { choiceRow, confirmDialog, flash, h, topBar } from '../ui.js?v=0.7.1';
+import { startAdventure, withNextProblem } from '../adventure.js?v=0.7.2';
+import { stickerPicture } from '../art.js?v=0.7.2';
+import { OPERATIONS } from '../math.js?v=0.7.2';
+import { DIFFICULTY_LABELS, THEMES, toggleOperation } from '../settings.js?v=0.7.2';
+import { nextSticker } from '../storyline.js?v=0.7.2';
+import { choiceRow, confirmDialog, flash, h, topBar } from '../ui.js?v=0.7.2';
 
 const OPERATION_NAMES = { '+': 'Add', '−': 'Subtract', '×': 'Multiply', '÷': 'Divide' };
 const DIFFICULTY_DETAILS = { beginner: 'Small numbers', intermediate: 'Bigger numbers', advanced: 'Big numbers' };
@@ -108,7 +108,7 @@ export function setupScreen(ctx) {
         h('h2', {}, 'How hard?'),
         difficultyRow,
         status,
-        h('p', { class: 'note trip-length' }, `${adventureLength} steps to the finish · detours of ${detourLength} questions`),
+        h('p', { class: 'note trip-length' }, `${adventureLength} steps to the finish · wandering: ${detourLength} questions`),
         h('button', { type: 'button', class: 'big-button primary go-button', onclick: go }, "Let's go!"),
       ),
     ),

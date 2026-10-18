@@ -16,6 +16,8 @@ export const SOUNDS = Object.freeze({
   cleared: { wave: 'sine', notes: [[523, 0, 0.12], [659, 0.1, 0.12], [784, 0.2, 0.3]] },
   setback: { wave: 'triangle', notes: [[392, 0, 0.22], [330, 0.2, 0.22], [262, 0.4, 0.4]] },
   milestone: { wave: 'sine', notes: [[523, 0, 0.14], [659, 0.12, 0.14], [784, 0.24, 0.14], [1047, 0.36, 0.45]] },
+  // Right answers in a row (5, 10, ...): a quick sparkle up.
+  streak: { wave: 'sine', notes: [[587, 0, 0.1], [740, 0.08, 0.1], [880, 0.16, 0.1], [1175, 0.24, 0.4]] },
   finish: { wave: 'sine', notes: [[523, 0, 0.16], [659, 0.15, 0.16], [784, 0.3, 0.16], [1047, 0.45, 0.2], [784, 0.62, 0.14], [1047, 0.76, 0.6]] },
 });
 export const VOLUME = 0.25;
