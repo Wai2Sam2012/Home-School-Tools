@@ -5,16 +5,18 @@
 //   High scores: a board for each adventure length and difficulty, top 10.
 //     The most right answers (as a share of answers) rank highest; then less
 //     total thinking time; then fewer counting tips.
-//   Need More Practice: the problems missed most often in the last 10 games,
-//     then the slowest ones. A problem learned in Learn from Incorrect leaves
-//     the list until it is missed (or slow) again in a later game.
+//   Need More Practice: the last 20 problems answered wrong in the last 10
+//     games, the most recent first, then (if there is room) slow ones. A
+//     problem learned in Learn from Incorrect stays on the list, marked
+//     learned, so it can still be practiced; missing it again in a later game
+//     makes it "to learn" again.
 
 export const HISTORY_SIZE = 10;
 export const BOARD_SIZE = 10;
-export const PRACTICE_SIZE = 10;
+export const PRACTICE_SIZE = 20;
 // Only the slowest few problems of each game are kept in its summary.
 const SLOWEST_PER_GAME = 10;
-// A problem answered right counts as slow (worth practising) from this long.
+// A problem answered right counts as slow (worth practicing) from this long.
 export const SLOW_MS = 5000;
 
 /** The board for an adventure length and difficulty: "20|beginner". */
@@ -92,22 +94,47 @@ export function problemText(key) {
 }
 
 /**
- * The problems to practise, from the last games: the ones missed most often
- * (then the slowest of those), then, if there is room, ones that took
- * SLOW_MS or longer, slowest first. learned ({ key: date }) leaves out what
- * happened to a problem before it was learned.
- * Returns [{ key, text, missed, slowMs }].
+ * Need More Practice, from the last games: the problems answered wrong, the
+ * most recent game first (in a game, the most missed first), then, if there
+ * is room, ones that took SLOW_MS or longer, slowest first. At most size.
+ * learned ({ key: date }) marks a problem learned when it was learned after
+ * the last time it was missed or slow; it stays on the list either way.
+ * Returns [{ key, text, missed, slowMs, learned }]; missed is how many times
+ * it was missed in these games.
  */
 export function needMorePractice(games, size = PRACTICE_SIZE, learned = {}) {
+  const recent = games.slice(-HISTORY_SIZE);
   const missed = new Map();
   const slow = new Map();
-  const counts = (key, game) => !learned[key] || String(game.at) > learned[key];
-  for (const game of games.slice(-HISTORY_SIZE)) {
-    for (const [key, n] of Object.entries(game.missed ?? {})) if (counts(key, game)) missed.set(key, (missed.get(key) ?? 0) + n);
-    for (const [key, ms] of Object.entries(game.slow ?? {})) if (counts(key, game)) slow.set(key, Math.max(slow.get(key) ?? 0, ms));
+  const lastSeen = new Map(); // key -> the date of the latest game it was missed or slow in
+  for (const game of recent) {
+    for (const [key, n] of Object.entries(game.missed ?? {})) {
+      missed.set(key, (missed.get(key) ?? 0) + n);
+      lastSeen.set(key, String(game.at));
+    }
+    for (const [key, ms] of Object.entries(game.slow ?? {})) {
+      if (ms < SLOW_MS) continue;
+      slow.set(key, Math.max(slow.get(key) ?? 0, ms));
+      if (!lastSeen.has(key) || String(game.at) > lastSeen.get(key)) lastSeen.set(key, String(game.at));
+    }
   }
-  const item = (key) => ({ key, text: problemText(key), missed: missed.get(key) ?? 0, slowMs: slow.get(key) ?? 0 });
-  const missedList = [...missed.keys()].map(item).sort((a, b) => b.missed - a.missed || b.slowMs - a.slowMs);
-  const slowList = [...slow.keys()].filter((key) => !missed.has(key) && slow.get(key) >= SLOW_MS).map(item).sort((a, b) => b.slowMs - a.slowMs);
-  return [...missedList, ...slowList].slice(0, size);
+  const order = [];
+  for (const game of [...recent].reverse()) {
+    const keys = Object.entries(game.missed ?? {}).sort((a, b) => b[1] - a[1]).map(([key]) => key);
+    for (const key of keys) if (!order.includes(key)) order.push(key);
+  }
+  const slowOnly = [...slow.keys()].filter((key) => !missed.has(key)).sort((a, b) => slow.get(b) - slow.get(a));
+  return [...order, ...slowOnly].slice(0, size).map((key) => ({
+    key,
+    text: problemText(key),
+    missed: missed.get(key) ?? 0,
+    slowMs: slow.get(key) ?? 0,
+    learned: Boolean(learned[key]) && String(learned[key]) > lastSeen.get(key),
+  }));
+}
+
+/** What a Learn from Incorrect round practices: the problems not learned yet, or (if all are) every one again. */
+export function toPractice(list) {
+  const open = list.filter((p) => !p.learned);
+  return open.length ? open : list;
 }

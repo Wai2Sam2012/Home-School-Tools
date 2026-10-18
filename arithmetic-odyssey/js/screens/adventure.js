@@ -8,17 +8,17 @@
 // Submit. It pauses while Repeat is reading and while the game is in the
 // background. The keypad works the whole time; nothing waits on speech.
 
-import { answerProblem, jumpTo, milestoneSteps, storyText, unlockSticker, useTip, withNextProblem } from '../adventure.js?v=0.6.5';
-import { hasTip } from '../blocks.js?v=0.6.5';
-import { createTipButton, createTipCard, showTipButtons } from '../tip-card.js?v=0.6.5';
-import { stickerPicture } from '../art.js?v=0.6.5';
-import { playerIcon } from '../avatars.js?v=0.6.5';
-import { createDetourRoad, loopProgress } from '../detour-road.js?v=0.6.5';
-import { createKeypad } from '../keypad.js?v=0.6.5';
-import { THEMES } from '../settings.js?v=0.6.5';
-import { createThinkingTimer } from '../timer.js?v=0.6.5';
-import { nextSticker } from '../storyline.js?v=0.6.5';
-import { h, topBar } from '../ui.js?v=0.6.5';
+import { answerProblem, jumpTo, milestoneSteps, storyText, unlockSticker, useTip, withNextProblem } from '../adventure.js?v=0.7.2';
+import { hasTip } from '../blocks.js?v=0.7.2';
+import { createTipButton, createTipCard, showTipButtons } from '../tip-card.js?v=0.7.2';
+import { stickerPicture } from '../art.js?v=0.7.2';
+import { playerIcon } from '../avatars.js?v=0.7.2';
+import { createDetourRoad, loopProgress } from '../detour-road.js?v=0.7.2';
+import { createKeypad } from '../keypad.js?v=0.7.2';
+import { THEMES } from '../settings.js?v=0.7.2';
+import { createThinkingTimer } from '../timer.js?v=0.7.2';
+import { nextSticker } from '../storyline.js?v=0.7.2';
+import { h, topBar } from '../ui.js?v=0.7.2';
 
 const PRAISE = ['Correct!', 'Great job!', 'You got it!', 'Awesome!', 'Nice work!'];
 // A right answer moves on by itself; after a wrong one the game waits for
@@ -80,11 +80,19 @@ export function adventureScreen(ctx) {
     question.classList.add('full');
   }
   const detourCount = h('p', { class: 'detour-count' });
+  // A question missed earlier in this trip, asked again (js/adventure.js).
+  const againNote = h('p', { class: 'again-note', hidden: true }, h('span', { 'aria-hidden': 'true' }, '🔁 '), 'One you missed. Try it again!');
   const repeat = h('button', { type: 'button', class: 'round-button repeat-button', 'aria-label': 'Read the question again', onclick: () => repeatQuestion() }, '🔊');
   // 🙏 Help (addition and subtraction): the question drawn with counting blocks.
   // Each question's Help counts once in the trip's "Help used".
   // While the tip is open it takes the place of the trail map and the story, so it can be bigger.
-  const tipCard = createTipCard({ onToggle: (open) => page?.classList.toggle('tip-open', open) });
+  // The size is fitted again straight away, so the screen never shows a frame that is too tall.
+  const tipCard = createTipCard({
+    onToggle: (open) => {
+      page?.classList.toggle('tip-open', open);
+      fitNow();
+    },
+  });
   // Help in front of the question (upright screen) and under it (wide screen); style.css shows one.
   const tipButtons = [createTipButton(() => showTip(), { place: 'front' }), createTipButton(() => showTip(), { place: 'below' })];
   function showTip() {
@@ -194,6 +202,8 @@ export function adventureScreen(ctx) {
     detourCount.hidden = state.mode !== 'detour';
     // Players call a detour "wandering" (the code keeps the word detour).
     if (state.detour) detourCount.textContent = `Wandering question ${state.detour.asked + 1} of ${state.detourLength}`;
+    againNote.hidden = !state.isAgain;
+    if (state.isAgain) intro = `${intro ? `${intro} ` : ''}Here's one you missed. Try it again!`;
     showTyped('');
     question.classList.remove('wrong-answer', 'right-answer');
     correctLine.hidden = true;
@@ -211,16 +221,36 @@ export function adventureScreen(ctx) {
     else startTimer(); // text only: timing starts when the question is shown
   }
 
+  // The finished trip is recorded (sticker, high score, history) as soon as
+  // the last answer is right, not when Trail's End opens a moment later, so
+  // leaving or closing the game in between never loses it.
+  let finishing = null;
+  function recordFinish() {
+    finishing ??= (async () => {
+      let error = null;
+      try {
+        storyline ??= await ctx.getStoryline(state.theme);
+      } catch (e) {
+        error = e;
+      }
+      if (error) {
+        // No sticker list: keep the score and history anyway.
+        const result = ctx.profiles.finishAdventure(player.id, state, { collected: player.collected[state.theme] ?? [], stickerId: null });
+        return { result, error };
+      }
+      const { sticker, collected } = unlockSticker(storyline, player.collected[state.theme]);
+      return { result: ctx.profiles.finishAdventure(player.id, state, { collected, stickerId: sticker?.id ?? null }), error: null };
+    })();
+    return finishing;
+  }
+
   async function finish() {
-    try {
-      storyline ??= await ctx.getStoryline(state.theme);
-    } catch (error) {
-      setStory(`You reached the end, but the sticker list could not be loaded: ${error.message}`, 'setback');
+    const { result, error } = await recordFinish();
+    if (error) {
+      setStory(`You reached the end! Your score is saved, but the sticker list could not be loaded: ${error.message}`, 'setback');
       return;
     }
     ctx.sound('finish');
-    const { sticker, collected } = unlockSticker(storyline, player.collected[state.theme]);
-    const result = ctx.profiles.finishAdventure(player.id, state, { collected, stickerId: sticker?.id ?? null });
     ctx.show('trailEnd', result);
   }
 
@@ -234,6 +264,7 @@ export function adventureScreen(ctx) {
     const detourStart = events.find((e) => e.type === 'detour-start');
     const cleared = events.find((e) => e.type === 'detour-cleared');
     const setback = events.find((e) => e.type === 'setback');
+    const streak = events.find((e) => e.type === 'streak');
     const lines = storyline ?? { milestones: [], detours: [], detourCleared: ['Wandering done! Back on the trail.'], setback: ["Back to the last flag. You can do it!"] };
     let line = '';
     let wait = 0; // how long the sound effect lasts; the voice waits for it
@@ -253,6 +284,9 @@ export function adventureScreen(ctx) {
       line = storyText(lines, setback);
       setStory(`↩️ ${line}`, 'setback');
       wait = ctx.sound('setback');
+    } else if (streak) {
+      line = `${streak.count} in a row! Keep it going!`;
+      setStory(`🔥 ${line}`, 'streak');
     } else if (state.mode !== 'detour') {
       setStory('');
     }
@@ -277,13 +311,19 @@ export function adventureScreen(ctx) {
     showTipButtons(tipButtons, false);
     const problem = state.problem;
     save(next);
+    if (events.some((e) => e.type === 'finished')) recordFinish();
     keypad.setEnabled(false);
     question.replaceChildren(`${problem.text} = `, h('span', { class: 'typed' }, value));
     // A wrong answer: the player's answer in red, crossed out, and the right
     // one in green in the answer box.
     question.classList.toggle('wrong-answer', !check.correct);
     question.classList.toggle('right-answer', check.correct);
-    if (check.correct) {
+    const streak = events.find((e) => e.type === 'streak');
+    if (check.correct && streak) {
+      feedback.replaceChildren(h('span', { 'aria-hidden': 'true' }, '🔥 '), `${streak.count} in a row!`);
+      feedback.className = 'feedback right streak';
+      ctx.sound('streak');
+    } else if (check.correct) {
       feedback.replaceChildren(h('span', { 'aria-hidden': 'true' }, '✓ '), PRAISE[Math.floor(Math.random() * PRAISE.length)]);
       feedback.className = 'feedback right';
       ctx.sound('right');
@@ -355,21 +395,25 @@ export function adventureScreen(ctx) {
     },
   };
   // ---- fit: the screen never scrolls. Each time its size or the window
-  // changes, start from full size and step down to more compact sizes until
-  // it fits; if even the smallest doesn't fit, let it scroll (see style.css).
+  // changes, start from the biggest size ('big', 0.7.2: fills a tall iPad)
+  // and step down to more compact sizes until it fits; if even the smallest
+  // doesn't fit, let it scroll (see style.css).
   let fitFrame = 0;
+  function fitNow() {
+    cancelAnimationFrame(fitFrame);
+    const app = page?.parentElement;
+    if (!app) return;
+    const tooTall = () => app.scrollHeight > app.clientHeight + 1;
+    app.classList.remove('fit-scroll');
+    const levels = ['big', '0', '1', '2', '3'];
+    let level = 0;
+    page.dataset.fit = levels[0];
+    while (tooTall() && level < levels.length - 1) page.dataset.fit = levels[++level];
+    app.classList.toggle('fit-scroll', tooTall());
+  }
   function fit() {
     cancelAnimationFrame(fitFrame);
-    fitFrame = requestAnimationFrame(() => {
-      const app = page?.parentElement;
-      if (!app) return;
-      const tooTall = () => app.scrollHeight > app.clientHeight + 1;
-      app.classList.remove('fit-scroll');
-      let level = 0;
-      page.dataset.fit = '0';
-      while (tooTall() && level < 3) page.dataset.fit = String(++level);
-      app.classList.toggle('fit-scroll', tooTall());
-    });
+    fitFrame = requestAnimationFrame(fitNow);
   }
   const resizes = new ResizeObserver(fit);
   window.addEventListener('resize', fit);
@@ -410,10 +454,10 @@ export function adventureScreen(ctx) {
   showQuestion(opening);
 
   const layout = h('div', { class: 'adventure-layout' },
-    h('section', { class: 'question-area' }, story, detourCount, h('div', { class: 'question-row' }, tipButtons[0], question, repeat), correctLine, feedback, h('div', { class: 'tip-row' }, tipButtons[1])),
+    h('section', { class: 'question-area' }, story, detourCount, againNote, h('div', { class: 'question-row' }, tipButtons[0], question, repeat), correctLine, feedback, h('div', { class: 'tip-row' }, tipButtons[1])),
     keypad.el,
   );
-  page = h('main', { class: `screen adventure-screen theme-${state.theme}`, dataset: { fit: '0' } },
+  page = h('main', { class: `screen adventure-screen theme-${state.theme}`, dataset: { fit: 'big' } },
     topBar(`${theme.icon} ${theme.title}`, () => ctx.show('home')),
     h('section', { class: 'trail-area' }, map, tipCard.el),
     layout,

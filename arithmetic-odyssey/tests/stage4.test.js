@@ -48,7 +48,7 @@ test('a new adventure starts at step 0 on the trail, with the setup and settings
   assert.equal(s.step, 0);
   assert.equal(s.checkpoint, 0);
   assert.equal(s.detour, null);
-  assert.deepEqual(s.stats, { answered: 0, correct: 0, detours: 0, setbacks: 0, thinkingMs: 0, tips: 0, missed: {}, times: {} });
+  assert.deepEqual(s.stats, { answered: 0, correct: 0, detours: 0, setbacks: 0, thinkingMs: 0, tips: 0, bestStreak: 0, missed: {}, times: {} });
   assert.ok(s.problem && s.problem.op === '+');
   assert.deepEqual(JSON.parse(JSON.stringify(s)), s, 'the state is plain data, so Stage 6 can save it');
 });
@@ -226,7 +226,8 @@ test('a 20-step trail finishes on the 20th right answer, with no milestone at th
   const r = playMany(start(), Array(20).fill(true));
   assert.equal(r.state.mode, 'done');
   assert.equal(r.state.step, 20);
-  assert.deepEqual(types(r.events).slice(-3), ['right', 'step', 'finished']);
+  // (20 right in a row also gives streak praise, 0.7.2.)
+  assert.deepEqual(types(r.events).slice(-4), ['right', 'streak', 'step', 'finished']);
   assert.equal(r.events.filter((e) => e.type === 'milestone').length, 1);
   assert.throws(() => answerProblem(r.state, '1'), /no question/);
   assert.equal(withNextProblem(r.state, random), r.state, 'no new question once finished');

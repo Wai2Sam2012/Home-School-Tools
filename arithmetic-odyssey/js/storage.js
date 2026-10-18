@@ -20,6 +20,8 @@ export const KEYS = Object.freeze({
   active: (id) => `${PREFIX}active.${id}`,
   quarantine: (key) => `${PREFIX}quarantine.${key.startsWith(PREFIX) ? key.slice(PREFIX.length) : key}`,
   undo: `${PREFIX}undo`,
+  // The last deleted player, so a grown-up can bring them back (js/backup.js, 0.7.2).
+  deleted: `${PREFIX}deleted`,
 });
 
 /** localStorage, or null when the browser refuses it (some private modes do). */

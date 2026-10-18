@@ -1,17 +1,42 @@
 // 5. Trail's End: the new sticker (with a slideshow of its pictures), its
 // facts, and a summary of the trip. When every sticker is collected, a
 // "Collection complete!" celebration with all the theme's pictures.
+// 0.7.2: the sticker pops in with confetti (not with Reduce Motion on), its
+// facts can be read aloud (🔊 Read to me), and the summary shows % right.
 
-import { stickerPicture } from '../art.js?v=0.6.5';
-import { soundLength } from '../audio.js?v=0.6.5';
-import { DIFFICULTY_LABELS, THEMES } from '../settings.js?v=0.6.5';
-import { formatDuration } from '../timer.js?v=0.6.5';
-import { h } from '../ui.js?v=0.6.5';
+import { stickerPicture } from '../art.js?v=0.7.2';
+import { soundLength } from '../audio.js?v=0.7.2';
+import { DIFFICULTY_LABELS, THEMES, isThemeId } from '../settings.js?v=0.7.2';
+import { readAloudButton, stickerReading } from '../read-aloud.js?v=0.7.2';
+import { formatDuration } from '../timer.js?v=0.7.2';
+import { h } from '../ui.js?v=0.7.2';
 
 const SLIDE_MS = 3500;
+const CONFETTI_PIECES = 36;
+const CONFETTI_MS = 4000;
+
+/** Confetti falling over the screen for a few seconds, unless the device asks for less motion. */
+function confetti(onLeave) {
+  if (globalThis.matchMedia?.('(prefers-reduced-motion: reduce)').matches) return null;
+  const pieces = Array.from({ length: CONFETTI_PIECES }, (_, i) => {
+    const piece = h('span', { class: `confetti-piece confetti-${i % 5}` });
+    piece.style.setProperty('--x', `${Math.round(Math.random() * 100)}vw`);
+    piece.style.setProperty('--drift', `${Math.round((Math.random() - 0.5) * 30)}vw`);
+    piece.style.setProperty('--delay', `${Math.round(Math.random() * 900)}ms`);
+    piece.style.setProperty('--spin', `${Math.round(360 + Math.random() * 720)}deg`);
+    return piece;
+  });
+  const layer = h('div', { class: 'confetti', 'aria-hidden': 'true' }, pieces);
+  const timer = setTimeout(() => layer.remove(), CONFETTI_MS);
+  onLeave(() => {
+    clearTimeout(timer);
+    layer.remove();
+  });
+  return layer;
+}
 
 export function trailEndScreen(ctx, result = {}) {
-  const theme = THEMES[result.theme] ?? THEMES.dino;
+  const theme = isThemeId(result.theme) ? THEMES[result.theme] : THEMES.dino;
   const stats = result.stats ?? { answered: 0, correct: 0, detours: 0, setbacks: 0, thinkingMs: 0 };
   const player = ctx.profiles.active();
   // The finish fanfare plays as this screen opens; the voice waits for it.
@@ -47,10 +72,13 @@ export function trailEndScreen(ctx, result = {}) {
       const count = Math.max(1, sticker.pictures.length);
       runSlideshow(Array.from({ length: count }, (_, picture) => ({ sticker, picture })));
       say(`You made it! Your new sticker is ${sticker.spokenName ?? sticker.name}.`);
-      about.replaceChildren(
-        h('h2', {}, `New sticker: ${sticker.number}. ${sticker.name}`),
+      // (No Read button on a device without a voice: replaceChildren would show null as text.)
+      about.replaceChildren(...[
+        h('div', { class: 'sticker-heading' },
+          h('h2', {}, `New sticker: ${sticker.number}. ${sticker.name}`),
+          readAloudButton(ctx, player, () => stickerReading(sticker))),
         h('ul', { class: 'fact-list' }, sticker.facts.map((f) => h('li', {}, f))),
-      );
+      ].filter(Boolean));
     } else {
       const withPictures = storyline.stickers.filter((s) => s.pictures.length > 0);
       runSlideshow((withPictures.length ? withPictures : storyline.stickers).map((s) => ({ sticker: s, picture: 0 })));
@@ -65,8 +93,10 @@ export function trailEndScreen(ctx, result = {}) {
   });
 
   const row = (label, value) => h('div', { class: 'summary-row' }, h('dt', {}, label), h('dd', {}, String(value)));
+  const percent = stats.answered ? Math.round((stats.correct / stats.answered) * 100) : 0;
 
   return h('main', { class: 'screen trail-end-screen' },
+    confetti(ctx.onLeave),
     h('h1', { tabIndex: -1 }, `${theme.icon} You made it!`),
     h('div', { class: 'trail-end-layout' },
       h('section', { class: 'panel' }, stage, about),
@@ -77,7 +107,8 @@ export function trailEndScreen(ctx, result = {}) {
           : null,
         h('dl', { class: 'summary' },
           row('Questions answered', stats.answered),
-          row('Right answers', stats.correct),
+          row(`Right answers (${stats.correct} of ${stats.answered})`, `${percent}%`),
+          row('Most in a row', stats.bestStreak ?? 0),
           row('Wanderings', stats.detours),
           row('Sent back to a flag', stats.setbacks),
           row('Thinking time', formatDuration(stats.thinkingMs ?? 0)),

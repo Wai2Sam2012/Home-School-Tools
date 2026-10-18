@@ -1,3 +1,7 @@
 # Batch files must keep Windows (CRLF) line endings, even in raw downloads.
 *.cmd -text
 *.bat -text
+
+# Pages: keep LF line endings, so the security policy fingerprints of their
+# inline scripts match on every computer (see arithmetic-odyssey/tools/csp.mjs).
+*.html text eol=lf

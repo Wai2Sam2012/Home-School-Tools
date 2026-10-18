@@ -5,7 +5,8 @@
 //
 // Number sizes: a "1-digit" operand is 1-9 and a "2-digit" operand is 10-99
 // (0 is never an operand, which keeps problems meaningful). Answers can be 0
-// only in subtraction, e.g. 7 - 7.
+// only in subtraction, e.g. 7 - 7. Giveaways (by 1, or a number take away
+// itself) are limited: see GIVEAWAY_EVERY.
 
 export const OPERATIONS = Object.freeze(['+', '−', '×', '÷']);
 export const DIFFICULTIES = Object.freeze(['beginner', 'intermediate', 'advanced']);
@@ -125,6 +126,25 @@ function makeProblem(op, a, b, answer) {
 // Public API
 // ---------------------------------------------------------------------------
 
+// Giveaway problems: anything added, taken away, multiplied or divided by 1,
+// and a number take away itself (answer 0). Beginner gets at most one in any
+// GIVEAWAY_EVERY questions in a row; Intermediate and Advanced never get one.
+export const GIVEAWAY_EVERY = 20;
+
+/** True for a giveaway problem (see GIVEAWAY_EVERY). */
+export function isGiveaway(problem) {
+  const { op, a, b } = problem;
+  if (op === '÷') return b === 1;
+  if (op === '−') return b === 1 || a === b;
+  return a === 1 || b === 1;
+}
+
+/** Whether a giveaway may come next, sinceGiveaway questions after the last one (null: none yet). */
+export function giveawayAllowed(difficulty, sinceGiveaway = null) {
+  if (difficulty !== 'beginner') return false;
+  return sinceGiveaway === null || sinceGiveaway >= GIVEAWAY_EVERY - 1;
+}
+
 /**
  * A saved problem made whole again (its text, key and spoken words), or null
  * if it is not a real problem (a damaged save).
@@ -167,21 +187,27 @@ export function generateProblem(op, difficulty, random = Math.random) {
  * @param {() => number} [settings.random] - defaults to Math.random
  * @param {string} [settings.lastKey] - key of the previous problem, so a
  *   resumed adventure does not repeat it either
+ * @param {number|null} [settings.sinceGiveaway] - questions since the last
+ *   giveaway (null: none yet), so the limit carries on in a resumed adventure
  */
-export function createProblemGenerator({ operations, difficulty, random = Math.random, lastKey = null }) {
+export function createProblemGenerator({ operations, difficulty, random = Math.random, lastKey = null, sinceGiveaway = null }) {
   checkSettings(operations, difficulty);
   const ops = [...new Set(operations)];
   let previous = lastKey;
+  let since = sinceGiveaway;
   return {
     next() {
       let problem;
       do {
         const op = ops[Math.floor(random() * ops.length)];
         problem = MAKERS[op](difficulty, random);
-      } while (problem.key === previous);
+      } while (problem.key === previous || (isGiveaway(problem) && !giveawayAllowed(difficulty, since)));
       previous = problem.key;
+      since = isGiveaway(problem) ? 0 : since === null ? null : since + 1;
       return problem;
     },
+    /** Questions since the last giveaway (null: none yet). */
+    sinceGiveaway: () => since,
   };
 }
 

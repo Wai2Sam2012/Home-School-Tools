@@ -1,7 +1,7 @@
 // Loads a theme's storyline.json (built by tools/build-storyline.mjs) and
 // answers questions about it: which sticker comes next, where pictures are.
 
-import { THEMES } from './settings.js?v=0.6.5';
+import { THEMES, isThemeId } from './settings.js?v=0.7.2';
 
 export const STORYLINE_SCHEMA = 1;
 
@@ -20,7 +20,7 @@ export function checkStoryline(data, theme) {
 }
 
 export async function loadStoryline(theme, fetchFile = globalThis.fetch) {
-  const info = THEMES[theme];
+  const info = isThemeId(theme) ? THEMES[theme] : null;
   if (!info) throw new Error(`Unknown theme "${theme}".`);
   const response = await fetchFile(`${info.folder}storyline.json`, { cache: 'no-cache' });
   if (!response.ok) throw new Error(`The ${info.title} story file could not be loaded (HTTP ${response.status}).`);

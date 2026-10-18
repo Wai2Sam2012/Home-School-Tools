@@ -1,9 +1,10 @@
-// The counting tip card: the question drawn with counting blocks (for
-// example 7 + 5 = ? as the 7 block, +, the 5 block, = and ?), opened with the
-// 🙏 button next to a question. Addition and subtraction only, for now.
+// The Help card (🙏): the question drawn as a picture to count or work out,
+// opened with the Help button next to a question. 7 + 5 as the 7 block, +,
+// the 5 block, = and ?; 4 × 23 as 4 rows of 23; 47 × 38 split into tens and
+// ones; 56 ÷ 7 as rows of 7 to count; 72 ÷ 3 as 60 ÷ 3 and 12 ÷ 3 (js/blocks.js).
 
-import { hasTip, tipSvg } from './blocks.js?v=0.6.5';
-import { h } from './ui.js?v=0.6.5';
+import { hasTip, tipSvg, tipTitle } from './blocks.js?v=0.7.2';
+import { h } from './ui.js?v=0.7.2';
 
 /**
  * Returns { el, show(problem), hide(), shown() }. onClose runs when the
@@ -13,14 +14,16 @@ import { h } from './ui.js?v=0.6.5';
 export function createTipCard({ onClose = () => {}, onToggle = () => {} } = {}) {
   const picture = h('div', { class: 'tip-picture-box' });
   const close = h('button', { type: 'button', class: 'round-button tip-close', 'aria-label': 'Close Help', onclick: () => { hide(); onClose(); } }, '✕');
-  const el = h('div', { class: 'tip-card', role: 'dialog', 'aria-label': 'Help: counting blocks', hidden: true },
-    h('p', { class: 'tip-title' }, '🙏 Count the blocks'),
-    picture,
-    close);
+  const title = h('p', { class: 'tip-title' });
+  // The ✕ sits in the title row, so it never covers the picture (0.7.2).
+  const el = h('div', { class: 'tip-card', role: 'dialog', 'aria-label': 'Help', hidden: true },
+    h('div', { class: 'tip-header' }, title, close),
+    picture);
 
   function show(problem) {
     if (!hasTip(problem)) return false;
-    picture.innerHTML = tipSvg(problem);
+    title.textContent = `🙏 ${tipTitle(problem)}`;
+    picture.innerHTML = tipSvg(problem); // numbers only (hasTip checks they are whole numbers)
     el.hidden = false;
     onToggle(true);
     return true;

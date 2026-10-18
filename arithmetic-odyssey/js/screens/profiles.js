@@ -1,11 +1,14 @@
 // 2. Profiles: choose a player or make a new one, or change a player's
 // picture. Deleting a player is in the grown-up Settings, so it can't happen by
-// accident.
+// accident; the last player deleted can be brought back here by a grown-up
+// (the same hold as the Grown-ups button, 0.7.2).
 
-import { AVATARS, MAX_PROFILES, NAME_MAX_LENGTH, checkProfileName } from '../profiles.js?v=0.6.5';
-import { createAvatarPicker } from '../avatar-picker.js?v=0.6.5';
-import { playerIcon } from '../avatars.js?v=0.6.5';
-import { h, topBar } from '../ui.js?v=0.6.5';
+import { AVATARS, MAX_PROFILES, NAME_MAX_LENGTH, checkProfileName } from '../profiles.js?v=0.7.2';
+import { createAvatarPicker } from '../avatar-picker.js?v=0.7.2';
+import { playerIcon } from '../avatars.js?v=0.7.2';
+import { deletedPlayer, undoDelete } from '../backup.js?v=0.7.2';
+import { createHoldButton } from '../hold.js?v=0.7.2';
+import { h, topBar } from '../ui.js?v=0.7.2';
 
 
 export function profilesScreen(ctx) {
@@ -25,11 +28,29 @@ export function profilesScreen(ctx) {
       h('span', { class: 'player-avatar', 'aria-hidden': 'true' }, '＋'),
       h('span', { class: 'player-name' }, 'New player')));
   }
+  const deleted = deletedPlayer(ctx.profiles);
+  const status = h('p', { class: 'status-line', role: 'status' });
+  const bringBack = deleted && ctx.profiles.canAdd()
+    ? h('div', { class: 'bring-back' },
+      createHoldButton({
+        label: `Bring back ${deleted.name}`,
+        onComplete: () => {
+          try {
+            undoDelete(ctx.profiles);
+            ctx.refresh();
+          } catch (error) {
+            status.textContent = error.message;
+          }
+        },
+      }),
+      status)
+    : null;
   return h('main', { class: 'screen profiles-screen' },
     topBar(players.length ? "Who's playing?" : 'Welcome!', () => ctx.show('start')),
     players.length ? null : h('p', { class: 'lead' }, 'Make a player to start your adventure.'),
     h('div', { class: 'player-grid' }, cards),
     players.length >= MAX_PROFILES ? h('p', { class: 'note' }, `There can be up to ${MAX_PROFILES} players. A grown-up can delete one in Settings.`) : null,
+    bringBack,
   );
 }
 

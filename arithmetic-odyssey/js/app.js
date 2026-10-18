@@ -1,26 +1,28 @@
 // Starts the game: keeps the players and story files, and switches between
 // screens. Each screen is a function in js/screens/ that builds its page.
 
-import { APP_VERSION } from './version.js?v=0.6.5';
-import { addDebugAction, addDebugInfo, isDebugOn, showDebugPanel } from './debug.js?v=0.6.5';
-import { audioSuspended, loadRecording, pickDifferent, playRecording, playSound, soundLength, unlockAudio } from './audio.js?v=0.6.5';
-import { AVATARS, createProfileStore } from './profiles.js?v=0.6.5';
-import { askToKeepData, createStorage, deviceStorage } from './storage.js?v=0.6.5';
-import { SPEECH_RATES, chooseVoice, createSpeaker, loadVoices } from './speech.js?v=0.6.5';
-import { THEMES } from './settings.js?v=0.6.5';
-import { collectNext, loadStoryline, pictureUrl } from './storyline.js?v=0.6.5';
-import { h } from './ui.js?v=0.6.5';
-import { startScreen } from './screens/start.js?v=0.6.5';
-import { newPlayerScreen, playerPictureScreen, profilesScreen } from './screens/profiles.js?v=0.6.5';
-import { homeScreen } from './screens/home.js?v=0.6.5';
-import { setupScreen } from './screens/setup.js?v=0.6.5';
-import { adventureScreen } from './screens/adventure.js?v=0.6.5';
-import { trailEndScreen } from './screens/trail-end.js?v=0.6.5';
-import { albumScreen } from './screens/album.js?v=0.6.5';
-import { statsScreen } from './screens/stats.js?v=0.6.5';
-import { learnScreen } from './screens/learn.js?v=0.6.5';
-import { settingsScreen } from './screens/settings.js?v=0.6.5';
-import { voiceLabScreen } from './screens/voice-lab.js?v=0.6.5';
+import { APP_VERSION } from './version.js?v=0.7.2';
+import { addDebugAction, addDebugInfo, isDebugOn, refreshDebugPanel, showDebugPanel } from './debug.js?v=0.7.2';
+import { measureAll } from './storage-report.js?v=0.7.2';
+import { audioSuspended, loadRecording, pickDifferent, playRecording, playSound, soundLength, unlockAudio } from './audio.js?v=0.7.2';
+import { AVATARS, createProfileStore } from './profiles.js?v=0.7.2';
+import { askToKeepData, createStorage, deviceStorage } from './storage.js?v=0.7.2';
+import { SPEECH_RATES, chooseVoice, createSpeaker, loadVoices } from './speech.js?v=0.7.2';
+import { COLOR_THEMES, THEMES } from './settings.js?v=0.7.2';
+import { collectNext, loadStoryline, pictureUrl } from './storyline.js?v=0.7.2';
+import { h } from './ui.js?v=0.7.2';
+import { startScreen } from './screens/start.js?v=0.7.2';
+import { newPlayerScreen, playerPictureScreen, profilesScreen } from './screens/profiles.js?v=0.7.2';
+import { PICTURES_SAVED_EVENT, createOffline, picturesToSave } from './offline.js?v=0.7.2';
+import { homeScreen } from './screens/home.js?v=0.7.2';
+import { setupScreen } from './screens/setup.js?v=0.7.2';
+import { adventureScreen } from './screens/adventure.js?v=0.7.2';
+import { trailEndScreen } from './screens/trail-end.js?v=0.7.2';
+import { albumScreen } from './screens/album.js?v=0.7.2';
+import { statsScreen } from './screens/stats.js?v=0.7.2';
+import { learnScreen } from './screens/learn.js?v=0.7.2';
+import { settingsScreen } from './screens/settings.js?v=0.7.2';
+import { voiceLabScreen } from './screens/voice-lab.js?v=0.7.2';
 
 const SCREENS = {
   start: { build: startScreen },
@@ -46,6 +48,7 @@ const storylines = new Map();
 const flagRecordings = new Map(); // theme -> its loaded recordings (themes/<theme>/sounds/flag-1.mp3, ...)
 const lastFlag = new Map(); // theme -> the recording played last time
 let current = { name: null, params: {}, leave: [] };
+let lastPictureSave = 0;
 
 // Saving problems (damaged data set aside, storage full or unavailable) are
 // listed in Settings and shown once in a short message.
@@ -103,6 +106,17 @@ const ctx = {
     ctx.speaker.setVoice(chooseVoice(ctx.voices, { chosenId: player.settings.voiceId }));
     ctx.speaker.rate = SPEECH_RATES[player.settings.speed] ?? SPEECH_RATES.normal;
     return true;
+  },
+
+  /** True when something can be read aloud on request (🔊 Read to me), even with Voice off. */
+  canReadAloud: () => ctx.voiceState === 'ready',
+
+  /** Reads text aloud with the player's voice and speed (🔊 Read to me). Resolves when it ends. */
+  readAloud(player, text) {
+    if (!ctx.canReadAloud()) return Promise.resolve('unavailable');
+    ctx.speaker.setVoice(chooseVoice(ctx.voices, { chosenId: player?.settings.voiceId }));
+    ctx.speaker.rate = SPEECH_RATES[player?.settings.speed] ?? SPEECH_RATES.normal;
+    return ctx.speaker.speak(text);
   },
 
   /**
@@ -173,6 +187,10 @@ const ctx = {
       screen = SCREENS.profiles;
     }
     current = { name, params, leave: [] };
+    // The color theme: the player's own, or before anyone is chosen, the last player's.
+    const player = ctx.profiles.active();
+    ctx.applyColors(player ? player.settings.colors : ctx.profiles.lastColors());
+    if (player) ctx.profiles.setLastColors(player.settings.colors);
     let page;
     try {
       page = screen.build(ctx, params);
@@ -184,6 +202,36 @@ const ctx = {
     root.dataset.screen = name;
     root.scrollTop = 0;
     page.querySelector('h1')?.focus({ preventScroll: true });
+    // Screens with stickers: save their pictures if there is internet (Trail's End: a sticker was just won).
+    if (['home', 'setup', 'trailEnd', 'album'].includes(name)) ctx.savePictures({ force: name === 'trailEnd' });
+  },
+
+  /** Sets the color theme of the whole game (css/style.css, [data-colors]). */
+  applyColors(colors) {
+    const name = COLOR_THEMES.includes(colors) ? colors : 'classic';
+    if (document.documentElement.dataset.colors !== name) document.documentElement.dataset.colors = name;
+  },
+
+  /** Offline play (js/offline.js): saving the game on the iPad, and updates. */
+  offline: createOffline({
+    // A new version takes over only on the start screen, so no adventure is interrupted.
+    canApplyUpdate: () => current.name === 'start',
+  }),
+
+  /**
+   * Saves the sticker pictures the players need (collected stickers and next
+   * stops) while there is internet. Cheap to call often: pictures already
+   * saved are skipped, and it runs at most every 5 seconds unless forced.
+   */
+  async savePictures({ force = false } = {}) {
+    if (ctx.offline.state().applying) return false;
+    const now = Date.now();
+    if (!force && now - lastPictureSave < 5000) return false;
+    lastPictureSave = now;
+    const loaded = {};
+    for (const theme of Object.keys(THEMES)) loaded[theme] = await ctx.getStoryline(theme).catch(() => null);
+    if (ctx.offline.state().applying) return false; // an update started switching in meanwhile
+    return ctx.offline.savePictures(picturesToSave(loaded, ctx.profiles.list()));
   },
 
   /** Draws the current screen again (used after debug actions). */
@@ -242,11 +290,46 @@ function addDebugTools() {
   addDebugAction("Remove the player's stickers", () => {
     const player = ctx.profiles.active();
     if (!player) return 'Choose a player first.';
+    // The browser's own box: the debug panel sits above the game's dialogs.
+    if (!globalThis.confirm(`Remove all of ${player.name}'s stickers? This can't be undone.`)) return 'Nothing removed.';
     for (const theme of Object.keys(player.collected)) ctx.profiles.setCollected(player.id, theme, []);
     ctx.refresh();
     return `Removed ${player.name}'s stickers.`;
   });
+
+  // Offline play, storage and memory (measured in the background; "Measure" updates them).
+  addDebugInfo('Offline play', () => `${ctx.offline.message() || 'starting'} [${ctx.offline.state().status}]`);
+  let measured = {};
+  const STORAGE_ROWS = ['Saved game data', 'Saved data by player', "Other tools' saved data here", 'Offline copy', 'Sticker pictures saved', 'Browser storage used',
+    'Kept when the iPad is short of space', 'Memory (JavaScript)', 'Page right now', 'Measured at'];
+  for (const label of STORAGE_ROWS) addDebugInfo(label, () => measured[label] ?? 'measuring…');
+  async function measure() {
+    let storage = null;
+    try {
+      storage = globalThis.localStorage;
+    } catch {
+      // Saving is blocked; measureAll says so.
+    }
+    measured = await measureAll({ storage, players: ctx.profiles.list(), sounds: [...flagRecordings.values()].reduce((n, list) => n + list.length, 0) });
+    refreshDebugPanel();
+    return 'Measured storage and memory.';
+  }
+  addDebugAction('Measure storage and memory', measure);
+  addDebugAction('Offline: check for an update now', () => (ctx.offline.checkForUpdate({ force: true }) ? 'Checking for a new version…' : 'Not possible right now (no internet or offline play is unavailable).'));
+  addDebugAction('Offline: save the sticker pictures now', async () => ((await ctx.savePictures({ force: true }))
+    ? 'Saving the pictures of collected stickers and next stops (only ones not saved yet).'
+    : 'Not possible right now (no internet, or offline play is not working).'));
+  addDebugAction('Offline: delete the saved copy', async () => {
+    const removed = await ctx.offline.remove();
+    return `Deleted ${removed} saved ${removed === 1 ? 'copy' : 'copies'} and the offline app. Players are kept. Reload to save it again.`;
+  });
+  addDebugAction('Offline: apply a waiting update now', () => (ctx.offline.applyUpdate() ? 'Updating: the page will reload.' : 'No update is waiting.'));
+  ctx.offline.onChange((state) => {
+    if (state.status === 'ready' || state.status === 'failed') measure();
+    else refreshDebugPanel();
+  });
   showDebugPanel(APP_VERSION);
+  measure();
 }
 
 // No pinch zoom while playing. Safari ignores user-scalable=no and doesn't
@@ -284,6 +367,7 @@ document.addEventListener('touchend', (event) => {
 // "Tap to continue": back from the background, the iPad may have suspended
 // sound. A tap is needed to start it again.
 document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) ctx.offline.checkForUpdate();
   if (document.hidden || !audioSuspended() || document.querySelector('.resume-overlay')) return;
   const overlay = h('div', { class: 'overlay resume-overlay', role: 'dialog', 'aria-modal': 'true', 'aria-label': 'Tap to continue' },
     h('button', {
@@ -304,6 +388,19 @@ if (isDebugOn()) {
   globalThis.aoDebug = ctx;
 }
 ctx.show('start');
+ctx.offline.start();
+
+// Sticker pictures: save the ones the players need whenever the game is ready
+// offline, the internet comes back, or a screen with stickers opens.
+ctx.offline.onChange((state) => {
+  // Not while an update is switching in (the page is about to reload).
+  if (!state.applying && ['ready', 'update-saving', 'update-ready'].includes(state.status)) ctx.savePictures();
+});
+globalThis.addEventListener('online', () => {
+  ctx.savePictures({ force: true });
+  // Pictures waiting for the internet try again.
+  globalThis.dispatchEvent(new Event(PICTURES_SAVED_EVENT));
+});
 
 // Tells the loading check in index.html that the scripts ran.
 document.documentElement.dataset.ready = '1';

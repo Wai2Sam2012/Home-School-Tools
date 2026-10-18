@@ -1,16 +1,16 @@
-// Learn from Incorrect (opened from My Stats): a short practice round with the
-// problems the player missed most and the ones that took longest. The rules
+// Learn from Incorrect (opened from Home): a practice round with the problems
+// from Need More Practice that aren't learned yet, mixed at random. The rules
 // are in js/learn.js. Like the adventure, each question is read aloud, the
 // thinking timer starts when reading ends (or at the first key press), and a
 // wrong answer shows the right one and waits for "Got it".
 
-import { LEARN_NEEDS, answerLearning, currentProblem, startLearning } from '../learn.js?v=0.6.5';
-import { hasTip } from '../blocks.js?v=0.6.5';
-import { createKeypad } from '../keypad.js?v=0.6.5';
-import { createTipButton, createTipCard, showTipButtons } from '../tip-card.js?v=0.6.5';
-import { PRACTICE_SIZE, needMorePractice } from '../scores.js?v=0.6.5';
-import { createThinkingTimer } from '../timer.js?v=0.6.5';
-import { h, topBar } from '../ui.js?v=0.6.5';
+import { LEARN_NEEDS, answerLearning, currentProblem, startLearning } from '../learn.js?v=0.7.2';
+import { hasTip } from '../blocks.js?v=0.7.2';
+import { createKeypad } from '../keypad.js?v=0.7.2';
+import { createTipButton, createTipCard, showTipButtons } from '../tip-card.js?v=0.7.2';
+import { PRACTICE_SIZE, needMorePractice, toPractice } from '../scores.js?v=0.7.2';
+import { createThinkingTimer } from '../timer.js?v=0.7.2';
+import { h, topBar } from '../ui.js?v=0.7.2';
 
 const PRAISE = ['Correct!', 'Great job!', 'You got it!', 'Nice work!'];
 const NEXT_AFTER_RIGHT_MS = 1100;
@@ -19,12 +19,12 @@ const GOT_IT_SETTLE_MS = 350;
 
 export function learnScreen(ctx) {
   const player = ctx.profiles.active();
-  let state = startLearning(needMorePractice(player.history, PRACTICE_SIZE, player.learned));
+  let state = startLearning(toPractice(needMorePractice(player.history, PRACTICE_SIZE, player.learned)));
   if (!state) {
     return h('main', { class: 'screen' },
-      topBar('Learn from Incorrect', () => ctx.show('stats')),
-      h('p', { class: 'lead' }, 'Nothing to practise right now. Great work! 🌟'),
-      h('button', { type: 'button', class: 'big-button primary', onclick: () => ctx.show('stats') }, 'Back to My Stats'));
+      topBar('Learn from Incorrect', () => ctx.show('home')),
+      h('p', { class: 'lead' }, 'Nothing to practice yet. Finish an adventure, and any problems you miss will show up here. 🌟'),
+      h('button', { type: 'button', class: 'big-button primary', onclick: () => ctx.show('home') }, 'Back to Home'));
   }
 
   const thinking = createThinkingTimer();
@@ -39,7 +39,7 @@ export function learnScreen(ctx) {
   const chips = h('ol', { class: 'learn-chips', 'aria-label': 'Problems in this round' });
   function showChips() {
     chips.replaceChildren(...state.items.map((item) => h('li', {
-      class: `learn-chip${item.learned ? ' learned' : ''}${!state.done && item.key === state.queue[0] ? ' now' : ''}`,
+      class: `learn-chip${item.learned ? ' learned' : ''}${!state.done && item.key === state.current ? ' now' : ''}`,
     },
     h('span', { class: 'learn-chip-text' }, item.problem.text),
     h('span', { class: 'learn-stars', 'aria-label': item.learned ? 'learned' : `${item.right} of ${LEARN_NEEDS}` },
@@ -63,7 +63,8 @@ export function learnScreen(ctx) {
   }
   const repeat = h('button', { type: 'button', class: 'round-button repeat-button', 'aria-label': 'Read the question again', onclick: () => repeatQuestion() }, '🔊');
   // 🙏 The same counting tip as in the adventure (practice: tips are not counted).
-  const tipCard = createTipCard();
+  // While it is open the Help buttons hide (style.css, .tip-open).
+  const tipCard = createTipCard({ onToggle: (open) => tipCard.el.closest('main')?.classList.toggle('tip-open', open) });
   const openTip = () => {
     if (!busy && !state.done) tipCard.show(currentProblem(state));
   };
@@ -203,11 +204,11 @@ export function learnScreen(ctx) {
     summary.replaceChildren(
       h('h2', {}, all ? 'Amazing work!' : 'Good practice!'),
       h('ul', { class: 'learn-results' }, state.items.map((item) =>
-        h('li', { class: item.learned ? 'learned' : '' }, h('span', { class: 'learn-chip-text' }, item.problem.text), h('span', {}, item.learned ? ' ✓ learned' : ' · keep practising')))),
-      all ? null : h('p', { class: 'note' }, 'The ones not learned yet stay in Need More Practice for next time.'),
+        h('li', { class: item.learned ? 'learned' : '' }, h('span', { class: 'learn-chip-text' }, item.problem.text), h('span', {}, item.learned ? ' ✓ learned' : ' · keep practicing')))),
+      h('p', { class: 'note' }, all ? 'They stay in Need More Practice (marked learned), so you can practice them again any time.' : 'The ones not learned yet are first in line next time.'),
       h('div', { class: 'button-row' },
-        h('button', { type: 'button', class: 'big-button primary', onclick: () => ctx.show('stats') }, 'Back to My Stats'),
-        h('button', { type: 'button', class: 'big-button', onclick: () => ctx.show('home') }, 'Home')),
+        h('button', { type: 'button', class: 'big-button primary', onclick: () => ctx.show('home') }, 'Home'),
+        h('button', { type: 'button', class: 'big-button', onclick: () => ctx.show('stats') }, 'My Stats')),
     );
     showChips();
     // The voice waits for the finish fanfare.
@@ -255,11 +256,11 @@ export function learnScreen(ctx) {
   const layout = h('div', { class: 'adventure-layout' },
     h('section', { class: 'question-area' }, tipCard.el, h('div', { class: 'question-row' }, tipButtons[0], question, repeat), correctLine, feedback, h('div', { class: 'tip-row' }, tipButtons[1])),
     keypad.el);
-  banner.textContent = `Let's practise ${state.items.length === 1 ? 'a tricky one' : `${state.items.length} tricky ones`}! Answer each one right ${LEARN_NEEDS} times.`;
-  showQuestion(`Let's practise the tricky ones!`);
+  banner.textContent = `Let's practice ${state.items.length === 1 ? 'a tricky one' : `${state.items.length} tricky ones`}! Answer each one right ${LEARN_NEEDS} times.`;
+  showQuestion(`Let's practice the tricky ones!`);
 
   return h('main', { class: 'screen learn-screen' },
-    topBar('Learn from Incorrect', () => ctx.show('stats')),
+    topBar('Learn from Incorrect', () => ctx.show('home')),
     banner,
     chips,
     layout,

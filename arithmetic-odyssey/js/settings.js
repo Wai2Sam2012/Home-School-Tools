@@ -2,7 +2,7 @@
 // (chosen by the player on the Setup screen), with their allowed values.
 // normalize...() turns anything, including damaged saved data, into valid values.
 
-import { DIFFICULTIES, OPERATIONS } from './math.js?v=0.6.5';
+import { DIFFICULTIES, OPERATIONS } from './math.js?v=0.7.2';
 
 export const ADVENTURE_LENGTHS = Object.freeze([20, 40, 60, 80, 100]);
 export const DETOUR_MIN = 3;
@@ -15,6 +15,14 @@ export const THEMES = Object.freeze({
   parks: Object.freeze({ id: 'parks', title: 'Off-Roading', icon: '🛻', folder: 'themes/national-parks/', ready: true, flagSound: 'engine' }),
 });
 
+/**
+ * True for the id of a real theme ('dino', 'parks'). Not a plain THEMES[x]
+ * check: a saved or restored value like "constructor" would pass that.
+ */
+export function isThemeId(id) {
+  return typeof id === 'string' && Object.prototype.hasOwnProperty.call(THEMES, id);
+}
+
 export const DIFFICULTY_LABELS = Object.freeze({
   beginner: 'Beginner',
   intermediate: 'Intermediate',
@@ -22,7 +30,11 @@ export const DIFFICULTY_LABELS = Object.freeze({
 });
 
 // voiceId '' means "the best voice on this device"; speed is a key of SPEECH_RATES in js/speech.js.
-export const DEFAULT_SETTINGS = Object.freeze({ voice: true, sound: true, voiceId: '', speed: 'normal', adventureLength: 20, detourLength: DETOUR_MIN });
+// The color themes for the whole game (css/style.css, [data-colors]), in the order offered in Settings.
+export const COLOR_THEMES = Object.freeze(['contrast', 'soft', 'classic', 'warm', 'dark']);
+export const COLOR_THEME_LABELS = Object.freeze({ contrast: 'High contrast', soft: 'Soft', classic: 'Classic', warm: 'Warm', dark: 'Dark' });
+
+export const DEFAULT_SETTINGS = Object.freeze({ voice: true, sound: true, voiceId: '', speed: 'normal', adventureLength: 20, detourLength: DETOUR_MIN, colors: 'classic' });
 export const SPEEDS = Object.freeze(['slower', 'normal']);
 export const DEFAULT_SETUP = Object.freeze({ theme: 'dino', operations: Object.freeze(['+']), difficulty: 'beginner' });
 
@@ -36,6 +48,7 @@ export function normalizeSettings(raw) {
     speed: SPEEDS.includes(value.speed) ? value.speed : DEFAULT_SETTINGS.speed,
     adventureLength: ADVENTURE_LENGTHS.includes(value.adventureLength) ? value.adventureLength : DEFAULT_SETTINGS.adventureLength,
     detourLength: Number.isInteger(detour) && detour >= DETOUR_MIN && detour <= DETOUR_MAX ? detour : DEFAULT_SETTINGS.detourLength,
+    colors: COLOR_THEMES.includes(value.colors) ? value.colors : DEFAULT_SETTINGS.colors,
   };
 }
 
@@ -44,7 +57,7 @@ export function normalizeSetup(raw) {
   const chosen = Array.isArray(value.operations) ? value.operations : [];
   const operations = OPERATIONS.filter((op) => chosen.includes(op));
   return {
-    theme: THEMES[value.theme]?.ready ? value.theme : DEFAULT_SETUP.theme,
+    theme: isThemeId(value.theme) && THEMES[value.theme].ready ? value.theme : DEFAULT_SETUP.theme,
     operations: operations.length ? operations : [...DEFAULT_SETUP.operations],
     difficulty: DIFFICULTIES.includes(value.difficulty) ? value.difficulty : DEFAULT_SETUP.difficulty,
   };

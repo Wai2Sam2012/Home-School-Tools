@@ -2,13 +2,13 @@
 // Only what changed is written: the adventure in progress once per question,
 // and the player's record when settings change or an adventure ends.
 
-import { AVATAR_IDS, checkColor } from './avatars.js?v=0.6.5';
-import { KEYS, PREFIX, createStorage, memoryStorage } from './storage.js?v=0.6.5';
+import { AVATAR_IDS, checkColor } from './avatars.js?v=0.7.2';
+import { KEYS, PREFIX, createStorage, memoryStorage } from './storage.js?v=0.7.2';
 import {
   LEARNED_MAX, MAX_PROFILES, NAME_MAX_LENGTH, RECORD_SCHEMA, checkActive, checkHistory, checkIndex, checkProfile, cleanName, profileRecord,
-} from './records.js?v=0.6.5';
-import { addHighScore, addToHistory, gameSummary } from './scores.js?v=0.6.5';
-import { DEFAULT_SETTINGS, DEFAULT_SETUP, THEMES, normalizeSettings, normalizeSetup } from './settings.js?v=0.6.5';
+} from './records.js?v=0.7.2';
+import { addHighScore, addToHistory, gameSummary } from './scores.js?v=0.7.2';
+import { DEFAULT_SETTINGS, DEFAULT_SETUP, THEMES, normalizeSettings, normalizeSetup } from './settings.js?v=0.7.2';
 
 // Player icon ids; the pictures are in images/avatars/ (js/avatars.js).
 export const AVATARS = AVATAR_IDS;
@@ -51,7 +51,7 @@ const defaultId = () => `p${Date.now().toString(36)}${Math.random().toString(36)
 export function createProfileStore({ storage = createStorage(memoryStorage()), makeId = defaultId, now = () => new Date() } = {}) {
   const profiles = [];
   let activeId = null;
-  let index = { schema: RECORD_SCHEMA, profiles: [], gamesSinceBackup: 0, lastBackupAt: null };
+  let index = { schema: RECORD_SCHEMA, profiles: [], gamesSinceBackup: 0, lastBackupAt: null, colors: DEFAULT_SETTINGS.colors };
 
   // ---------------------------------------------------------------- saving
   const saveIndex = () => {
@@ -229,6 +229,14 @@ export function createProfileStore({ storage = createStorage(memoryStorage()), m
     // ---------------------------------------------------------------- backup support
 
     /** Finished adventures since the last backup, and when that was. */
+    /** The last player's color theme (shown before a player is chosen). */
+    lastColors: () => index.colors ?? DEFAULT_SETTINGS.colors,
+    setLastColors(colors) {
+      if (index.colors === colors) return;
+      index.colors = colors;
+      saveIndex();
+    },
+
     backupStatus: () => ({ gamesSinceBackup: index.gamesSinceBackup, lastBackupAt: index.lastBackupAt, remind: index.gamesSinceBackup >= BACKUP_REMINDER_GAMES }),
 
     markBackedUp() {

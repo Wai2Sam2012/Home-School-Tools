@@ -20,6 +20,9 @@ An offline math adventure game for the iPad, with two themes: **Dinosaur Adventu
 | [images/avatars/](images/avatars/) | The 16 player pictures, each in 5 colors (`<picture>/<color>.png`), so they can be replaced. See its [README](images/avatars/README.md). |
 | [tools/Start-LocalServer.ps1](tools/Start-LocalServer.ps1) | Runs the game in a browser on your PC. See [Testing in a browser on your PC](#testing-in-a-browser-on-your-pc). |
 | [tools/set-version.mjs](tools/set-version.mjs) | Sets a new version number, and the matching `?v=` tag on every game file, so browsers never mix cached files from two versions. Run `node tools/set-version.mjs 1.2.3` for each release. |
+| [tools/csp.mjs](tools/csp.mjs) | Sets the security policy in `index.html` and `offline.html` (only the game's own files may load). Run it after changing a script or style written in either page. |
+| [tools/build-offline.mjs](tools/build-offline.mjs) | Builds the offline app, `sw.js`, from [tools/sw-template.js](tools/sw-template.js) and the list of every file the game needs (with a fingerprint of each). Run automatically after the story files; see [Playing offline](#playing-offline). |
+| [manifest.json](manifest.json), [offline.html](offline.html), [images/icons/](images/icons/) | The installable app: its name, colors and Home Screen icons, and the page shown if something can't open offline. |
 | [tools/build-storyline.mjs](tools/build-storyline.mjs) | Builds each theme's story file (`storyline.json`) from its fact files, `game-text.json` and pictures. Run automatically; see [Adding pictures](#adding-pictures). |
 | [tests/](tests/) | Automated tests. See [Running the tests](#running-the-tests). |
 | [package.json](package.json) | Only tells Node.js that the game's `.js` files are modules, so the tests can load them. No packages are installed. |
@@ -37,7 +40,8 @@ Each theme keeps all of its resources (facts, story text, pictures, sounds and t
 | 4. The adventure | Done: the trail map with a flag every 10 steps, detours after a wrong answer (called **wandering** in the game: "Wandering question 1 of 3"), going back to the last flag when a whole detour is missed, Resume Adventure, and Trail's End with the new sticker, a slideshow of its pictures and a trip summary. |
 | 5. Sound, voice and timer | Done: sound effects, questions and story moments read aloud with a Repeat button, the thinking timer (shown on Trail's End), and a "Tap to continue" screen when the iPad pauses sound. Grown-ups can turn the voice and the sound effects on or off in Settings, choose the voice and its speed (tap a voice to hear it), and see which voice is used. |
 | 6. Saving, stats, high scores and backup | Done (0.6.0): players, settings, stickers and the adventure in progress are saved on the iPad and survive closing the game; Need More Practice and high scores in My Stats; Back up and Restore (with undo) in Grown-up Settings. See [Saving and backup](#saving-and-backup). **0.6.1:** Learn from Incorrect, and recorded flag sounds. **0.6.2:** three dinosaur roars and two truck engines, picked at random at each flag. **0.6.3:** 🙏 Help (counting blocks) for addition and subtraction (high scores also weigh Help used), two dirt bike flag sounds, detours are called "wandering", and the answer is typed straight into the question. **0.6.4:** the dinosaur theme is called Dinosaur Adventure; the title no longer covers Back on narrow screens; the 80 player picture colors are ready for Stage 7. **0.6.5:** players choose a picture and one of its 5 options (numbered 1 to 5), and can change it by tapping their picture on Home. |
-| 7–8 | Not started |
+| 7. Offline app | Done (0.7.0): the game saves itself on the iPad (about 4 MB: everything it needs, with each theme's first sticker) and plays with no internet; other stickers' pictures are saved as they are collected (and each player's next stop ahead of time). **Add to Home Screen** makes it a full-screen app called **Arithmetic Odyssey**; updates download in the background and apply the next time the game opens. See [Playing offline](#playing-offline). The debug panel shows how much is stored and the memory used. **0.7.1:** 🙏 Help for multiplication (groups, or a box split into tens and ones) and division (sharing into groups, or splitting into easy parts); 🎯 Learn from Incorrect is on Home, asks every problem in a random order until each is right 3 times, and Need More Practice keeps the last 20 problems missed (learned ones are ticked); 5 color choices (High contrast, Soft, Classic, Warm, Dark) in Settings; a security review (a strict security policy on the pages, safer backup and local-server checks); two bug fixes (a trip finished just before leaving the screen is never lost; hidden buttons stay hidden). **0.7.2:** subtraction Help shows "take away"; a missed question comes back 3 questions later; "5 in a row!" praise; fewer giveaway questions (by 1, or a number take away itself: at most one in 20 on Beginner, none on Intermediate and Advanced); Trail's End has confetti, % right, the longest streak and 🔊 Read to me (also on the album card); bigger keys and trail map; Trail's End fits without scrolling; Home shows the next stop and sticker counts; the album is in sections with counts; Settings is split into "Just for this player" and "Everyone on this iPad"; a deleted player can be brought back; the Grown-ups button takes two fingers; the publish workflow and picture downloaders are locked down further. |
+| 8. Release and iPad acceptance | Not started |
 
 ## Running the tests
 
@@ -48,7 +52,7 @@ cd arithmetic-odyssey
 node --test
 ```
 
-You should see `# fail 0` (201 tests in version 0.6.3). Each test name starts with its ID from the test plan in [GAME-PLAN.md](GAME-PLAN.md) where it has one, for example `T1.3`.
+You should see `# fail 0` (288 tests in version 0.7.2). Each test name starts with its ID from the test plan in [GAME-PLAN.md](GAME-PLAN.md) where it has one, for example `T1.3`.
 
 ## Testing in a browser on your PC
 
@@ -57,16 +61,26 @@ The game has to run from a web server, not by double-clicking `index.html`: brow
 ```powershell
 cd arithmetic-odyssey\tools
 Unblock-File .\Start-LocalServer.ps1    # only needed once, for files downloaded from GitHub
-pwsh -ExecutionPolicy Bypass -File .\Start-LocalServer.ps1
+powershell -ExecutionPolicy Bypass -File .\Start-LocalServer.ps1    # Windows PowerShell 5.1 (or pwsh for PowerShell 7)
 ```
 
-It first rebuilds the story files if Node.js is installed (otherwise it warns and uses the last build), then serves the whole repository and opens the game at `http://localhost:8080/arithmetic-odyssey/`, the same folder layout as the published site. Add `?debug=1` to the address to show the debug panel. Press **Ctrl+C** in the PowerShell window to stop the server. If port 8080 is busy, add `-Port 8081`.
+It first rebuilds the story files and the offline app (`sw.js`) if Node.js is installed (otherwise it warns and uses the last build), then serves the whole repository and opens the game at `http://localhost:8080/arithmetic-odyssey/`, the same folder layout as the published site. Add `?debug=1` to the address to show the debug panel. Press **Ctrl+C** in the PowerShell window to stop the server. If port 8080 is busy, add `-Port 8081`. The server only answers this PC (another device on the network gets "403 Forbidden"), and never serves backups (`*-backup-*.json`), `downloaded-pictures` or hidden files such as `.git`.
 
 To see the game at iPad size, press **F12** in Chrome or Edge, then **Ctrl+Shift+M**, and choose an iPad from the device list.
 
-The debug panel sits in the top-right corner; **Hide** folds it away. Besides the device facts, it has buttons to **add a test player**, **collect the next 5 Dino stickers** (to try the Sticker Album) and **remove the player's stickers**. It can also open the **voice and sound tester**, which plays every English voice on the device with a choice of sample line, speed and pitch (or all of them in turn, saying each name) and every sound effect, and make speech **pretend the end event never comes**, to check the game never waits on speech. During an adventure, it can also **answer right** or **answer wrong** (to force a detour or a trip back to the flag) and **jump to just before the next flag** or **to the last step**. **Delete this game's saved data** starts over with no players.
+The debug panel sits in the top-right corner; **Hide** folds it away. Besides the device facts, it has buttons to **add a test player**, **collect the next 5 Dino stickers** (to try the Sticker Album) and **remove the player's stickers** (it asks first). It can also open the **voice and sound tester**, which plays every English voice on the device with a choice of sample line, speed and pitch (or all of them in turn, saying each name) and every sound effect, and make speech **pretend the end event never comes**, to check the game never waits on speech. During an adventure, it can also **answer right** or **answer wrong** (to force a detour or a trip back to the flag) and **jump to just before the next flag** or **to the last step**. **Delete this game's saved data** starts over with no players.
 
-**Grown-up Settings** opens by holding the **Grown-ups** button on a player's home screen for 3 seconds. Deleting a player is there, so children can't do it by accident.
+**Storage and memory** (in the debug panel, measured when it opens and with **Measure storage and memory**):
+- **Saved game data:** the size of the players' saves, in total and for each player, against the browser's limit of about 5 MB. Other tools on the same github.io address share that limit, so their data is shown too.
+- **Offline copy:** how many files are saved for offline play and their size; **Sticker pictures saved:** the collected stickers' and next stops' pictures saved so far.
+- **Browser storage used:** the browser's own count of everything the game stores, out of what it allows, and whether it is **kept when the iPad is short of space**.
+- **Memory (JavaScript):** only Chrome and Edge report it (on the PC). Safari on the iPad never does, so the panel also shows what the page holds right now: its elements, pictures and loaded sounds.
+
+The panel also has **Offline: check for an update now**, **apply a waiting update now**, **save the sticker pictures now** and **delete the saved copy** (players are kept).
+
+**The offline copy while you work on the game.** The game plays from its saved copy, so after changing a file: restart the server (it rebuilds `sw.js`), then open the game and reload once. The new version takes over on the start screen. Or use **Offline: delete the saved copy** in the debug panel.
+
+**Grown-up Settings** opens by holding the **Grown-ups** button on a player's home screen for 3 seconds: with **two fingers at once** on the iPad (one finger only shows a hint), or with the mouse on a PC. The button doesn't say how, so children are less likely to find it. Settings is in two parts: **Just for** the player (colors, voice, sound, lengths, Delete) and **Everyone on this iPad** (saving, offline play, backup). Deleting a player is there, so children can't do it by accident; the last player deleted can be brought back with **Bring back** on the player list (the same two-finger hold).
 
 ## Publishing and testing on the iPad
 
@@ -77,20 +91,44 @@ Every push to the repository's `main` branch runs `.github/workflows/deploy.yml`
 
 **One-time setup:** in the repository on GitHub, open **Settings → Pages** and set **Build and deployment → Source** to **GitHub Actions**. Without this, the deploy step fails.
 
+The workflow can only read the repository while it builds and tests; only its last step, which runs no repository code, may publish. Each action it uses is pinned to an exact version (commit), so a changed tag can't change what runs; to update one, see the comment at the top of `deploy.yml`. `tests/security.test.js` checks both.
+
 The **Actions** tab shows each run; a green tick means it published. Tests, tools and `downloaded-pictures` are never published. To preview exactly what will be published, run `node .github/scripts/assemble-site.mjs` from the repository folder; it copies the site into `_site`.
+
+## Playing offline
+
+The game saves itself on the iPad the first time it opens with internet: every screen, all 80 player pictures, the sounds and story files, and the pictures of each theme's **first sticker** (about 4 MB). The start screen shows **Saving the game for offline play… 45%**, then **✓ Ready to play offline**. From then on it plays with no internet, even after the iPad restarts.
+
+**Sticker pictures are saved as they are collected,** so the saved game only grows as stickers are won (all of them together are about 18 MB today):
+- When a player collects a sticker with internet, its pictures are saved, so the Sticker Album shows them offline later.
+- Each player's **next stop** (the sticker shown on the trip planner and at the end of the trail) is saved ahead of time, so the next adventure's goal shows offline too.
+- A sticker collected **without internet** shows its drawing with **📶 Waiting to connect to the internet to get the pictures** (on the small album tiles: **📶 Waiting for internet**). When the internet comes back, its pictures are saved and appear by themselves.
+
+**Install it as an app (best):** open the game's address in Safari, tap **Share › Add to Home Screen**, then open it from its icon (**Arithmetic Odyssey**; the iPad may shorten a long name under the icon). It opens full screen, like an app. Open it once with internet so it saves itself; the Home Screen app keeps its own saved copy and its own players (separate from the Safari tab).
+
+**Updates:** when a new version is published, the game downloads it in the background the next time it opens with internet (only the files that changed; saved sticker pictures are kept). It never switches in the middle of an adventure: the start screen says **Update ready: it will apply next time you open the game**, and the next time the game opens it switches before anyone plays. **Update now** (on the start screen, or in Grown-up Settings › Offline play) switches straight away; an adventure in progress is kept.
+
+**If something didn't save:** the start screen says some files couldn't be saved and **Ready to play offline** doesn't appear. The game still plays online; the next time it opens with internet it saves the rest (only what is missing).
+
+**What it checks:** every file is checked against a fingerprint when it is saved, and the list of files is built from the game itself each time it is published, so newly uploaded pictures are always included. `tests/stage7.test.js` checks the list is complete.
 
 ## Saving and backup
 
 **What is saved.** Players, their settings, stickers, high scores, the last 10 games and any adventure in progress are saved on the iPad as they change: an adventure after every question, so closing the game never loses more than the question on screen. When the game opens again, **Resume Adventure** carries on from the same question.
 
-**Where.** Only on this iPad, in the browser's storage. Nothing is sent anywhere, and it is not synced to other devices. The Safari tab and the Home Screen app (Stage 7) keep **separate** saves, so always play from the same one. Grown-up Settings shows how much space the save uses.
+**Where.** Only on this iPad, in the browser's storage. Nothing is sent anywhere, and it is not synced to other devices. The Safari tab and the Home Screen app keep **separate** saves, so always play from the same one. Grown-up Settings shows how much space the save uses.
 
 **My Stats.**
-- **Need More Practice:** the problems missed most often in the last 10 games, then ones that took 5 seconds or more.
+- **Need More Practice:** the last 20 problems missed (newest game first), then ones that took 5 seconds or more. Problems learned in Learn from Incorrect stay on the list with a ✓, so they can be looked over; they leave it as newer misses push them off.
 - **High Scores:** one board for each adventure length and difficulty, top 10. The most right answers (as a share of all answers) win; then the shortest total thinking time; then the least 🙏 Help. A trip that went back to a flag still counts when it is finished.
-- **Help (counting blocks):** the 🙏 Help button on an addition or subtraction question shows it with counting blocks (for 7 + 5: the 7 block, +, the 5 block, = and ?), in place of the trail map while it is open. The button sits in front of the question when the iPad stands upright, and under it when the iPad lies sideways. Each question's Help counts once in the trip's "Help used".
+- **Help (🙏):** the Help button shows the question as a picture, in place of the trail map while it is open. Addition: counting blocks (for 7 + 5: the 7 block, +, the 5 block, = and ?). Subtraction: take away (for 9 − 5: 9 squares in rows of ten, the last 5 greyed and crossed out, so the 4 left are the answer). Multiplication: groups of dots to count (3 × 4: 3 groups of 4), or for two 2-digit numbers a box split into tens and ones (23 × 14 = 20×10 + 20×4 + 3×10 + 3×4). Division: the dots shared into rows (12 ÷ 3), or for a bigger answer the number split into an easy part and the rest (84 ÷ 4 = 80 ÷ 4 + 4 ÷ 4). The button sits in front of the question when the iPad stands upright, and under it when the iPad lies sideways. Each question's Help counts once in the trip's "Help used".
 - **Typing an answer:** the digits show in orange in the question, in place of the ?.
-- **Learn from Incorrect** (under Need More Practice): a short, calm round with those problems (up to 8), with no trail or setbacks. Each problem has to be answered right twice (a slow one, within 5 seconds); a wrong answer shows the right one, and the problem comes back two questions later. The round ends when all are learned or after 4 tries each. A learned problem leaves Need More Practice until it is missed or slow again in a later game.
+- **A missed question comes back** 3 questions later in the same trip, with "🔁 One you missed. Try it again!" (once for each miss; at most 5 wait at a time).
+- **Streaks:** every 5 right answers in a row gets "🔥 5 in a row!" and a sparkle sound. Trail's End shows the trip's longest streak.
+- **Giveaway questions** (anything + − × ÷ by 1, or a number take away itself): Beginner has at most one in any 20 questions in a row; Intermediate and Advanced have none.
+- **Trail's End:** the new sticker pops in with confetti (none when the iPad's Reduce Motion is on), the trip as small tiles (% right, most in a row, wanderings, thinking time, Help used), and **🔊 Read to me**, which reads the sticker's name and facts aloud even with Voice off (tap again to stop). The album card has it too.
+- **🎯 Learn from Incorrect** (on Home, next to Start Adventure, Sticker Album and My Stats): a calm round with every problem on Need More Practice that isn't learned yet (up to 20; if all are learned, all of them again), with no trail or setbacks. The problems come in a random order, never the same one twice in a row while others are left. Each has to be answered right 3 times (a slow one, within 5 seconds); a wrong answer shows the right one and starts that problem's count again. The round ends when all are learned, or after 6 tries for each problem.
+- **Colors** (Settings): High contrast, Soft, Classic (the original), Warm or Dark. Each player keeps their own; the start screens use the last player's.
 
 **Back up** (Grown-up Settings) makes one file, `arithmetic-odyssey-backup-YYYY-MM-DD.json`, with every player. On the iPad the share sheet opens: choose **Save to Files** (iCloud Drive keeps it off the iPad too). Settings reminds you after 5 finished adventures without a backup. Backups hold the children's names, so keep them private and never add them to this repository.
 
@@ -126,11 +164,21 @@ Most things can be changed without knowing much code. After a change, run the te
 | **Which sound plays at a flag** | The recordings in the theme's `sounds/` folder, `flag-1.mp3`, `flag-2.mp3` and so on: one is picked at random at each flag, never the same twice in a row (see [themes/dino/sounds/README.md](themes/dino/sounds/README.md)). Without any, `flagSound` for each theme in `js/settings.js`. |
 | **The word for a detour** ("Wandering") | "Wandering question 1 of 3" in `js/screens/adventure.js` (`showQuestion()`); **Wandering length** in `js/screens/settings.js`; **Wanderings** on Trail's End in `js/screens/trail-end.js`; and the `detourCleared` and `setback` lines in each theme's `game-text.json`. The code itself still says detour. |
 | **Counting blocks** (colors and sizes) | `BLOCKS` in `js/blocks.js`, then `node tools/build-blocks.mjs` to write the pictures again. See [images/blocks/README.md](images/blocks/README.md). |
-| **Help (counting blocks, 🙏)** | Which problems have it: `hasTip()` and `TIP_OPERATIONS` in `js/blocks.js`; the picture: `tipSvg()` there; the card: `js/tip-card.js`; its look: `.tip-card` and `.tip-button` in `css/style.css` (`.tip-front` is the button in front of the question on an upright screen, `.tip-row` the one under it on a sideways screen). |
-| **Learn from Incorrect** | `LEARN_NEEDS` (right answers to learn a problem), `LEARN_SPACING` and `LEARN_MAX_PROBLEMS` at the top of `js/learn.js`. |
+| **Help (🙏)** | Which problems have it: `hasTip()` and `TIP_OPERATIONS` in `js/blocks.js`; which picture: `tipKind()` there (blocks, groups, area or split) and its title `tipTitle()`; the picture: `tipSvg()` there; the card: `js/tip-card.js`; its look: `.tip-card` and `.tip-button` in `css/style.css` (`.tip-front` is the button in front of the question on an upright screen, `.tip-row` the one under it on a sideways screen). |
+| **Learn from Incorrect** | `LEARN_NEEDS` (right answers to learn a problem, 3), `TRIES_PER_PROBLEM` and `LEARN_MAX_PROBLEMS` at the top of `js/learn.js`; how many problems Need More Practice keeps: `PRACTICE_SIZE` in `js/scores.js` (20). |
+| **The color choices** | The colors are CSS variables at the top of `css/style.css` (`:root`), and each choice changes them in a `:root[data-colors="..."]` block below it; the names in `COLOR_THEMES` and `COLOR_THEME_LABELS` in `js/settings.js`. `tests/themes.test.js` checks every choice sets every color and that text stays readable (contrast). |
+| **The pages' security policy** | The `Content-Security-Policy` line in `index.html` and `offline.html` lets only the game's own files load. After changing a script or style written in either page, run `node tools/csp.mjs` (it fills in their fingerprints), or the browser blocks it. `tests/security.test.js` checks this. |
+| **Giveaway questions** | `isGiveaway()` (which problems count) and `GIVEAWAY_EVERY` (20) in `js/math.js`. |
+| **Missed questions asked again** | `AGAIN_AFTER` (3 other questions first) and `AGAIN_MAX` (5 waiting) at the top of `js/adventure.js`; the note in `js/screens/adventure.js` (`againNote`). |
+| **Streak praise** | `STREAK_EVERY` (5) in `js/adventure.js`; the words in `afterAnswer()` and `submit()` in `js/screens/adventure.js`; the sound `streak` in `js/audio.js`. |
+| **Trail's End confetti** | `CONFETTI_PIECES` and `CONFETTI_MS` in `js/screens/trail-end.js`; colours and fall in `css/style.css` (`.confetti`). |
+| **🔊 Read to me** | `js/read-aloud.js` (what is read: `stickerReading()`). |
+| **The grown-up hold** | `HOLD_MS` (3 seconds) and `HOLD_FINGERS` (2) in `js/hold.js`. |
 | **How high scores are ranked** | `compareScores()` in `js/scores.js`; the board size and history length (10) at the top of the same file. |
 | **When a problem counts as slow** in Need More Practice | `SLOW_MS` at the top of `js/scores.js` (5000 milliseconds). |
 | **The backup reminder** | `BACKUP_REMINDER_GAMES` at the top of `js/profiles.js` (5 adventures). |
+| **The app's name and icon** on the Home Screen | `short_name` in `manifest.json` and `apple-mobile-web-app-title` in `index.html` (both "Arithmetic Odyssey"; a long name may be shortened under the icon); the icons in `images/icons/` (180, 192 and 512 pixels square). |
+| **The offline app** | `tools/sw-template.js` (how files are saved and answered), `tools/build-offline.mjs` (which files), `js/offline.js` (the messages and when an update applies). The offline budget is `OFFLINE_BUDGET_BYTES` in `tools/build-offline.mjs`. |
 | **The detour road** on the trail map | Its shape in `js/detour-road.js` (`LOOP`); its colours in `css/style.css` under `.detour-road`. |
 
 After changing any `.js` file, give the game a new version number so iPads load the new files: `node tools/set-version.mjs 1.2.3`.
@@ -189,7 +237,7 @@ themes/dino/downloaded-pictures/
 
 Right-clicking `Get-DinoPictures.ps1` and choosing **Run with PowerShell** also works, but that uses Windows PowerShell 5.1; the window waits for Enter before closing.
 
-**From a PowerShell window**, which also lets you pass options. Use `pwsh` for PowerShell 7 or `powershell.exe` for Windows PowerShell 5.1:
+**From a PowerShell window**, which also lets you pass options. The examples use `powershell` (Windows PowerShell 5.1, built into Windows); `pwsh` (PowerShell 7) works the same:
 
 ```powershell
 cd arithmetic-odyssey\tools
@@ -198,10 +246,10 @@ cd arithmetic-odyssey\tools
 Unblock-File .\Get-DinoPictures.ps1
 
 # 1. Try one dinosaur and only list what would be downloaded.
-pwsh -ExecutionPolicy Bypass -File .\Get-DinoPictures.ps1 -Dinosaur Eoraptor -ListOnly
+powershell -ExecutionPolicy Bypass -File .\Get-DinoPictures.ps1 -Dinosaur Eoraptor -ListOnly
 
 # 2. Download everything (about 60 pages; takes a while because it pauses 1 second between requests).
-pwsh -ExecutionPolicy Bypass -File .\Get-DinoPictures.ps1
+powershell -ExecutionPolicy Bypass -File .\Get-DinoPictures.ps1
 ```
 
 Useful options:
@@ -210,12 +258,14 @@ Useful options:
 - `-MaxImagesPerDinosaur 5`: at most 5 pictures each.
 - `-Force`: download again.
 - `-OutputPath D:\DinoPictures`: save somewhere else.
+- `-MaxPictureMB 10`: the largest picture to download (default 20 MB).
 
 Run `Get-Help .\Get-DinoPictures.ps1 -Full` for all of them.
 
 What happens when something goes wrong:
 
 - **Failures are logged, not fatal.** A page or picture that fails is logged in `download-log.csv` and the script carries on.
+- **Only real pictures are kept.** Downloads are https only. A download stops as soon as it is bigger than `-MaxPictureMB`. A file is kept only if the server says it is a picture and it starts like a JPEG, PNG, GIF or WebP, so a web page or program can never be saved under a picture's name. These refusals are not retried.
 - **Exit codes:**
   - `0`: everything succeeded.
   - `1`: something failed.
@@ -252,6 +302,7 @@ The folders are the same as the game's (see [PICTURES.md](themes/national-parks/
   - `-PicturesPerAttraction 3`: fewer pictures.
   - `-ParkPicturesOnly`: 5 photos of each park instead of 5 per attraction (about 315 photos instead of about 1,260).
   - `-Force`: download again.
+  - `-MaxPictureMB 10`: the largest picture to download (default 20 MB).
 - **What it keeps:** only JPEG and PNG landscape photos at least 800 pixels wide. It skips maps, logos, signs and diagrams. If an attraction has too few photos (for example "Sled dog kennels"), general photos of the park fill the gap.
 - **Size:** Commons sends copies 1024 pixels wide, the size the game uses, so most photos are 100 to 200 KB and already fit the game (at most 400 KB and 1600 pixels). The log marks any that are over 400 KB.
 - **Re-running resumes:** photos already downloaded are skipped and never downloaded twice. A photo that fails to download is replaced by the next one found.

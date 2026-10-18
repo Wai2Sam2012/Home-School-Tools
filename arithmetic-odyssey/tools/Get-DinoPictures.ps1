@@ -68,6 +68,10 @@
 .PARAMETER TimeoutSeconds
     Timeout for each web request. Default 60.
 
+.PARAMETER MaxPictureMB
+    Largest picture to download, in MB. A bigger one is stopped as soon as it
+    passes the limit and is not saved. Default 20.
+
 .PARAMETER SiteUrl
     Base URL of the site. Only change this for testing.
 
@@ -111,6 +115,8 @@ param(
     [int]$DelayMilliseconds = 1000,
     [ValidateRange(1, 600)]
     [int]$TimeoutSeconds = 60,
+    [ValidateRange(1, 200)]
+    [int]$MaxPictureMB = 20,
     [string]$SiteUrl = 'https://dinosaurpictures.org',
     [string]$UserAgent = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36'
 )
@@ -136,13 +142,34 @@ $MaxPathLength = 250
 # Helpers
 # ---------------------------------------------------------------------------
 
+function Protect-CsvRow {
+    # A copy of a row whose text can't run as a formula when the CSV is opened
+    # in Excel: a cell starting with = + - @ (from a web page or Commons) gets
+    # a leading apostrophe.
+    param($Row)
+    $copy = [ordered]@{}
+    foreach ($prop in $Row.PSObject.Properties) {
+        $value = $prop.Value
+        if ($value -is [string] -and $value -match '^[=+\-@\t\r]') { $value = "'" + $value }
+        $copy[$prop.Name] = $value
+    }
+    return [pscustomobject]$copy
+}
+
 function Get-HttpStatusCode {
     param($ErrorRecord)
-    try {
-        $response = $ErrorRecord.Exception.Response
-        if ($null -ne $response) { return [int]$response.StatusCode }
-    } catch {
-        # Not an HTTP error (DNS failure, timeout, ...).
+    # The web error may be wrapped (a .NET call made inside a function), so
+    # look through the inner errors too.
+    $exception = $ErrorRecord.Exception
+    while ($null -ne $exception) {
+        try {
+            if ($exception.PSObject.Properties['Response'] -and $null -ne $exception.Response) {
+                return [int]$exception.Response.StatusCode
+            }
+        } catch {
+            # Not an HTTP error (DNS failure, timeout, ...).
+        }
+        $exception = $exception.InnerException
     }
     return 0
 }
@@ -158,6 +185,7 @@ function Invoke-WithRetry {
         try {
             return & $Action
         } catch {
+            if ($_.Exception -is [System.IO.InvalidDataException]) { throw }
             $code = Get-HttpStatusCode $_
             $retryable = ($code -eq 0) -or ($code -eq 429) -or ($code -ge 500)
             if (-not $retryable -or $i -eq $Attempts) { throw }
@@ -173,6 +201,64 @@ function Get-ErrorText {
     $code = Get-HttpStatusCode $ErrorRecord
     if ($code -gt 0) { return "HTTP $code - $($ErrorRecord.Exception.Message)" }
     return $ErrorRecord.Exception.Message
+}
+
+function Test-PictureBytes {
+    # True when the file starts like a JPEG, PNG, GIF or WebP picture, so a web
+    # page or a program saved under a picture name is never kept.
+    param([byte[]]$Bytes)
+    if ($null -eq $Bytes -or $Bytes.Length -lt 12) { return $false }
+    if ($Bytes[0] -eq 0xFF -and $Bytes[1] -eq 0xD8 -and $Bytes[2] -eq 0xFF) { return $true }
+    if ($Bytes[0] -eq 0x89 -and $Bytes[1] -eq 0x50 -and $Bytes[2] -eq 0x4E -and $Bytes[3] -eq 0x47) { return $true }
+    if ($Bytes[0] -eq 0x47 -and $Bytes[1] -eq 0x49 -and $Bytes[2] -eq 0x46 -and $Bytes[3] -eq 0x38) { return $true }
+    $riff = $Bytes[0] -eq 0x52 -and $Bytes[1] -eq 0x49 -and $Bytes[2] -eq 0x46 -and $Bytes[3] -eq 0x46
+    $webp = $Bytes[8] -eq 0x57 -and $Bytes[9] -eq 0x45 -and $Bytes[10] -eq 0x42 -and $Bytes[11] -eq 0x50
+    return ($riff -and $webp)
+}
+
+function Get-LimitedPicture {
+    # Downloads one picture into memory: returns @{ Bytes }. Stops as soon as
+    # it is bigger than -MaxPictureMB, and refuses anything that is not a JPEG,
+    # PNG, GIF or WebP picture over https. Those refusals throw an
+    # InvalidDataException, which Invoke-WithRetry does not retry.
+    param([string]$Url)
+    $limit = [long]$MaxPictureMB * 1024 * 1024
+    $request = [System.Net.HttpWebRequest]::Create($Url)
+    $request.UserAgent = $UserAgent
+    $request.Timeout = $TimeoutSeconds * 1000
+    $request.ReadWriteTimeout = $TimeoutSeconds * 1000
+    $request.MaximumAutomaticRedirections = 5
+    $response = $request.GetResponse()
+    try {
+        if ($response.ResponseUri.Scheme -ne 'https') {
+            throw (New-Object System.IO.InvalidDataException "Moved away from https to $($response.ResponseUri)")
+        }
+        $contentType = [string]$response.ContentType
+        if ($contentType -notmatch '(?i)^image/(jpeg|png|gif|webp)\b') {
+            throw (New-Object System.IO.InvalidDataException "Not a picture (Content-Type: $contentType)")
+        }
+        if ($response.ContentLength -gt $limit) {
+            throw (New-Object System.IO.InvalidDataException "Too big ($($response.ContentLength) bytes; the limit is $MaxPictureMB MB)")
+        }
+        $stream = $response.GetResponseStream()
+        $memory = New-Object System.IO.MemoryStream
+        $buffer = New-Object byte[] 65536
+        while (($read = $stream.Read($buffer, 0, $buffer.Length)) -gt 0) {
+            $memory.Write($buffer, 0, $read)
+            if ($memory.Length -gt $limit) {
+                throw (New-Object System.IO.InvalidDataException "Too big (over the limit of $MaxPictureMB MB)")
+            }
+        }
+        $bytes = $memory.ToArray()
+    } finally {
+        $response.Close()
+    }
+    if ($bytes.Length -eq 0) { throw (New-Object System.IO.InvalidDataException 'Downloaded file is empty') }
+    if (-not (Test-PictureBytes $bytes)) {
+        throw (New-Object System.IO.InvalidDataException 'The file is not a JPEG, PNG, GIF or WebP picture')
+    }
+    # In a hashtable, so PowerShell passes the bytes on as one array.
+    return @{ Bytes = $bytes }
 }
 
 function Get-ListFile {
@@ -278,7 +364,14 @@ function Get-ImageUrl {
             $originalUri = $null
             if ([uri]::TryCreate([string]$original, [UriKind]::Absolute, [ref]$originalUri)) { $primary = $originalUri }
         }
-        if ($primary.Scheme -ne 'http' -and $primary.Scheme -ne 'https') { continue }
+        # Pictures are only downloaded over https: an http address is moved to https.
+        if ($primary.Scheme -eq 'http') {
+            $secure = New-Object System.UriBuilder $primary
+            $secure.Scheme = 'https'
+            $secure.Port = -1
+            $primary = $secure.Uri
+        }
+        if ($primary.Scheme -ne 'https') { continue }
         $ext = [System.IO.Path]::GetExtension($primary.AbsolutePath).ToLowerInvariant()
         if ($ImageExtensions -notcontains $ext) { continue }
         if (-not $AllowExternal -and -not (Test-SiteHost $primary $SiteHost)) { continue }
@@ -358,15 +451,7 @@ function Save-Image {
     param([string]$Url, [string]$Path)
     $partPath = "$Path.part"
     try {
-        $response = Invoke-WithRetry {
-            Invoke-WebRequest -Uri $Url -UseBasicParsing -UserAgent $UserAgent -TimeoutSec $TimeoutSeconds
-        }
-        $contentType = [string]($response.Headers['Content-Type'] -join ';')
-        if ($contentType -and $contentType -notmatch '(?i)^image/') {
-            throw "Not an image (Content-Type: $contentType)"
-        }
-        $bytes = $response.RawContentStream.ToArray()
-        if ($bytes.Length -eq 0) { throw 'Downloaded file is empty' }
+        $bytes = (Invoke-WithRetry { Get-LimitedPicture -Url $Url }).Bytes
         [System.IO.File]::WriteAllBytes($partPath, $bytes)
         if ([System.IO.File]::Exists($Path)) { [System.IO.File]::Delete($Path) }
         [System.IO.File]::Move($partPath, $Path)
@@ -599,7 +684,7 @@ foreach ($page in $pages) {
 }
 
 try {
-    $log | Export-Csv -LiteralPath $logPath -NoTypeInformation -Encoding UTF8
+    $log | ForEach-Object { Protect-CsvRow $_ } | Export-Csv -LiteralPath $logPath -NoTypeInformation -Encoding UTF8
     Write-Host "Log written to $logPath"
 } catch {
     Write-Warning "Could not write the log to ${logPath}: $($_.Exception.Message)"

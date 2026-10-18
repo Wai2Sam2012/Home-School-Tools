@@ -227,8 +227,9 @@ test('T0.3 the deploy workflow runs on main, runs the tests, builds the site and
   // The story files are built before the tests and before the site is copied.
   assert.match(workflow, /node arithmetic-odyssey\/tools\/build-storyline\.mjs[\s\S]*node --test[\s\S]*assemble-site\.mjs/);
   assert.match(workflow, /node \.github\/scripts\/assemble-site\.mjs _site/);
-  assert.match(workflow, /actions\/upload-pages-artifact@v\d+[\s\S]*path: _site/);
-  assert.match(workflow, /actions\/deploy-pages@v\d+/);
+  // Actions are pinned to a commit, with the version in a comment (0.7.2).
+  assert.match(workflow, /actions\/upload-pages-artifact@[0-9a-f]{40} # v\d+[\s\S]*path: _site/);
+  assert.match(workflow, /actions\/deploy-pages@[0-9a-f]{40} # v\d+/);
 });
 
 // ---------------------------------------------------------------- Windows files
