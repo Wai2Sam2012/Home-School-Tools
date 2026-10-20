@@ -17,7 +17,8 @@
 //
 // container is navigator.serviceWorker (replaced in tests).
 
-import { nextSticker, pictureUrl } from './storyline.js?v=0.7.2';
+import { LEVELS, collectionKey } from './settings.js?v=0.7.4';
+import { nextSticker, pictureUrl, stickerSet } from './storyline.js?v=0.7.4';
 
 export const OFFLINE_TEXT = Object.freeze({
   checking: 'Checking offline play…',
@@ -44,20 +45,23 @@ const TAKE_OVER_WAIT_MS = 4000;
 const RELOAD_KEY = 'ao.offline.reloaded';
 
 /**
- * The sticker pictures the players need saved: for each theme, every sticker
- * a player has collected and each player's next stop. storylines is
- * { theme: storyline } (a missing theme is skipped). Returns addresses.
+ * The sticker pictures the players need saved: for each theme and level,
+ * every sticker a player has collected and each player's next stop.
+ * storylines is { theme: storyline } (a missing theme is skipped). Returns addresses.
  */
 export function picturesToSave(storylines, players) {
   const urls = new Set();
   for (const [theme, storyline] of Object.entries(storylines)) {
     if (!storyline) continue;
-    for (const player of players) {
-      const owned = new Set(player.collected?.[theme] ?? []);
-      const next = nextSticker(storyline, [...owned]);
-      for (const sticker of storyline.stickers) {
-        if (!owned.has(sticker.id) && sticker !== next) continue;
-        for (const picture of sticker.pictures ?? []) urls.add(pictureUrl(theme, picture));
+    for (const level of LEVELS) {
+      const set = stickerSet(storyline, level);
+      for (const player of players) {
+        const owned = new Set(player.collected?.[collectionKey(theme, level)] ?? []);
+        const next = nextSticker(set, [...owned]);
+        for (const sticker of set.stickers) {
+          if (!owned.has(sticker.id) && sticker !== next) continue;
+          for (const picture of sticker.pictures ?? []) urls.add(pictureUrl(theme, picture));
+        }
       }
     }
   }

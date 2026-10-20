@@ -95,7 +95,9 @@ function collectFiles(gameDir, { version = readVersion(gameDir), storylines = nu
     const { text, storyline } = storylines?.[theme] ?? storylineText(theme, gameDir);
     add(`themes/${theme}/storyline.json`, Buffer.from(text));
     const first = new Set(storyline.stickers[0]?.pictures ?? []);
-    const used = new Set([...Object.values(storyline.sounds ?? {}).flat(), ...storyline.stickers.flatMap((s) => s.pictures ?? [])]);
+    // Every level's stickers (Intermediate and Advanced sets too, 0.7.3).
+    const stickers = [...storyline.stickers, ...Object.values(storyline.levels ?? {}).flat()];
+    const used = new Set([...Object.values(storyline.sounds ?? {}).flat(), ...stickers.flatMap((s) => s.pictures ?? [])]);
     for (const p of [...used].sort()) {
       const path = `themes/${theme}/${p}`;
       if (!existsSync(join(gameDir, path))) throw new Error(`${path} is in the story file but missing.`);

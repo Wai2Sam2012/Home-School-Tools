@@ -2,13 +2,13 @@
 // Only what changed is written: the adventure in progress once per question,
 // and the player's record when settings change or an adventure ends.
 
-import { AVATAR_IDS, checkColor } from './avatars.js?v=0.7.2';
-import { KEYS, PREFIX, createStorage, memoryStorage } from './storage.js?v=0.7.2';
+import { AVATAR_IDS, checkColor } from './avatars.js?v=0.7.4';
+import { KEYS, PREFIX, createStorage, memoryStorage } from './storage.js?v=0.7.4';
 import {
   LEARNED_MAX, MAX_PROFILES, NAME_MAX_LENGTH, RECORD_SCHEMA, checkActive, checkHistory, checkIndex, checkProfile, cleanName, profileRecord,
-} from './records.js?v=0.7.2';
-import { addHighScore, addToHistory, gameSummary } from './scores.js?v=0.7.2';
-import { DEFAULT_SETTINGS, DEFAULT_SETUP, THEMES, normalizeSettings, normalizeSetup } from './settings.js?v=0.7.2';
+} from './records.js?v=0.7.4';
+import { addHighScore, addToHistory, gameSummary } from './scores.js?v=0.7.4';
+import { DEFAULT_SETTINGS, DEFAULT_SETUP, collectionKey, collectionKeys, normalizeSettings, normalizeSetup } from './settings.js?v=0.7.4';
 
 // Player icon ids; the pictures are in images/avatars/ (js/avatars.js).
 export const AVATARS = AVATAR_IDS;
@@ -38,7 +38,7 @@ export function freeName(name, profiles) {
 }
 
 function emptyCollection() {
-  return Object.fromEntries(Object.keys(THEMES).map((theme) => [theme, []]));
+  return Object.fromEntries(collectionKeys().map((key) => [key, []]));
 }
 
 const defaultId = () => `p${Date.now().toString(36)}${Math.random().toString(36).slice(2, 6)}`;
@@ -199,7 +199,8 @@ export function createProfileStore({ storage = createStorage(memoryStorage()), m
       const { boards, rank } = addHighScore(p.highScores, game);
       p.highScores = boards;
       p.history = addToHistory(p.history, game);
-      p.collected = { ...p.collected, [adventure.theme]: collected };
+      // The trip's own level's set (0.7.3).
+      p.collected = { ...p.collected, [collectionKey(adventure.theme, adventure.difficulty)]: collected };
       p.lastResult = { theme: adventure.theme, length: adventure.length, difficulty: adventure.difficulty, stats: adventure.stats, stickerId, rank };
       p.adventure = null;
       savePlayer(p);
@@ -219,10 +220,10 @@ export function createProfileStore({ storage = createStorage(memoryStorage()), m
       return saveProfile(p);
     },
 
-    /** Debug and tests: sets a player's stickers for a theme. */
-    setCollected(id, theme, ids) {
+    /** Debug and tests: sets a player's stickers for a theme (and level: a collectionKey()). */
+    setCollected(id, key, ids) {
       const p = this.get(id);
-      p.collected = { ...p.collected, [theme]: [...ids] };
+      p.collected = { ...p.collected, [key]: [...ids] };
       saveProfile(p);
     },
 

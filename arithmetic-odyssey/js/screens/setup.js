@@ -1,12 +1,12 @@
 // 3. Setup: theme, operations and difficulty, with the next sticker on the
 // trip ("Next stop: Eoraptor!").
 
-import { startAdventure, withNextProblem } from '../adventure.js?v=0.7.2';
-import { stickerPicture } from '../art.js?v=0.7.2';
-import { OPERATIONS } from '../math.js?v=0.7.2';
-import { DIFFICULTY_LABELS, THEMES, toggleOperation } from '../settings.js?v=0.7.2';
-import { nextSticker } from '../storyline.js?v=0.7.2';
-import { choiceRow, confirmDialog, flash, h, topBar } from '../ui.js?v=0.7.2';
+import { startAdventure, withNextProblem } from '../adventure.js?v=0.7.4';
+import { stickerPicture } from '../art.js?v=0.7.4';
+import { OPERATIONS } from '../math.js?v=0.7.4';
+import { DIFFICULTY_LABELS, THEMES, collectionKey, toggleOperation } from '../settings.js?v=0.7.4';
+import { nextSticker, stickerSet } from '../storyline.js?v=0.7.4';
+import { choiceRow, confirmDialog, fitToWindow, flash, h, topBar } from '../ui.js?v=0.7.4';
 
 const OPERATION_NAMES = { '+': 'Add', '−': 'Subtract', '×': 'Multiply', '÷': 'Divide' };
 const DIFFICULTY_DETAILS = { beginner: 'Small numbers', intermediate: 'Bigger numbers', advanced: 'Big numbers' };
@@ -18,13 +18,16 @@ export function setupScreen(ctx) {
   // ---- theme and next stop
   const nextStop = h('div', { class: 'next-stop' }, h('p', {}, 'Loading the map…'));
   async function showNextStop() {
-    const theme = player.setup.theme;
+    const { theme, difficulty } = player.setup;
     try {
-      const storyline = await ctx.getStoryline(theme);
-      const sticker = nextSticker(storyline, player.collected[theme]);
+      // The chosen level's sticker set (0.7.3).
+      const storyline = stickerSet(await ctx.getStoryline(theme), difficulty);
+      const sticker = nextSticker(storyline, player.collected[collectionKey(theme, difficulty)] ?? []);
+      let text = 'You collected every sticker! 🎉';
+      if (storyline.stickers.length === 0) text = `${DIFFICULTY_LABELS[difficulty]} stickers are coming soon. This trip won't give a sticker yet.`;
       nextStop.replaceChildren(...(sticker
         ? [stickerPicture(theme, sticker, 0, { className: 'next-stop-picture' }), h('p', { class: 'next-stop-text' }, `Next stop: ${sticker.name}!`)]
-        : [h('p', { class: 'next-stop-text' }, 'You collected every sticker! 🎉')]));
+        : [h('p', { class: 'next-stop-text' }, text)]));
     } catch (error) {
       nextStop.replaceChildren(h('p', { class: 'form-error' }, error.message));
     }
@@ -73,7 +76,10 @@ export function setupScreen(ctx) {
     label: 'Difficulty',
     value: player.setup.difficulty,
     options: Object.keys(DIFFICULTY_LABELS).map((d) => ({ value: d, label: DIFFICULTY_LABELS[d], detail: DIFFICULTY_DETAILS[d] })),
-    onChange: (difficulty) => ctx.profiles.updateSetup(player.id, { difficulty }),
+    onChange: (difficulty) => {
+      ctx.profiles.updateSetup(player.id, { difficulty });
+      showNextStop(); // each level has its own stickers
+    },
   });
 
   async function go() {
@@ -94,7 +100,7 @@ export function setupScreen(ctx) {
   }
 
   const { adventureLength, detourLength } = player.settings;
-  return h('main', { class: 'screen setup-screen' },
+  const page = h('main', { class: 'screen setup-screen' },
     topBar('Plan your trip', () => ctx.show('home')),
     h('div', { class: 'setup-layout' },
       h('section', { class: 'panel' },
@@ -113,4 +119,7 @@ export function setupScreen(ctx) {
       ),
     ),
   );
+  // Steps down to a compact size if the window is short (Safari's bars, Split View).
+  fitToWindow(ctx, page);
+  return page;
 }

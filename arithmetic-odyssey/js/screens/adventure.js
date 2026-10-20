@@ -8,17 +8,17 @@
 // Submit. It pauses while Repeat is reading and while the game is in the
 // background. The keypad works the whole time; nothing waits on speech.
 
-import { answerProblem, jumpTo, milestoneSteps, storyText, unlockSticker, useTip, withNextProblem } from '../adventure.js?v=0.7.2';
-import { hasTip } from '../blocks.js?v=0.7.2';
-import { createTipButton, createTipCard, showTipButtons } from '../tip-card.js?v=0.7.2';
-import { stickerPicture } from '../art.js?v=0.7.2';
-import { playerIcon } from '../avatars.js?v=0.7.2';
-import { createDetourRoad, loopProgress } from '../detour-road.js?v=0.7.2';
-import { createKeypad } from '../keypad.js?v=0.7.2';
-import { THEMES } from '../settings.js?v=0.7.2';
-import { createThinkingTimer } from '../timer.js?v=0.7.2';
-import { nextSticker } from '../storyline.js?v=0.7.2';
-import { h, topBar } from '../ui.js?v=0.7.2';
+import { answerProblem, jumpTo, milestoneSteps, storyText, unlockSticker, useTip, withNextProblem } from '../adventure.js?v=0.7.4';
+import { hasTip } from '../blocks.js?v=0.7.4';
+import { createTipButton, createTipCard, showTipButtons } from '../tip-card.js?v=0.7.4';
+import { stickerPicture } from '../art.js?v=0.7.4';
+import { playerIcon } from '../avatars.js?v=0.7.4';
+import { createDetourRoad, loopProgress } from '../detour-road.js?v=0.7.4';
+import { createKeypad } from '../keypad.js?v=0.7.4';
+import { THEMES, collectionKey } from '../settings.js?v=0.7.4';
+import { createThinkingTimer } from '../timer.js?v=0.7.4';
+import { nextSticker, stickerSet } from '../storyline.js?v=0.7.4';
+import { h, topBar } from '../ui.js?v=0.7.4';
 
 const PRAISE = ['Correct!', 'Great job!', 'You got it!', 'Awesome!', 'Nice work!'];
 // A right answer moves on by itself; after a wrong one the game waits for
@@ -39,6 +39,8 @@ export function adventureScreen(ctx) {
       h('button', { type: 'button', class: 'big-button primary', onclick: () => ctx.show('setup') }, 'Plan a new trip'));
   }
   const theme = THEMES[state.theme];
+  // The stickers of this trip's level (0.7.3): each level has its own set.
+  const setKey = collectionKey(state.theme, state.difficulty);
   let storyline = null;
   let timer = 0;
   let busy = false;
@@ -235,10 +237,11 @@ export function adventureScreen(ctx) {
       }
       if (error) {
         // No sticker list: keep the score and history anyway.
-        const result = ctx.profiles.finishAdventure(player.id, state, { collected: player.collected[state.theme] ?? [], stickerId: null });
+        const result = ctx.profiles.finishAdventure(player.id, state, { collected: player.collected[setKey] ?? [], stickerId: null });
         return { result, error };
       }
-      const { sticker, collected } = unlockSticker(storyline, player.collected[state.theme]);
+      // A level whose set is still to come gives no sticker (Trail's End says so).
+      const { sticker, collected } = unlockSticker(stickerSet(storyline, state.difficulty), player.collected[setKey] ?? []);
       return { result: ctx.profiles.finishAdventure(player.id, state, { collected, stickerId: sticker?.id ?? null }), error: null };
     })();
     return finishing;
@@ -436,7 +439,7 @@ export function adventureScreen(ctx) {
   // The destination: the sticker this trail unlocks.
   ctx.getStoryline(state.theme).then((loaded) => {
     storyline = loaded;
-    const sticker = nextSticker(storyline, player.collected[state.theme]);
+    const sticker = nextSticker(stickerSet(storyline, state.difficulty), player.collected[setKey] ?? []);
     if (sticker) {
       goal.replaceChildren(stickerPicture(state.theme, sticker, 0, { className: 'goal-picture' }));
       goal.title = sticker.name;

@@ -634,6 +634,21 @@ Chosen by the owner from the 0.7.1 review list:
 | T7.19 | Two fingers on the Grown-ups button for 3 seconds open Settings on the iPad; one finger doesn't | iPad |
 | T7.20 | 🔊 Read to me reads the sticker with the iPad's voice | iPad |
 
+### Stage 7.3 (0.7.3): more fixes before Stage 8
+
+- **No scrolling on the iPad:** Safari's address and tab bars (about 70–100 px) and Split View make the window smaller than the screen, so Home (with its next stop), the trip planner and Trail's End could scroll. They now step down through compact sizes until they fit (`fitToWindow()` in `js/ui.js`), like the adventure screen; nothing is wider than the window at any iPad size, including narrow Split View (the picture colors and Trail's End buttons wrap).
+- **Home's next stop:** "Pick an adventure to start!" until the first game; then the trip in progress, or else the last game played (theme and level).
+- **Sticker sets per level:** each theme has a Beginner set (the current stickers), an Intermediate set and an Advanced set, saved separately (`dino`, `dino.intermediate`, ...; older saves keep theirs as Beginner). Intermediate and Advanced are empty until their stickers are added (`themes/<theme>/levels/<level>/`, see `themes/LEVELS.md`); until then their trips give no sticker and the game says they are coming soon. The album has a level choice.
+- **🎨 Colors** moved from Grown-up Settings to Home, so anyone can change them.
+- **Debug panel:** collect the next 1 or 5 Dino or Off-Roading stickers (from the player's chosen level).
+- **Private Browsing** in Safari forgets everything when the tab closes; that is how private tabs work, so the game is played in a normal tab or from the Home Screen.
+
+| ID | Test | Kind |
+|---|---|---|
+| T7.21 | Sticker sets per level: collections per theme and level, old saves read as Beginner, empty sets give no sticker, story files with sets are checked, the build reports set problems (`tests/stage73.test.js`) | Automated |
+| T7.22 | Home, the trip planner and Trail's End fit Safari-sized and Split View windows without scrolling or zoom | PC |
+| T7.23 | In Safari on the iPad (not the Home Screen app), no screen scrolls or pans sideways | iPad |
+
 ### Stage 8: Release and iPad acceptance
 
 **Build:** the final README (setup, publishing, installation on iPad, offline checklist and troubleshooting) and the first full release.
@@ -707,3 +722,11 @@ A good routine is to build and test each stage on the PC, push it, and then run 
 2. **The question missed on the main trail.** **Decided (0.7.2):** asked again 3 questions later in the same trip, marked "One you missed. Try it again!", once for each miss (at most 5 waiting). It is still counted in Need More Practice.
 3. **Grown-up check.** **Decided (0.7.2):** hold the Grown-ups button for 3 seconds with two fingers at once on a touch screen (a mouse or keyboard on a PC still holds with one press). The button no longer says how; a one-finger touch shows a short hint.
 4. **Picture rights.** Both the repository and the website are public, so anyone can see and download the pictures. Choose pictures you are allowed to share; photos taken by National Park Service staff are generally free to reuse. Record each picture's source in `CREDITS.md` so any picture can be swapped out later if needed.
+
+### Later (tabled by the owner)
+
+1. **Save progress after every game** (tabled 0.7.4). The wish: the grown-up picks a save location once in Settings, and after each game (or flag) the progress is saved over the old file, with the player only acknowledging it.
+   - **What the iPad allows:** a web page can't remember a folder or write to it without a tap (Safari has no folder access), so it can't save on its own.
+   - **The closest version:** a Grown-up Settings switch, "Ask to save progress after each game". When it is on, Trail's End shows a **💾 Save progress** button. It opens the share sheet with the backup, always named `arithmetic-odyssey-progress.json`; the grown-up taps **Save to Files** and **Save**. Files usually opens in the last folder used. Whether Files then offers to replace the old file is still to be checked on the iPad.
+   - **Cost:** two or three taps each time, and someone who can use the Files screen.
+   - On a PC (Chrome or Edge), a chosen file could be saved over silently after each game.

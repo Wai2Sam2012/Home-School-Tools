@@ -1,28 +1,29 @@
 // Starts the game: keeps the players and story files, and switches between
 // screens. Each screen is a function in js/screens/ that builds its page.
 
-import { APP_VERSION } from './version.js?v=0.7.2';
-import { addDebugAction, addDebugInfo, isDebugOn, refreshDebugPanel, showDebugPanel } from './debug.js?v=0.7.2';
-import { measureAll } from './storage-report.js?v=0.7.2';
-import { audioSuspended, loadRecording, pickDifferent, playRecording, playSound, soundLength, unlockAudio } from './audio.js?v=0.7.2';
-import { AVATARS, createProfileStore } from './profiles.js?v=0.7.2';
-import { askToKeepData, createStorage, deviceStorage } from './storage.js?v=0.7.2';
-import { SPEECH_RATES, chooseVoice, createSpeaker, loadVoices } from './speech.js?v=0.7.2';
-import { COLOR_THEMES, THEMES } from './settings.js?v=0.7.2';
-import { collectNext, loadStoryline, pictureUrl } from './storyline.js?v=0.7.2';
-import { h } from './ui.js?v=0.7.2';
-import { startScreen } from './screens/start.js?v=0.7.2';
-import { newPlayerScreen, playerPictureScreen, profilesScreen } from './screens/profiles.js?v=0.7.2';
-import { PICTURES_SAVED_EVENT, createOffline, picturesToSave } from './offline.js?v=0.7.2';
-import { homeScreen } from './screens/home.js?v=0.7.2';
-import { setupScreen } from './screens/setup.js?v=0.7.2';
-import { adventureScreen } from './screens/adventure.js?v=0.7.2';
-import { trailEndScreen } from './screens/trail-end.js?v=0.7.2';
-import { albumScreen } from './screens/album.js?v=0.7.2';
-import { statsScreen } from './screens/stats.js?v=0.7.2';
-import { learnScreen } from './screens/learn.js?v=0.7.2';
-import { settingsScreen } from './screens/settings.js?v=0.7.2';
-import { voiceLabScreen } from './screens/voice-lab.js?v=0.7.2';
+import { APP_VERSION } from './version.js?v=0.7.4';
+import { addDebugAction, addDebugInfo, isDebugOn, refreshDebugPanel, showDebugPanel } from './debug.js?v=0.7.4';
+import { measureAll } from './storage-report.js?v=0.7.4';
+import { audioSuspended, loadRecording, pickDifferent, playRecording, playSound, soundLength, unlockAudio } from './audio.js?v=0.7.4';
+import { AVATARS, createProfileStore } from './profiles.js?v=0.7.4';
+import { askToKeepData, createStorage, deviceStorage } from './storage.js?v=0.7.4';
+import { SPEECH_RATES, chooseVoice, createSpeaker, loadVoices } from './speech.js?v=0.7.4';
+import { COLOR_THEMES, DIFFICULTY_LABELS, THEMES, collectionKey } from './settings.js?v=0.7.4';
+import { collectNext, loadStoryline, pictureUrl, stickerSet } from './storyline.js?v=0.7.4';
+import { h } from './ui.js?v=0.7.4';
+import { startScreen } from './screens/start.js?v=0.7.4';
+import { newPlayerScreen, playerPictureScreen, profilesScreen } from './screens/profiles.js?v=0.7.4';
+import { PICTURES_SAVED_EVENT, createOffline, picturesToSave } from './offline.js?v=0.7.4';
+import { homeScreen } from './screens/home.js?v=0.7.4';
+import { setupScreen } from './screens/setup.js?v=0.7.4';
+import { adventureScreen } from './screens/adventure.js?v=0.7.4';
+import { trailEndScreen } from './screens/trail-end.js?v=0.7.4';
+import { albumScreen } from './screens/album.js?v=0.7.4';
+import { statsScreen } from './screens/stats.js?v=0.7.4';
+import { learnScreen } from './screens/learn.js?v=0.7.4';
+import { settingsScreen } from './screens/settings.js?v=0.7.4';
+import { voiceLabScreen } from './screens/voice-lab.js?v=0.7.4';
+import { colorsScreen } from './screens/colors.js?v=0.7.4';
 
 const SCREENS = {
   start: { build: startScreen },
@@ -37,6 +38,7 @@ const SCREENS = {
   stats: { build: statsScreen, needsPlayer: true },
   learn: { build: learnScreen, needsPlayer: true },
   settings: { build: settingsScreen, needsPlayer: true },
+  colors: { build: colorsScreen, needsPlayer: true },
   voiceLab: { build: voiceLabScreen },
 };
 
@@ -274,14 +276,33 @@ function addDebugTools() {
     ctx.show('home');
     return `Added and chose ${player.name}.`;
   });
-  addDebugAction('Collect the next 5 Dino stickers', async () => {
+  // Collecting stickers: from the set of the level chosen on the player's
+  // trip planner (each level has its own set, 0.7.3), or Beginner while that
+  // level's set is still to come (0.7.4).
+  const collectAction = (theme, n) => async () => {
     const player = ctx.profiles.active();
     if (!player) return 'Choose a player first.';
-    const storyline = await ctx.getStoryline('dino');
-    ctx.profiles.setCollected(player.id, 'dino', collectNext(storyline, player.collected.dino, 5));
+    const storyline = await ctx.getStoryline(theme);
+    let level = player.setup.difficulty;
+    let note = '';
+    if (stickerSet(storyline, level).stickers.length === 0) {
+      note = ` (no ${DIFFICULTY_LABELS[level]} stickers yet, so Beginner)`;
+      level = 'beginner';
+    }
+    const key = collectionKey(theme, level);
+    const set = stickerSet(storyline, level);
+    const name = `${DIFFICULTY_LABELS[level]} ${THEMES[theme].title}`;
+    const before = (player.collected[key] ?? []).length;
+    ctx.profiles.setCollected(player.id, key, collectNext(set, player.collected[key] ?? [], n));
     ctx.refresh();
-    return `${player.name} has ${player.collected.dino.length} Dino stickers.`;
-  });
+    const now = player.collected[key].length;
+    if (now === before) return `${player.name} already has every ${name} sticker (${now}).${note}`;
+    return `${player.name} has ${now} of ${set.stickers.length} ${name} stickers.${note}`;
+  };
+  addDebugAction('Collect the next Dino sticker', collectAction('dino', 1));
+  addDebugAction('Collect the next 5 Dino stickers', collectAction('dino', 5));
+  addDebugAction('Collect the next Off-Roading sticker', collectAction('parks', 1));
+  addDebugAction('Collect the next 5 Off-Roading stickers', collectAction('parks', 5));
   const onAdventure = (run) => () => (ctx.debugAdventure ? run(ctx.debugAdventure) : 'Start or resume an adventure first.');
   addDebugAction('Adventure: answer right', onAdventure((a) => a.answer(true)));
   addDebugAction('Adventure: answer wrong', onAdventure((a) => a.answer(false)));

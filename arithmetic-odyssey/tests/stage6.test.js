@@ -80,7 +80,7 @@ test('players, settings, setup and stickers are still there after the game is cl
   assert.equal(again.settings.adventureLength, 40);
   assert.equal(again.settings.detourLength, 5);
   assert.deepEqual(again.setup, { theme: 'parks', operations: ['×', '÷'], difficulty: 'advanced' });
-  assert.deepEqual(again.collected, { dino: ['eoraptor', 'herrerasaurus'], parks: [] });
+  assert.deepEqual(again.collected, { dino: ['eoraptor', 'herrerasaurus'], parks: [], 'dino.intermediate': [], 'dino.advanced': [], 'parks.intermediate': [], 'parks.advanced': [] });
   assert.deepEqual(d.problems, []);
 });
 
@@ -490,7 +490,7 @@ test('T6.9 saves from before saving existed (schema 0) are brought up to date', 
   const store = createProfileStore({ storage: createStorage(backend, { onProblem: (p) => problems.push(p) }) });
   const sam = store.get('old1');
   assert.deepEqual(problems, []);
-  assert.deepEqual(sam.collected, { dino: ['eoraptor', 'herrerasaurus'], parks: [] });
+  assert.deepEqual(sam.collected, { dino: ['eoraptor', 'herrerasaurus'], parks: [], 'dino.intermediate': [], 'dino.advanced': [], 'parks.intermediate': [], 'parks.advanced': [] });
   assert.deepEqual(sam.highScores, {});
   assert.equal(sam.settings.voice, false);
   assert.equal(sam.setup.difficulty, 'intermediate');
@@ -513,7 +513,7 @@ test('saved values are cleaned up: unknown pictures, too-long names and out-of-r
   assert.equal(p.name, 'A very long name tha');
   assert.equal(p.avatar, 'longneck');
   assert.equal(p.settings.adventureLength, 20);
-  assert.deepEqual(p.collected, { dino: ['x'], parks: [] });
+  assert.deepEqual(p.collected, { dino: ['x'], parks: [], 'dino.intermediate': [], 'dino.advanced': [], 'parks.intermediate': [], 'parks.advanced': [] });
   assert.deepEqual(p.highScores, {});
   const index = checkIndex({ schema: 1, profiles: [{ id: 'a b', name: 'X' }, { id: 'ok', name: 'Y' }, { id: 'ok', name: 'Z' }] });
   assert.deepEqual(index.profiles.map((e) => e.name), ['Y'], 'bad and repeated ids are dropped');

@@ -111,7 +111,8 @@ test('× with a number up to 10: groups to count (4 rows of 23, numbered)', () =
   assert.equal(tipTitle(p), '4 groups of 23: count them all');
   assert.equal(tipTitle(problem('×', 1, 8)), '1 group of 8: count them all');
   const t = texts(tipSvg(p));
-  assert.deepEqual(t, ['10', '10', '3', '1', '10', '10', '3', '2', '10', '10', '3', '3', '10', '10', '3', '4'], 'each row: 10, 10, 3 and its number');
+  // Each row is 10, 10 and 3 (no numbers on the blocks since 0.7.4), with the row's number.
+  assert.deepEqual(t, ['1', '2', '3', '4'], 'each row numbered');
   assert.equal((tipSvg(p).match(/width="20" height="20" /g) ?? []).length, 92, '92 squares in all (4 × 23)');
   assert.equal(tipKind(problem('×', 7, 8)), 'groups');
   assert.equal((tipSvg(problem('×', 7, 8)).match(/width="20" height="20" /g) ?? []).length, 56);
@@ -132,7 +133,7 @@ test('÷ with an answer up to 12: how many groups make it (rows to count)', () =
   assert.equal(tipKind(p), 'groups');
   assert.equal(tipTitle(p), 'How many 7s make 56? Count the rows');
   const t = texts(tipSvg(p));
-  assert.deepEqual(t, ['7', '1', '7', '2', '7', '3', '7', '4', '7', '5', '7', '6', '7', '7', '7', '8'], '8 numbered rows of the 7 block');
+  assert.deepEqual(t, ['1', '2', '3', '4', '5', '6', '7', '8'], '8 numbered rows of the 7 block (no number on the block since 0.7.4)');
   assert.equal(tipKind(problem('÷', 456, 38)), 'groups', '456 ÷ 38 = 12: 12 rows of 38');
 });
 
@@ -158,7 +159,8 @@ test('÷ with a bigger answer: split into easy parts (72 = 60 + 12)', () => {
 test('a tip shows the problem with blocks: 7 block, +, 5 block, =, ?', () => {
   const svg = tipSvg(problem('+', 7, 5));
   const texts = [...svg.matchAll(/>([^<>]+)<\/text>/g)].map((m) => m[1]);
-  assert.deepEqual(texts, ['7', '+', '5', '=', '?'], 'the 7 block (its badge), +, the 5 block, = and ?');
+  // 0.7.4: no number on the blocks (it got in the way of counting).
+  assert.deepEqual(texts, ['+', '=', '?'], 'the 7 block, +, the 5 block, = and ?, with no numbers on the blocks');
   assert.ok(!svg.includes('<svg x='), 'blocks are drawn as shapes, not pictures in the picture');
   assert.match(svg, /aria-label="7 plus 5 with counting blocks"/);
   assert.equal((svg.match(/width="20" height="20" /g) ?? []).length, 12, '12 squares in all (7 + 5)');
@@ -167,8 +169,21 @@ test('a tip shows the problem with blocks: 7 block, +, 5 block, =, ?', () => {
 test('bigger numbers use tens and the rest, standing up: 47 + 35', () => {
   const svg = tipSvg(problem('+', 47, 35));
   const texts = [...svg.matchAll(/>([^<>]+)<\/text>/g)].map((m) => m[1]);
-  assert.deepEqual(texts, ['10', '10', '10', '10', '7', '+', '10', '10', '10', '5', '=', '?']);
+  assert.deepEqual(texts, ['+', '=', '?']);
   assert.equal((svg.match(/width="20" height="20" /g) ?? []).length, 82);
+});
+
+test('Help pictures never put a number on a block (0.7.4)', () => {
+  const badge = /<circle[^>]*fill="#ffffff" opacity="0.92"/;
+  for (const [op, a, b] of [['+', 7, 5], ['+', 47, 35], ['×', 3, 4], ['×', 4, 23], ['×', 2, 45], ['÷', 56, 7], ['÷', 360, 40]]) {
+    const svg = tipSvg(problem(op, a, b));
+    assert.doesNotMatch(svg, badge, `${a} ${op} ${b}`);
+  }
+  // The groups keep their row numbers (1, 2, 3 ...), which count the groups, not the squares.
+  const groups = [...tipSvg(problem('×', 3, 4)).matchAll(/>([^<>]+)<\/text>/g)].map((m) => m[1]);
+  assert.deepEqual(groups, ['1', '2', '3']);
+  // The block pictures in images/blocks/ keep their number.
+  assert.match(blockSvg(7), badge);
 });
 
 test('subtraction Help is take away: the first number, with the second crossed out from the end (0.7.2)', () => {

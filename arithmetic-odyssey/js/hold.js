@@ -6,7 +6,7 @@
 // short hint instead. A mouse, pen or keyboard (a grown-up at a PC) still
 // holds with one press.
 
-import { h } from './ui.js?v=0.7.2';
+import { h } from './ui.js?v=0.7.4';
 
 export const HOLD_MS = 3000;
 // How many fingers must hold the button on a touch screen.
@@ -46,7 +46,10 @@ export function createHoldButton({ label, holdMs = HOLD_MS, fingers = HOLD_FINGE
 
   const fill = h('span', { class: 'hold-fill', 'aria-hidden': 'true' });
   const hintText = h('span', { class: 'hold-hint', 'aria-live': 'polite' });
-  const button = h('button', { type: 'button', class: 'hold-button', 'aria-description': holdHint(fingers, holdMs) }, fill, h('span', { class: 'hold-label' }, label), hintText);
+  const button = h('button', { type: 'button', class: 'hold-button', 'aria-description': holdHint(fingers, holdMs) }, fill, h('span', { class: 'hold-label' }, label));
+  // The hint floats just above the button (0.7.4), so showing it never changes
+  // the button's size or moves it out from under the fingers.
+  const wrap = h('span', { class: 'hold-wrap' }, button, hintText);
 
   function setHint(text) {
     clearTimeout(hintTimer);
@@ -134,5 +137,5 @@ export function createHoldButton({ label, holdMs = HOLD_MS, fingers = HOLD_FINGE
     update();
   });
 
-  return button;
+  return wrap;
 }
