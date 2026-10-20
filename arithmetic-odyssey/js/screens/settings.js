@@ -2,12 +2,12 @@
 // detour length, saving, offline play, backup and restore, and deleting the
 // player.
 
-import { COLOR_THEMES, COLOR_THEME_LABELS, ADVENTURE_LENGTHS, DETOUR_MAX, DETOUR_MIN, stepDetourLength } from '../settings.js?v=0.7.2';
-import { bestVersions, chooseVoice, isFunVoice, voiceId, voiceQuality } from '../speech.js?v=0.7.2';
-import { playerIcon } from '../avatars.js?v=0.7.2';
-import { MAX_BACKUP_FILE_BYTES, canUndoRestore, keepDeletedPlayer, makeBackup, parseBackup, restoreBackup, saveBackupFile, undoRestore } from '../backup.js?v=0.7.2';
-import { formatBytes } from '../storage.js?v=0.7.2';
-import { choiceDialog, choiceRow, confirmDialog, h, topBar } from '../ui.js?v=0.7.2';
+import { ADVENTURE_LENGTHS, DETOUR_MAX, DETOUR_MIN, stepDetourLength } from '../settings.js?v=0.7.3';
+import { bestVersions, chooseVoice, isFunVoice, voiceId, voiceQuality } from '../speech.js?v=0.7.3';
+import { playerIcon } from '../avatars.js?v=0.7.3';
+import { MAX_BACKUP_FILE_BYTES, canUndoRestore, keepDeletedPlayer, makeBackup, parseBackup, restoreBackup, saveBackupFile, undoRestore } from '../backup.js?v=0.7.3';
+import { formatBytes } from '../storage.js?v=0.7.3';
+import { choiceDialog, choiceRow, confirmDialog, h, topBar } from '../ui.js?v=0.7.3';
 
 const REGIONS = { US: 'US', GB: 'UK', AU: 'Australia', IE: 'Ireland', IN: 'India', ZA: 'South Africa', NZ: 'New Zealand', CA: 'Canada', SG: 'Singapore' };
 const SAMPLE = 'Hi! What is 7 times 8?';
@@ -261,21 +261,6 @@ export function settingsScreen(ctx) {
     h('h2', { class: 'settings-group-title', id: 'settings-player' }, 'Just for ', playerIcon(player, { className: 'avatar-icon inline' }), ` ${player.name}`),
     h('p', { class: 'note' }, `These change the game for ${player.name} only. Each player has their own.`),
     h('div', { class: 'settings-layout' },
-      h('section', { class: 'panel colors-panel' },
-        h('h2', {}, 'Colors'),
-        choiceRow({
-          label: 'Colors',
-          className: 'colors-row',
-          value: player.settings.colors,
-          options: COLOR_THEMES.map((c) => ({ value: c, label: COLOR_THEME_LABELS[c] })),
-          onChange: (colors) => {
-            ctx.profiles.updateSettings(player.id, { colors });
-            ctx.applyColors(colors);
-            ctx.profiles.setLastColors(colors);
-          },
-        }),
-        h('p', { class: 'note' }, `The colors of the whole game for ${player.name}. High contrast is the easiest to read; Dark is gentle in a dim room.`),
-      ),
       h('section', { class: 'panel' },
         h('h2', {}, 'Questions'),
         choiceRow({

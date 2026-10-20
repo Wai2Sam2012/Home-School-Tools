@@ -1,7 +1,7 @@
 // Loads a theme's storyline.json (built by tools/build-storyline.mjs) and
 // answers questions about it: which sticker comes next, where pictures are.
 
-import { THEMES, isThemeId } from './settings.js?v=0.7.2';
+import { LEVELS, THEMES, isThemeId } from './settings.js?v=0.7.3';
 
 export const STORYLINE_SCHEMA = 1;
 
@@ -11,12 +11,25 @@ export function checkStoryline(data, theme) {
   if (data.schema !== STORYLINE_SCHEMA) throw new Error(`The story file has schema ${data.schema}; this game needs ${STORYLINE_SCHEMA}.`);
   if (data.theme !== theme) throw new Error(`The story file is for "${data.theme}", not "${theme}".`);
   if (!Array.isArray(data.stickers) || data.stickers.length === 0) throw new Error('The story file has no stickers.');
-  for (const s of data.stickers) {
+  // The Intermediate and Advanced sets may be empty (coming later).
+  const lists = [data.stickers, ...LEVELS.slice(1).map((level) => data.levels?.[level] ?? [])];
+  if (data.levels !== undefined && (typeof data.levels !== 'object' || lists.some((l) => !Array.isArray(l)))) throw new Error('The story file has a damaged level list.');
+  for (const s of lists.flat()) {
     if (typeof s.id !== 'string' || typeof s.name !== 'string' || !Array.isArray(s.facts) || !Array.isArray(s.pictures)) {
       throw new Error('A sticker in the story file is missing its id, name, facts or pictures.');
     }
   }
   return data;
+}
+
+/**
+ * The stickers for one level, as a storyline (so nextSticker(), collectNext()
+ * and the rest work on it): Beginner is the main list; Intermediate and
+ * Advanced are their own sets, empty until they are added.
+ */
+export function stickerSet(storyline, level = 'beginner') {
+  if (level === 'beginner' || !LEVELS.includes(level)) return storyline;
+  return { ...storyline, stickers: storyline.levels?.[level] ?? [] };
 }
 
 export async function loadStoryline(theme, fetchFile = globalThis.fetch) {

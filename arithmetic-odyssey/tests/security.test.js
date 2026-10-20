@@ -13,7 +13,7 @@ import { PRIVATE_FILE } from '../../.github/scripts/assemble-site.mjs';
 import { MAX_BACKUP_FILE_BYTES, makeBackup, parseBackup } from '../js/backup.js';
 import { createProfileStore } from '../js/profiles.js';
 import { checkProfile } from '../js/records.js';
-import { THEMES, isThemeId, normalizeSettings, normalizeSetup } from '../js/settings.js';
+import { THEMES, collectionKeys, isThemeId, normalizeSettings, normalizeSetup } from '../js/settings.js';
 import { createStorage, memoryStorage } from '../js/storage.js';
 
 const GAME = resolve(dirname(fileURLToPath(import.meta.url)), '..');
@@ -145,7 +145,7 @@ test('a hostile backup file is cleaned, and changes nothing outside the player',
   const parsed = parseBackup(hostileBackup());
   assert.equal(parsed.ok, true);
   const { profile } = parsed.players[0];
-  assert.deepEqual(Object.keys(profile.collected).sort(), Object.keys(THEMES).sort());
+  assert.deepEqual(Object.keys(profile.collected).sort(), collectionKeys().sort());
   assert.deepEqual(profile.collected.dino, ['d1']);
   assert.deepEqual(Object.keys(profile.highScores), ['10|easy']);
   assert.equal(profile.highScores['10|easy'][0].theme, 'dino');

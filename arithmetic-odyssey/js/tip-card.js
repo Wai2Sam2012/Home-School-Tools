@@ -3,8 +3,8 @@
 // the 5 block, = and ?; 4 × 23 as 4 rows of 23; 47 × 38 split into tens and
 // ones; 56 ÷ 7 as rows of 7 to count; 72 ÷ 3 as 60 ÷ 3 and 12 ÷ 3 (js/blocks.js).
 
-import { hasTip, tipSvg, tipTitle } from './blocks.js?v=0.7.2';
-import { h } from './ui.js?v=0.7.2';
+import { hasTip, tipSvg, tipTitle } from './blocks.js?v=0.7.3';
+import { h } from './ui.js?v=0.7.3';
 
 /**
  * Returns { el, show(problem), hide(), shown() }. onClose runs when the

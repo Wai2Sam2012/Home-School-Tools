@@ -8,11 +8,11 @@
 //   ao.v1.history.<id>   the last 10 finished games
 //   ao.v1.active.<id>    the adventure in progress
 
-import { ADVENTURE_SCHEMA, AGAIN_AFTER, AGAIN_MAX } from './adventure.js?v=0.7.2';
-import { AVATAR_IDS, checkColor } from './avatars.js?v=0.7.2';
-import { createProblemGenerator, restoreProblem } from './math.js?v=0.7.2';
-import { HISTORY_SIZE, BOARD_SIZE } from './scores.js?v=0.7.2';
-import { COLOR_THEMES, DEFAULT_SETTINGS, DEFAULT_SETUP, THEMES, isThemeId, normalizeSettings, normalizeSetup } from './settings.js?v=0.7.2';
+import { ADVENTURE_SCHEMA, AGAIN_AFTER, AGAIN_MAX } from './adventure.js?v=0.7.3';
+import { AVATAR_IDS, checkColor } from './avatars.js?v=0.7.3';
+import { createProblemGenerator, restoreProblem } from './math.js?v=0.7.3';
+import { HISTORY_SIZE, BOARD_SIZE } from './scores.js?v=0.7.3';
+import { COLOR_THEMES, DEFAULT_SETTINGS, DEFAULT_SETUP, collectionKeys, isThemeId, normalizeSettings, normalizeSetup } from './settings.js?v=0.7.3';
 
 export const RECORD_SCHEMA = 1;
 export const MAX_PROFILES = 8;
@@ -99,11 +99,12 @@ export function checkIndex(data) {
 
 // ---------------------------------------------------------------- profile
 
+/** Stickers per theme and level ("dino", "dino.intermediate", ...); saves from before 0.7.3 have Beginner only. */
 function checkCollected(raw) {
   const value = isObject(raw) ? raw : {};
-  return Object.fromEntries(Object.keys(THEMES).map((theme) => {
-    const list = Array.isArray(value[theme]) ? value[theme].filter((id) => typeof id === 'string' && id.length <= 80) : [];
-    return [theme, [...new Set(list)]];
+  return Object.fromEntries(collectionKeys().map((key) => {
+    const list = Object.hasOwn(value, key) && Array.isArray(value[key]) ? value[key].filter((id) => typeof id === 'string' && id.length <= 80) : [];
+    return [key, [...new Set(list)]];
   }));
 }
 

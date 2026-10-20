@@ -121,6 +121,42 @@ export function choiceRow({ label, options, value, onChange, className = '' }) {
   return h('div', { class: `choice-row ${className}`.trim(), role: 'group', 'aria-label': label }, buttons);
 }
 
+/**
+ * Fits a screen to the window (0.7.3): it starts at full size and steps down
+ * through compact sizes (data-fit "0", "1", "2"; style.css makes each one
+ * smaller) until the screen fits without scrolling. Safari's address and tab
+ * bars, and Split View, make the window shorter than the iPad's screen. If
+ * even the smallest size doesn't fit, the screen scrolls as before, so
+ * nothing is ever out of reach. Refits whenever the screen or window changes
+ * size, until the screen is left.
+ */
+export function fitToWindow(ctx, page, levels = ['0', '1', '2']) {
+  let frame = 0;
+  const fitNow = () => {
+    cancelAnimationFrame(frame);
+    const app = page.parentElement;
+    if (!app) return;
+    const tooTall = () => app.scrollHeight > app.clientHeight + 1;
+    let level = 0;
+    page.dataset.fit = levels[0];
+    while (tooTall() && level < levels.length - 1) page.dataset.fit = levels[++level];
+  };
+  const fit = () => {
+    cancelAnimationFrame(frame);
+    frame = requestAnimationFrame(fitNow);
+  };
+  const resizes = new ResizeObserver(fit);
+  resizes.observe(page);
+  for (const child of page.children) resizes.observe(child);
+  window.addEventListener('resize', fit);
+  ctx.onLeave(() => {
+    cancelAnimationFrame(frame);
+    resizes.disconnect();
+    window.removeEventListener('resize', fit);
+  });
+  return fit;
+}
+
 /** A short message that appears for a few seconds in a status line. */
 export function flash(statusEl, message, ms = 2500) {
   statusEl.textContent = message;

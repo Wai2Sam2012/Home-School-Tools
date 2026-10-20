@@ -2,7 +2,7 @@
 // (chosen by the player on the Setup screen), with their allowed values.
 // normalize...() turns anything, including damaged saved data, into valid values.
 
-import { DIFFICULTIES, OPERATIONS } from './math.js?v=0.7.2';
+import { DIFFICULTIES, OPERATIONS } from './math.js?v=0.7.3';
 
 export const ADVENTURE_LENGTHS = Object.freeze([20, 40, 60, 80, 100]);
 export const DETOUR_MIN = 3;
@@ -28,6 +28,21 @@ export const DIFFICULTY_LABELS = Object.freeze({
   intermediate: 'Intermediate',
   advanced: 'Advanced',
 });
+
+// Sticker sets (0.7.3): each theme has a set of stickers for each level, so
+// one level can't fill the whole album. Beginner is the theme's main list;
+// Intermediate and Advanced come from themes/<theme>/levels/ (see the README there).
+export const LEVELS = Object.freeze(Object.keys(DIFFICULTY_LABELS));
+
+/** Where a player's stickers of a theme and level are kept: "dino" (Beginner), "dino.intermediate", ... */
+export function collectionKey(theme, level = 'beginner') {
+  return level === 'beginner' || !LEVELS.includes(level) ? theme : `${theme}.${level}`;
+}
+
+/** Every collection key: each theme at each level. */
+export function collectionKeys() {
+  return Object.keys(THEMES).flatMap((theme) => LEVELS.map((level) => collectionKey(theme, level)));
+}
 
 // voiceId '' means "the best voice on this device"; speed is a key of SPEECH_RATES in js/speech.js.
 // The color themes for the whole game (css/style.css, [data-colors]), in the order offered in Settings.

@@ -634,6 +634,21 @@ Chosen by the owner from the 0.7.1 review list:
 | T7.19 | Two fingers on the Grown-ups button for 3 seconds open Settings on the iPad; one finger doesn't | iPad |
 | T7.20 | 🔊 Read to me reads the sticker with the iPad's voice | iPad |
 
+### Stage 7.3 (0.7.3): more fixes before Stage 8
+
+- **No scrolling on the iPad:** Safari's address and tab bars (about 70–100 px) and Split View make the window smaller than the screen, so Home (with its next stop), the trip planner and Trail's End could scroll. They now step down through compact sizes until they fit (`fitToWindow()` in `js/ui.js`), like the adventure screen; nothing is wider than the window at any iPad size, including narrow Split View (the picture colors and Trail's End buttons wrap).
+- **Home's next stop:** "Pick an adventure to start!" until the first game; then the trip in progress, or else the last game played (theme and level).
+- **Sticker sets per level:** each theme has a Beginner set (the current stickers), an Intermediate set and an Advanced set, saved separately (`dino`, `dino.intermediate`, ...; older saves keep theirs as Beginner). Intermediate and Advanced are empty until their stickers are added (`themes/<theme>/levels/<level>/`, see `themes/LEVELS.md`); until then their trips give no sticker and the game says they are coming soon. The album has a level choice.
+- **🎨 Colors** moved from Grown-up Settings to Home, so anyone can change them.
+- **Debug panel:** collect the next 1 or 5 Dino or Off-Roading stickers (from the player's chosen level).
+- **Private Browsing** in Safari forgets everything when the tab closes; that is how private tabs work, so the game is played in a normal tab or from the Home Screen.
+
+| ID | Test | Kind |
+|---|---|---|
+| T7.21 | Sticker sets per level: collections per theme and level, old saves read as Beginner, empty sets give no sticker, story files with sets are checked, the build reports set problems (`tests/stage73.test.js`) | Automated |
+| T7.22 | Home, the trip planner and Trail's End fit Safari-sized and Split View windows without scrolling or zoom | PC |
+| T7.23 | In Safari on the iPad (not the Home Screen app), no screen scrolls or pans sideways | iPad |
+
 ### Stage 8: Release and iPad acceptance
 
 **Build:** the final README (setup, publishing, installation on iPad, offline checklist and troubleshooting) and the first full release.

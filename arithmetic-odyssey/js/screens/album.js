@@ -1,17 +1,18 @@
 // 6. Sticker Album: every sticker in order, with locked ones greyed out,
 // in sections (dinosaurs by period, parks by region) with a count each.
+// Each level has its own set (0.7.3): Beginner, Intermediate and Advanced.
 // Tapping a collected sticker shows its pictures and facts.
 
 /** The section a sticker is in: its period (dinosaurs) or region (parks). */
 export function stickerSection(sticker) {
-  return sticker.period ?? sticker.region ?? '';
+  return sticker.period ?? sticker.region ?? sticker.section ?? '';
 }
 
-import { placeholderArt, stickerPicture } from '../art.js?v=0.7.2';
-import { readAloudButton, stickerReading } from '../read-aloud.js?v=0.7.2';
-import { THEMES } from '../settings.js?v=0.7.2';
-import { nextSticker } from '../storyline.js?v=0.7.2';
-import { choiceRow, flash, h, topBar } from '../ui.js?v=0.7.2';
+import { placeholderArt, stickerPicture } from '../art.js?v=0.7.3';
+import { readAloudButton, stickerReading } from '../read-aloud.js?v=0.7.3';
+import { DIFFICULTY_LABELS, LEVELS, THEMES, collectionKey } from '../settings.js?v=0.7.3';
+import { nextSticker, stickerSet } from '../storyline.js?v=0.7.3';
+import { choiceRow, flash, h, topBar } from '../ui.js?v=0.7.3';
 
 /** Long one-word names get a smaller size so they fit on one line ("Thecodontosaurus"). */
 function nameSize(name) {
@@ -21,8 +22,10 @@ function nameSize(name) {
   return '';
 }
 
-export function albumScreen(ctx, { theme = 'dino' } = {}) {
+export function albumScreen(ctx, { theme = 'dino', level } = {}) {
   const player = ctx.profiles.active();
+  // Opens at the level asked for (Trail's End), else the player's own level.
+  if (!LEVELS.includes(level)) level = LEVELS.includes(player.setup.difficulty) ? player.setup.difficulty : 'beginner';
   // Floats at the bottom of the screen, so it is seen however far the album is scrolled.
   const status = h('p', { class: 'status-line album-status', role: 'status' });
   const body = h('div', { class: 'album-body' }, h('p', {}, 'Loading stickers…'));
@@ -34,9 +37,14 @@ export function albumScreen(ctx, { theme = 'dino' } = {}) {
       return;
     }
     try {
-      const storyline = await ctx.getStoryline(theme);
-      const owned = new Set(player.collected[theme]);
-      const upNext = nextSticker(storyline, player.collected[theme]);
+      const storyline = stickerSet(await ctx.getStoryline(theme), level);
+      const collected = player.collected[collectionKey(theme, level)] ?? [];
+      if (storyline.stickers.length === 0) {
+        body.replaceChildren(h('p', { class: 'lead album-soon' }, `🚧 ${DIFFICULTY_LABELS[level]} ${info.title} stickers are coming soon!`));
+        return;
+      }
+      const owned = new Set(collected);
+      const upNext = nextSticker(storyline, collected);
       const tile = (s) => {
         const have = owned.has(s.id);
         return h('button', {
@@ -77,6 +85,17 @@ export function albumScreen(ctx, { theme = 'dino' } = {}) {
       options: Object.values(THEMES).map((t) => ({ value: t.id, label: `${t.icon} ${t.title}` })),
       onChange: (value) => {
         theme = value;
+        body.replaceChildren(h('p', {}, 'Loading stickers…'));
+        showTheme();
+      },
+    }),
+    choiceRow({
+      label: 'Level',
+      className: 'level-row',
+      value: level,
+      options: LEVELS.map((l) => ({ value: l, label: DIFFICULTY_LABELS[l] })),
+      onChange: (value) => {
+        level = value;
         body.replaceChildren(h('p', {}, 'Loading stickers…'));
         showTheme();
       },

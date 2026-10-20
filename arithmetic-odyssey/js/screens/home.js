@@ -2,13 +2,13 @@
 // with Learn from Incorrect, change their picture, switch player, or
 // (grown-ups, by holding for 3 seconds) open Settings.
 
-import { stickerPicture } from '../art.js?v=0.7.2';
-import { createHoldButton } from '../hold.js?v=0.7.2';
-import { playerIcon } from '../avatars.js?v=0.7.2';
-import { PRACTICE_SIZE, needMorePractice } from '../scores.js?v=0.7.2';
-import { THEMES } from '../settings.js?v=0.7.2';
-import { nextSticker } from '../storyline.js?v=0.7.2';
-import { h } from '../ui.js?v=0.7.2';
+import { stickerPicture } from '../art.js?v=0.7.3';
+import { createHoldButton } from '../hold.js?v=0.7.3';
+import { playerIcon } from '../avatars.js?v=0.7.3';
+import { PRACTICE_SIZE, needMorePractice } from '../scores.js?v=0.7.3';
+import { DIFFICULTY_LABELS, LEVELS, THEMES, collectionKey, isThemeId } from '../settings.js?v=0.7.3';
+import { nextSticker, stickerSet } from '../storyline.js?v=0.7.3';
+import { fitToWindow, h } from '../ui.js?v=0.7.3';
 
 export function homeScreen(ctx) {
   const player = ctx.profiles.active();
@@ -18,25 +18,38 @@ export function homeScreen(ctx) {
   const toLearn = practice.filter((p) => !p.learned).length;
   const learnDetail = toLearn ? `${toLearn} to learn` : practice.length ? `Practice ${practice.length} again` : 'Nothing yet';
 
-  // The next stop (0.7.2): the sticker the next trip leads to, and how many of
-  // each theme's stickers the player has. Filled in when the story files load.
-  const nextTheme = trip?.theme ?? player.setup.theme;
+  // The next stop: the sticker the next trip leads to, and how many of each
+  // theme's stickers the player has at that level. It follows the trip in
+  // progress, or else the last game played (theme and level, 0.7.3); before
+  // the first game there is nothing chosen yet, so it asks to pick one.
+  const last = trip ?? player.history.at(-1) ?? null;
   const nextStop = h('section', { class: 'home-next', 'aria-label': 'Next stop' });
-  Promise.all(Object.keys(THEMES).map((id) => ctx.getStoryline(id).then((s) => [id, s], () => [id, null]))).then((loaded) => {
-    const stories = Object.fromEntries(loaded);
-    const story = stories[nextTheme];
-    const sticker = story ? nextSticker(story, player.collected[nextTheme] ?? []) : null;
-    const counts = h('p', { class: 'home-counts' }, Object.entries(stories).filter(([, s]) => s).map(([id, s]) =>
-      h('span', { class: 'home-count' }, `${THEMES[id].icon} ${(player.collected[id] ?? []).length} of ${s.stickers.length}`)));
-    nextStop.replaceChildren(...[
-      sticker ? stickerPicture(nextTheme, sticker, 0, { className: 'home-next-picture' }) : null,
-      h('div', { class: 'home-next-text' },
-        h('p', { class: 'home-next-title' }, sticker ? `Next stop: ${sticker.name}!` : story ? `You have every ${THEMES[nextTheme].title} sticker! 🎉` : ''),
-        counts),
-    ].filter(Boolean));
-  });
+  if (!last || !isThemeId(last.theme)) {
+    nextStop.replaceChildren(h('div', { class: 'home-next-text' }, h('p', { class: 'home-next-title' }, '🗺️ Pick an adventure to start!')));
+  } else {
+    const nextTheme = last.theme;
+    const level = LEVELS.includes(last.difficulty) ? last.difficulty : 'beginner';
+    Promise.all(Object.keys(THEMES).map((id) => ctx.getStoryline(id).then((s) => [id, stickerSet(s, level)], () => [id, null]))).then((loaded) => {
+      const stories = Object.fromEntries(loaded);
+      const story = stories[nextTheme];
+      const owned = (id) => player.collected[collectionKey(id, level)] ?? [];
+      const sticker = story ? nextSticker(story, owned(nextTheme)) : null;
+      let title = '';
+      if (sticker) title = `Next stop: ${sticker.name}!`;
+      else if (story?.stickers.length === 0) title = `${DIFFICULTY_LABELS[level]} stickers are coming soon!`;
+      else if (story) title = `You have every ${THEMES[nextTheme].title} sticker! 🎉`;
+      const counts = h('p', { class: 'home-counts' },
+        h('span', { class: 'home-count home-level' }, DIFFICULTY_LABELS[level]),
+        Object.entries(stories).filter(([, s]) => s?.stickers.length).map(([id, s]) =>
+          h('span', { class: 'home-count' }, `${THEMES[id].icon} ${owned(id).length} of ${s.stickers.length}`)));
+      nextStop.replaceChildren(...[
+        sticker ? stickerPicture(nextTheme, sticker, 0, { className: 'home-next-picture' }) : null,
+        h('div', { class: 'home-next-text' }, h('p', { class: 'home-next-title' }, title), counts),
+      ].filter(Boolean));
+    });
+  }
 
-  return h('main', { class: 'screen home-screen' },
+  const page = h('main', { class: 'screen home-screen' },
     h('header', { class: 'home-header' },
       // Tapping the picture lets the player choose another picture or color.
       h('button', { type: 'button', class: 'player-avatar large avatar-button', 'aria-label': 'Change your picture', onclick: () => ctx.show('playerPicture') },
@@ -64,7 +77,13 @@ export function homeScreen(ctx) {
     ),
     h('footer', { class: 'home-footer' },
       h('button', { type: 'button', class: 'big-button quiet', onclick: () => ctx.show('profiles') }, 'Switch player'),
+      // Anyone can change the colors (0.7.3).
+      h('button', { type: 'button', class: 'big-button quiet colors-button', onclick: () => ctx.show('colors') },
+        h('span', { 'aria-hidden': 'true' }, '🎨 '), 'Colors'),
       createHoldButton({ label: 'Grown-ups', onComplete: () => ctx.show('settings') }),
     ),
   );
+  // Steps down to a compact size if the window is short (Safari's bars, Split View).
+  fitToWindow(ctx, page);
+  return page;
 }

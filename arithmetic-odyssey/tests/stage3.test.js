@@ -118,7 +118,7 @@ test('T3.1 buttons are large: at least 60 px high', () => {
 test('T3.1 every screen in the app has its module', () => {
   const app = read('js/app.js');
   const screens = [...app.matchAll(/^ {2}(\w+): \{ build: (\w+)/gm)];
-  assert.deepEqual(screens.map((m) => m[1]), ['start', 'profiles', 'newPlayer', 'home', 'playerPicture', 'setup', 'adventure', 'trailEnd', 'album', 'stats', 'learn', 'settings', 'voiceLab']);
+  assert.deepEqual(screens.map((m) => m[1]), ['start', 'profiles', 'newPlayer', 'home', 'playerPicture', 'setup', 'adventure', 'trailEnd', 'album', 'stats', 'learn', 'settings', 'colors', 'voiceLab']);
   for (const [, , builder] of screens) assert.match(app, new RegExp(`import \\{[^}]*\\b${builder}\\b[^}]*\\} from './screens/`), builder);
 });
 
@@ -154,7 +154,7 @@ test('players can be added, chosen and deleted', () => {
   assert.equal(ana.avatar, 'dog');
   assert.deepEqual(ana.settings, DEFAULT_SETTINGS);
   assert.deepEqual(ana.setup, normalizeSetup(DEFAULT_SETUP));
-  assert.deepEqual(ana.collected, { dino: [], parks: [] });
+  assert.deepEqual(ana.collected, { dino: [], parks: [], 'dino.intermediate': [], 'dino.advanced': [], 'parks.intermediate': [], 'parks.advanced': [] });
   const ben = store.add('Ben', 'not an avatar');
   assert.equal(ben.avatar, AVATARS[0], 'an unknown avatar falls back to the first');
   store.select(ben.id);

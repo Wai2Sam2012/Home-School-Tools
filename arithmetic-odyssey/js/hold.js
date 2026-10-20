@@ -6,7 +6,7 @@
 // short hint instead. A mouse, pen or keyboard (a grown-up at a PC) still
 // holds with one press.
 
-import { h } from './ui.js?v=0.7.2';
+import { h } from './ui.js?v=0.7.3';
 
 export const HOLD_MS = 3000;
 // How many fingers must hold the button on a touch screen.

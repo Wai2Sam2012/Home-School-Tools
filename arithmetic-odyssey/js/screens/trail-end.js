@@ -4,12 +4,13 @@
 // 0.7.2: the sticker pops in with confetti (not with Reduce Motion on), its
 // facts can be read aloud (🔊 Read to me), and the summary shows % right.
 
-import { stickerPicture } from '../art.js?v=0.7.2';
-import { soundLength } from '../audio.js?v=0.7.2';
-import { DIFFICULTY_LABELS, THEMES, isThemeId } from '../settings.js?v=0.7.2';
-import { readAloudButton, stickerReading } from '../read-aloud.js?v=0.7.2';
-import { formatDuration } from '../timer.js?v=0.7.2';
-import { h } from '../ui.js?v=0.7.2';
+import { stickerPicture } from '../art.js?v=0.7.3';
+import { soundLength } from '../audio.js?v=0.7.3';
+import { DIFFICULTY_LABELS, LEVELS, THEMES, isThemeId } from '../settings.js?v=0.7.3';
+import { stickerSet } from '../storyline.js?v=0.7.3';
+import { readAloudButton, stickerReading } from '../read-aloud.js?v=0.7.3';
+import { formatDuration } from '../timer.js?v=0.7.3';
+import { fitToWindow, h } from '../ui.js?v=0.7.3';
 
 const SLIDE_MS = 3500;
 const CONFETTI_PIECES = 36;
@@ -66,7 +67,11 @@ export function trailEndScreen(ctx, result = {}) {
     if (slides.length > 1) slideTimer = setInterval(show, SLIDE_MS);
   }
 
-  ctx.getStoryline(theme.id).then((storyline) => {
+  ctx.getStoryline(theme.id).then((all) => {
+    // The trip's level's set (0.7.3).
+    const level = LEVELS.includes(result.difficulty) ? result.difficulty : 'beginner';
+    const levelName = level === 'beginner' ? '' : `${DIFFICULTY_LABELS[level]} `;
+    const storyline = stickerSet(all, level);
     const sticker = storyline.stickers.find((s) => s.id === result.stickerId);
     if (sticker) {
       const count = Math.max(1, sticker.pictures.length);
@@ -79,13 +84,22 @@ export function trailEndScreen(ctx, result = {}) {
           readAloudButton(ctx, player, () => stickerReading(sticker))),
         h('ul', { class: 'fact-list' }, sticker.facts.map((f) => h('li', {}, f))),
       ].filter(Boolean));
+    } else if (storyline.stickers.length === 0) {
+      // This level's stickers are still to come: show the theme's pictures meanwhile.
+      const withPictures = all.stickers.filter((s) => s.pictures.length > 0);
+      runSlideshow((withPictures.length ? withPictures : all.stickers).map((s) => ({ sticker: s, picture: 0 })));
+      say(`You made it! ${levelName}stickers are coming soon.`);
+      about.replaceChildren(
+        h('h2', {}, `${levelName}stickers are coming soon! 🚧`),
+        h('p', { class: 'lead' }, 'Your trip and score are saved. Beginner trips still collect Beginner stickers.'),
+      );
     } else {
       const withPictures = storyline.stickers.filter((s) => s.pictures.length > 0);
       runSlideshow((withPictures.length ? withPictures : storyline.stickers).map((s) => ({ sticker: s, picture: 0 })));
-      say(`You made it! You collected every ${theme.title} sticker!`);
+      say(`You made it! You collected every ${levelName}${theme.title} sticker!`);
       about.replaceChildren(
         h('h2', {}, 'Collection complete! 🎉'),
-        h('p', { class: 'lead' }, `You have all ${storyline.stickers.length} ${theme.title} stickers!`),
+        h('p', { class: 'lead' }, `You have all ${storyline.stickers.length} ${levelName}${theme.title} stickers!`),
       );
     }
   }).catch((error) => {
@@ -95,7 +109,7 @@ export function trailEndScreen(ctx, result = {}) {
   const row = (label, value) => h('div', { class: 'summary-row' }, h('dt', {}, label), h('dd', {}, String(value)));
   const percent = stats.answered ? Math.round((stats.correct / stats.answered) * 100) : 0;
 
-  return h('main', { class: 'screen trail-end-screen' },
+  const page = h('main', { class: 'screen trail-end-screen' },
     confetti(ctx.onLeave),
     h('h1', { tabIndex: -1 }, `${theme.icon} You made it!`),
     h('div', { class: 'trail-end-layout' },
@@ -116,10 +130,13 @@ export function trailEndScreen(ctx, result = {}) {
         ),
         h('div', { class: 'trail-end-buttons' },
           h('button', { type: 'button', class: 'big-button primary', onclick: () => ctx.show('setup') }, 'New adventure'),
-          h('button', { type: 'button', class: 'big-button', onclick: () => ctx.show('album', { theme: theme.id }) }, 'Sticker Album'),
+          h('button', { type: 'button', class: 'big-button', onclick: () => ctx.show('album', { theme: theme.id, level: result.difficulty }) }, 'Sticker Album'),
           h('button', { type: 'button', class: 'big-button quiet', onclick: () => ctx.show('home') }, 'Home'),
         ),
       ),
     ),
   );
+  // Steps down to a compact size if the window is short (Safari's bars, Split View).
+  fitToWindow(ctx, page);
+  return page;
 }

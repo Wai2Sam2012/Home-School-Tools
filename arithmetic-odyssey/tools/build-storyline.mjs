@@ -6,7 +6,9 @@
 //   - recorded flag sounds, if the theme's sounds/ folder has flag.mp3 or
 //     several (flag-1.mp3, flag-2.mp3, ...; also .m4a or .wav): the game
 //     picks one at random at each flag; without any it makes its own,
-//   - the theme's CREDITS.md.
+//   - the theme's CREDITS.md,
+//   - the Intermediate and Advanced sticker sets, if any, from
+//     levels/intermediate/ and levels/advanced/ (see buildLevelSets()).
 //
 // Usage (from the arithmetic-odyssey folder):
 //   node tools/build-storyline.mjs                  build every theme
@@ -311,8 +313,7 @@ function addFactsAndPictures(themeDir, text, stickers, folders, item) {
 
   const pictures = findPictures(themeDir, stickers, folders);
   problems.push(...pictures.problems);
-  const credits = existsSync(join(themeDir, 'CREDITS.md')) ? parseCredits(readFileSync(join(themeDir, 'CREDITS.md'), 'utf8')) : [];
-  if (existsSync(join(themeDir, 'credits.csv'))) credits.push(...parseCreditsCsv(readFileSync(join(themeDir, 'credits.csv'), 'utf8')));
+  const credits = themeCredits(themeDir);
   const uncredited = [];
   for (const s of stickers) {
     s.pictures = pictures.byId[s.id];
@@ -320,7 +321,111 @@ function addFactsAndPictures(themeDir, text, stickers, folders, item) {
   }
   const sounds = findSounds(themeDir);
   for (const p of Object.values(sounds).flat()) if (!isCredited(p, credits)) uncredited.push(p);
-  return { problems, uncredited, sounds };
+  const sets = buildLevelSets(themeDir, credits);
+  problems.push(...sets.problems);
+  uncredited.push(...sets.uncredited);
+  return { problems, uncredited, sounds, levels: sets.levels };
+}
+
+// ---------------------------------------------------------------- Intermediate and Advanced sets (0.7.3)
+
+export const SET_LEVELS = ['intermediate', 'advanced'];
+
+/**
+ * The sticker sets for Intermediate and Advanced. Each is a folder
+ * levels/<level>/ in the theme with:
+ *   stickers.json   [{ "name": "...", "section": "...", "facts": ["...", "..."],
+ *                      "details": ["..."] (optional, shown on the card) }, ...]
+ *   pictures/<sticker name>/<any name>.jpg   (also .jpeg, .png, .webp)
+ * A missing folder or an empty list is a set that is still to come: the game
+ * says "coming soon" and those trips don't give a sticker yet. Pictures are
+ * credited in the theme's CREDITS.md or credits.csv, like the others.
+ * Returns { levels: { intermediate: [...], advanced: [...] }, problems, uncredited }.
+ */
+export function buildLevelSets(themeDir, credits = themeCredits(themeDir)) {
+  const levels = {};
+  const problems = [];
+  const uncredited = [];
+  for (const level of SET_LEVELS) {
+    const folder = join(themeDir, 'levels', level);
+    const where = `levels/${level}`;
+    levels[level] = [];
+    if (!existsSync(join(folder, 'stickers.json'))) continue;
+    let list;
+    try {
+      list = JSON.parse(readFileSync(join(folder, 'stickers.json'), 'utf8'));
+    } catch (error) {
+      problems.push(`${where}/stickers.json can't be read: ${error.message}`);
+      continue;
+    }
+    if (!Array.isArray(list)) {
+      problems.push(`${where}/stickers.json must be a list: [ { "name": ..., "facts": [...] }, ... ]`);
+      continue;
+    }
+    const seen = new Set();
+    list.forEach((item, i) => {
+      const name = typeof item?.name === 'string' ? item.name.trim() : '';
+      if (!name) {
+        problems.push(`${where}/stickers.json sticker ${i + 1}: needs a "name"`);
+        return;
+      }
+      const id = `${level}-${slug(name)}`;
+      if (seen.has(id)) {
+        problems.push(`${where}/stickers.json: "${name}" is in the list twice`);
+        return;
+      }
+      seen.add(id);
+      const facts = Array.isArray(item.facts) ? item.facts.filter((f) => typeof f === 'string' && f.trim()) : [];
+      if (facts.length < 2) problems.push(`${where}/stickers.json: ${name} needs at least 2 facts`);
+      levels[level].push({
+        id,
+        number: levels[level].length + 1,
+        name,
+        ...(spokenName(name) !== name ? { spokenName: spokenName(name) } : {}),
+        section: typeof item.section === 'string' ? item.section.trim() : '',
+        ...(Array.isArray(item.details) ? { details: item.details.filter((d) => typeof d === 'string') } : {}),
+        facts,
+        pictures: [],
+      });
+    });
+    // Pictures: levels/<level>/pictures/<sticker name>/
+    const root = join(folder, 'pictures');
+    if (!existsSync(root)) continue;
+    for (const entry of readdirSync(root, { withFileTypes: true })) {
+      if (entry.name.startsWith('.')) continue;
+      if (!entry.isDirectory()) {
+        problems.push(`${where}/pictures/${entry.name}: put pictures in a folder named after their sticker`);
+        continue;
+      }
+      const key = squash(entry.name);
+      const sticker = levels[level].find((s) => squash(s.name) === key) ?? levels[level].find((s) => folderKeys(s.name).has(key));
+      if (!sticker) {
+        problems.push(`${where}/pictures/${entry.name}/: no sticker called "${entry.name}" in ${where}/stickers.json`);
+        continue;
+      }
+      const files = readdirSync(join(root, entry.name), { withFileTypes: true })
+        .filter((f) => f.isFile() && !f.name.startsWith('.'))
+        .map((f) => f.name)
+        .sort((a, b) => a.localeCompare(b));
+      for (const file of files) {
+        const path = `${where}/pictures/${entry.name}/${file}`;
+        if (!PICTURE_TYPES.includes(file.slice(file.lastIndexOf('.')).toLowerCase())) {
+          problems.push(`${path}: not a picture the game can use (${PICTURE_TYPES.join(', ')})`);
+          continue;
+        }
+        sticker.pictures.push(path);
+        if (!isCredited(path, credits)) uncredited.push(path);
+      }
+    }
+  }
+  return { levels, problems, uncredited };
+}
+
+/** The theme's picture credits, from CREDITS.md and credits.csv. */
+function themeCredits(themeDir) {
+  const credits = existsSync(join(themeDir, 'CREDITS.md')) ? parseCredits(readFileSync(join(themeDir, 'CREDITS.md'), 'utf8')) : [];
+  if (existsSync(join(themeDir, 'credits.csv'))) credits.push(...parseCreditsCsv(readFileSync(join(themeDir, 'credits.csv'), 'utf8')));
+  return credits;
 }
 
 /** The story text every theme's storyline carries, from its game-text.json (and its recorded sounds). */
@@ -334,9 +439,10 @@ function storyParts(text, sounds = {}) {
   };
 }
 
-function report(stickers, { sounds, ...checks }, where) {
+function report(stickers, { sounds, levels, ...checks }, where) {
   return {
     stickers: stickers.length,
+    levels: Object.fromEntries(Object.entries(levels ?? {}).map(([level, list]) => [level, list.length])),
     withPictures: stickers.filter((s) => s.pictures.length > 0).length,
     pictures: stickers.reduce((n, s) => n + s.pictures.length, 0),
     missingPictures: stickers.filter((s) => s.pictures.length === 0).map(where),
@@ -364,6 +470,7 @@ export function buildDinoStoryline(themeDir = join(GAME_DIR, 'themes', 'dino')) 
     stickers: stickers.map(({ id, number, periodNumber, name, period, group, diet, when, found, facts, pictures: pics }) => ({
       id, number, periodNumber, name, period, group, diet, when, found, facts, pictures: pics,
     })),
+    levels: checks.levels,
     ...storyParts(text, checks.sounds),
   };
   return { storyline, report: report(stickers, checks, (s) => `${s.period} #${s.periodNumber} ${s.name}`) };
@@ -410,6 +517,7 @@ export function buildParksStoryline(themeDir = join(GAME_DIR, 'themes', 'nationa
       facts: s.facts,
       pictures: s.pictures,
     })),
+    levels: checks.levels,
     ...storyParts(text, checks.sounds),
   };
   return { storyline, report: report(stickers, checks, (s) => `${s.regionFolder} #${s.regionNumber} ${s.name}`) };
@@ -437,6 +545,7 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
     console.log(`${name}: wrote ${out}`);
     console.log(`  ${report.stickers} stickers, ${report.withPictures} with pictures (${report.pictures} pictures, ${(totalSize(storyline, themeDir) / 1e6).toFixed(1)} MB)`);
     if (report.missingPictures.length) console.log(`  No pictures yet (the game shows a drawing): ${report.missingPictures.length}`);
+    for (const [level, n] of Object.entries(report.levels)) console.log(`  ${level[0].toUpperCase()}${level.slice(1)} stickers: ${n || 'none yet (coming soon)'}`);
     for (const p of report.uncredited) console.log(`  WARNING no credit line in CREDITS.md: ${p}`);
     for (const p of report.problems) console.log(`  PROBLEM ${p}`);
     if (report.problems.length) failed = true;
@@ -445,5 +554,5 @@ if (process.argv[1] && resolve(process.argv[1]) === fileURLToPath(import.meta.ur
 }
 
 function totalSize(storyline, themeDir) {
-  return storyline.stickers.flatMap((s) => s.pictures).reduce((n, p) => n + statSync(join(themeDir, p)).size, 0);
+  return [...storyline.stickers, ...Object.values(storyline.levels ?? {}).flat()].flatMap((s) => s.pictures).reduce((n, p) => n + statSync(join(themeDir, p)).size, 0);
 }
