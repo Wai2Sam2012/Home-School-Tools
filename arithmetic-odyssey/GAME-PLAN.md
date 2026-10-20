@@ -722,3 +722,11 @@ A good routine is to build and test each stage on the PC, push it, and then run 
 2. **The question missed on the main trail.** **Decided (0.7.2):** asked again 3 questions later in the same trip, marked "One you missed. Try it again!", once for each miss (at most 5 waiting). It is still counted in Need More Practice.
 3. **Grown-up check.** **Decided (0.7.2):** hold the Grown-ups button for 3 seconds with two fingers at once on a touch screen (a mouse or keyboard on a PC still holds with one press). The button no longer says how; a one-finger touch shows a short hint.
 4. **Picture rights.** Both the repository and the website are public, so anyone can see and download the pictures. Choose pictures you are allowed to share; photos taken by National Park Service staff are generally free to reuse. Record each picture's source in `CREDITS.md` so any picture can be swapped out later if needed.
+
+### Later (tabled by the owner)
+
+1. **Save progress after every game** (tabled 0.7.4). The wish: the grown-up picks a save location once in Settings, and after each game (or flag) the progress is saved over the old file, with the player only acknowledging it.
+   - **What the iPad allows:** a web page can't remember a folder or write to it without a tap (Safari has no folder access), so it can't save on its own.
+   - **The closest version:** a Grown-up Settings switch, "Ask to save progress after each game". When it is on, Trail's End shows a **💾 Save progress** button. It opens the share sheet with the backup, always named `arithmetic-odyssey-progress.json`; the grown-up taps **Save to Files** and **Save**. Files usually opens in the last folder used. Whether Files then offers to replace the old file is still to be checked on the iPad.
+   - **Cost:** two or three taps each time, and someone who can use the Files screen.
+   - On a PC (Chrome or Edge), a chosen file could be saved over silently after each game.
