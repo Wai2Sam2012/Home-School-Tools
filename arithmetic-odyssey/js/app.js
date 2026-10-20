@@ -277,21 +277,27 @@ function addDebugTools() {
     return `Added and chose ${player.name}.`;
   });
   // Collecting stickers: from the set of the level chosen on the player's
-  // trip planner (each level has its own set, 0.7.3).
+  // trip planner (each level has its own set, 0.7.3), or Beginner while that
+  // level's set is still to come (0.7.4).
   const collectAction = (theme, n) => async () => {
     const player = ctx.profiles.active();
     if (!player) return 'Choose a player first.';
-    const level = player.setup.difficulty;
+    const storyline = await ctx.getStoryline(theme);
+    let level = player.setup.difficulty;
+    let note = '';
+    if (stickerSet(storyline, level).stickers.length === 0) {
+      note = ` (no ${DIFFICULTY_LABELS[level]} stickers yet, so Beginner)`;
+      level = 'beginner';
+    }
     const key = collectionKey(theme, level);
-    const set = stickerSet(await ctx.getStoryline(theme), level);
+    const set = stickerSet(storyline, level);
     const name = `${DIFFICULTY_LABELS[level]} ${THEMES[theme].title}`;
-    if (set.stickers.length === 0) return `There are no ${name} stickers yet.`;
     const before = (player.collected[key] ?? []).length;
     ctx.profiles.setCollected(player.id, key, collectNext(set, player.collected[key] ?? [], n));
     ctx.refresh();
     const now = player.collected[key].length;
-    if (now === before) return `${player.name} already has every ${name} sticker (${now}).`;
-    return `${player.name} has ${now} of ${set.stickers.length} ${name} stickers.`;
+    if (now === before) return `${player.name} already has every ${name} sticker (${now}).${note}`;
+    return `${player.name} has ${now} of ${set.stickers.length} ${name} stickers.${note}`;
   };
   addDebugAction('Collect the next Dino sticker', collectAction('dino', 1));
   addDebugAction('Collect the next 5 Dino stickers', collectAction('dino', 5));
