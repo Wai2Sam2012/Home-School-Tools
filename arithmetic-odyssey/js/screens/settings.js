@@ -2,12 +2,12 @@
 // detour length, saving, offline play, backup and restore, and deleting the
 // player.
 
-import { ADVENTURE_LENGTHS, DETOUR_MAX, DETOUR_MIN, stepDetourLength } from '../settings.js?v=0.7.4';
-import { bestVersions, chooseVoice, isFunVoice, voiceId, voiceQuality } from '../speech.js?v=0.7.4';
-import { playerIcon } from '../avatars.js?v=0.7.4';
-import { MAX_BACKUP_FILE_BYTES, canUndoRestore, keepDeletedPlayer, makeBackup, parseBackup, restoreBackup, saveBackupFile, undoRestore } from '../backup.js?v=0.7.4';
-import { formatBytes } from '../storage.js?v=0.7.4';
-import { choiceDialog, choiceRow, confirmDialog, h, topBar } from '../ui.js?v=0.7.4';
+import { ADVENTURE_LENGTHS, DETOUR_MAX, DETOUR_MIN, stepDetourLength } from '../settings.js?v=0.7.5';
+import { bestVersions, chooseVoice, isFunVoice, voiceId, voiceQuality } from '../speech.js?v=0.7.5';
+import { playerIcon } from '../avatars.js?v=0.7.5';
+import { MAX_BACKUP_FILE_BYTES, canUndoRestore, keepDeletedPlayer, makeBackup, parseBackup, restoreBackup, saveBackupFile, undoRestore } from '../backup.js?v=0.7.5';
+import { formatBytes } from '../storage.js?v=0.7.5';
+import { choiceDialog, choiceRow, confirmDialog, h, topBar } from '../ui.js?v=0.7.5';
 
 const REGIONS = { US: 'US', GB: 'UK', AU: 'Australia', IE: 'Ireland', IN: 'India', ZA: 'South Africa', NZ: 'New Zealand', CA: 'Canada', SG: 'Singapore' };
 const SAMPLE = 'Hi! What is 7 times 8?';

@@ -3,7 +3,7 @@
 // around it as the detour questions are answered, back to the spot where it
 // left the trail.
 
-import { avatarIcon } from './avatars.js?v=0.7.4';
+import { avatarIcon } from './avatars.js?v=0.7.5';
 
 // The loop, in a 150 × 60 pixel box whose point (24, 0) sits on the trail.
 const WIDTH = 150;

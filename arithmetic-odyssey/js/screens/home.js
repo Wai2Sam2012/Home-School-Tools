@@ -2,13 +2,13 @@
 // with Learn from Incorrect, change their picture, switch player, or
 // (grown-ups, by holding for 3 seconds) open Settings.
 
-import { stickerPicture } from '../art.js?v=0.7.4';
-import { createHoldButton } from '../hold.js?v=0.7.4';
-import { playerIcon } from '../avatars.js?v=0.7.4';
-import { PRACTICE_SIZE, needMorePractice } from '../scores.js?v=0.7.4';
-import { DIFFICULTY_LABELS, LEVELS, THEMES, collectionKey, isThemeId } from '../settings.js?v=0.7.4';
-import { nextSticker, stickerSet } from '../storyline.js?v=0.7.4';
-import { fitToWindow, h } from '../ui.js?v=0.7.4';
+import { stickerPicture } from '../art.js?v=0.7.5';
+import { createHoldButton } from '../hold.js?v=0.7.5';
+import { playerIcon } from '../avatars.js?v=0.7.5';
+import { PRACTICE_SIZE, needMorePractice } from '../scores.js?v=0.7.5';
+import { DIFFICULTY_LABELS, LEVELS, THEMES, collectionKey, isThemeId } from '../settings.js?v=0.7.5';
+import { nextSticker, stickerSet } from '../storyline.js?v=0.7.5';
+import { fitToWindow, h } from '../ui.js?v=0.7.5';
 
 export function homeScreen(ctx) {
   const player = ctx.profiles.active();
