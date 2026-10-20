@@ -410,6 +410,26 @@ h1:focus {
   display: none;
 }
 
+/* The hint floats above the button, so the button never changes size (0.7.4). */
+.hold-wrap {
+  position: relative;
+  display: inline-flex;
+}
+
+.hold-wrap > .hold-hint {
+  position: absolute;
+  right: 0;
+  bottom: calc(100% + 6px);
+  z-index: 5;
+  padding: 6px 12px;
+  border-radius: 10px;
+  background: var(--toast-bg);
+  color: var(--toast-text);
+  font-weight: 600;
+  white-space: nowrap;
+  pointer-events: none;
+}
+
 .hold-button.holding {
   border-style: solid;
   border-color: var(--accent);

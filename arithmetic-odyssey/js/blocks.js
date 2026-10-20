@@ -183,7 +183,8 @@ export function tipSvg(problem, { unit = 20 } = {}) {
 
 /** A block's shapes, moved to (x, y) (not a picture inside the picture, which page styles could stretch). */
 function placedBlock(value, x, y, { unit, vertical = false }) {
-  const svg = blockSvg(value, { unit, vertical });
+  // No number badge in Help (0.7.4): the number got in the way of counting the squares.
+  const svg = blockSvg(value, { unit, vertical, label: false });
   const [, w, hh] = svg.match(/viewBox="0 0 ([\d.]+) ([\d.]+)"/).map(Number);
   const shapes = svg.slice(svg.indexOf('>') + 1, svg.lastIndexOf('</svg>')).replace(/<title>.*?<\/title>/, '');
   return { svg: `<g transform="translate(${x} ${y})">${shapes}</g>`, w, h: hh };
@@ -366,7 +367,8 @@ function addSubSvg(problem, { unit }) {
   // Each number: its blocks, side by side when standing, one per row when lying.
   const groups = [problem.a, problem.b].map((n) => {
     const blocks = numberAsBlocks(n).map((v) => {
-      const svg = blockSvg(v, { unit, vertical });
+      // No number badge in Help (0.7.4): the number got in the way of counting the squares.
+      const svg = blockSvg(v, { unit, vertical, label: false });
       const [, w, hh] = svg.match(/viewBox="0 0 ([\d.]+) ([\d.]+)"/).map(Number);
       return { svg, w, h: hh };
     });

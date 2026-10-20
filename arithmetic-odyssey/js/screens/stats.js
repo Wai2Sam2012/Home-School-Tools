@@ -3,10 +3,10 @@
 // high-score boards, one for each adventure length and difficulty
 // (GAME-PLAN.md 1.11).
 
-import { PRACTICE_SIZE, boardKey, needMorePractice } from '../scores.js?v=0.7.3';
-import { ADVENTURE_LENGTHS, DIFFICULTY_LABELS, THEMES } from '../settings.js?v=0.7.3';
-import { formatDuration } from '../timer.js?v=0.7.3';
-import { choiceRow, h, topBar } from '../ui.js?v=0.7.3';
+import { PRACTICE_SIZE, boardKey, needMorePractice } from '../scores.js?v=0.7.4';
+import { ADVENTURE_LENGTHS, DIFFICULTY_LABELS, THEMES } from '../settings.js?v=0.7.4';
+import { formatDuration } from '../timer.js?v=0.7.4';
+import { choiceRow, h, topBar } from '../ui.js?v=0.7.4';
 
 /** "Oct 17" */
 function shortDate(iso) {
