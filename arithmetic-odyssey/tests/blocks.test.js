@@ -6,7 +6,7 @@ import assert from 'node:assert/strict';
 import { readFileSync, readdirSync } from 'node:fs';
 import { join } from 'node:path';
 
-import { BLOCKS, blockFor, blockSvg, divisionSplit, hasTip, numberAsBlocks, textColorFor, tipKind, tipSvg, tipTitle } from '../js/blocks.js';
+import { BLOCKS, blockFor, blockSvg, hasTip, numberAsBlocks, textColorFor, tipKind, tipSvg, tipTitle } from '../js/blocks.js';
 import { restoreProblem } from '../js/math.js';
 import { BLOCKS_DIR, blockFileName, blockFiles } from '../tools/build-blocks.mjs';
 
@@ -130,26 +130,16 @@ test('÷ with an answer up to 12: how many groups make it (rows to count)', () =
   assert.equal(tipTitle(p), 'How many 7s make 56? Count the rows');
   const t = texts(tipSvg(p));
   assert.deepEqual(t, ['1', '2', '3', '4', '5', '6', '7', '8'], '8 numbered rows of the 7 block (no number on the block since 0.7.4)');
-  assert.equal(tipKind(problem('÷', 456, 38)), 'groups', '456 ÷ 38 = 12: 12 rows of 38');
+  assert.equal(tipKind(problem('÷', 456, 38)), 'longdivision', '456 ÷ 38: a 2-digit divisor gets long division (0.7.8)');
 });
 
-test('÷ with a bigger answer: split into easy parts (72 = 60 + 12)', () => {
-  const p = problem('÷', 72, 3);
-  assert.equal(tipKind(p), 'split');
-  assert.deepEqual(divisionSplit(72, 3), { first: 60, rest: 12 });
-  assert.equal(tipTitle(p), '72 = 60 + 12: share each part, then add');
-  assert.deepEqual(texts(tipSvg(p)), ['72 = 60 + 12', '60 ÷ 3 = ?', '+', '12 ÷ 3 = ?']);
-  assert.deepEqual(texts(tipSvg(problem('÷', 90, 1))), ['90 = 90', '90 ÷ 1 = ?'], 'nothing left over: one box');
-  assert.equal(tipTitle(problem('÷', 90, 1)), '90 ÷ 1: think tens first');
-  // Every split adds up, and each part divides evenly.
-  for (let b = 1; b <= 9; b++) {
-    for (let q = 13; q * b <= 99; q++) {
-      const { first, rest } = divisionSplit(q * b, b);
-      assert.equal(first + rest, q * b);
-      assert.equal(first % b, 0);
-      assert.equal(rest % b, 0, `${q * b} ÷ ${b}`);
-    }
+test('÷ with a 2-digit divisor or answer: the long division note pad (0.7.8)', () => {
+  for (const [a, b] of [[72, 3], [156, 12], [96, 12], [990, 99], [60, 6]]) {
+    assert.equal(tipKind(problem('÷', a, b)), 'longdivision', `${a} ÷ ${b}`);
+    assert.match(tipTitle(problem('÷', a, b)), /Long division: tap a box/);
+    assert.throws(() => tipSvg(problem('÷', a, b)), /column-pad/);
   }
+  for (const [a, b] of [[56, 7], [81, 9], [9, 3], [8, 1]]) assert.equal(tipKind(problem('÷', a, b)), 'groups', `${a} ÷ ${b} keeps the rows to count`);
 });
 
 test('a tip shows the problem with blocks: 7 block, +, 5 block, =, ?', () => {
@@ -171,7 +161,7 @@ test('bigger numbers use tens and the rest, standing up: 47 + 35', () => {
 
 test('Help pictures never put a number on a block (0.7.4)', () => {
   const badge = /<circle[^>]*fill="#ffffff" opacity="0.92"/;
-  for (const [op, a, b] of [['+', 7, 5], ['+', 47, 35], ['×', 3, 4], ['×', 9, 8], ['÷', 56, 7], ['÷', 360, 40]]) {
+  for (const [op, a, b] of [['+', 7, 5], ['+', 47, 35], ['×', 3, 4], ['×', 9, 8], ['÷', 56, 7], ['÷', 8, 2]]) {
     const svg = tipSvg(problem(op, a, b));
     assert.doesNotMatch(svg, badge, `${a} ${op} ${b}`);
   }

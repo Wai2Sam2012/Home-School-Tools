@@ -8,8 +8,8 @@
 //   The trail ends at step `length`, and the next sticker is unlocked.
 //   A missed question comes back AGAIN_AFTER questions later (0.7.2).
 
-import { checkAnswer, createProblemGenerator, isGiveaway, restoreProblem } from './math.js?v=0.7.6';
-import { collectNext, nextSticker } from './storyline.js?v=0.7.6';
+import { checkAnswer, createProblemGenerator, isGiveaway, restoreProblem } from './math.js?v=0.7.8';
+import { collectNext, nextSticker } from './storyline.js?v=0.7.8';
 
 export const ADVENTURE_SCHEMA = 1;
 export const MILESTONE_EVERY = 10;

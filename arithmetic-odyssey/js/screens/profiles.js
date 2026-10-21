@@ -3,12 +3,12 @@
 // accident; the last player deleted can be brought back here by a grown-up
 // (the same hold as the Grown-ups button, 0.7.2).
 
-import { AVATARS, MAX_PROFILES, NAME_MAX_LENGTH, checkProfileName } from '../profiles.js?v=0.7.6';
-import { createAvatarPicker } from '../avatar-picker.js?v=0.7.6';
-import { playerIcon } from '../avatars.js?v=0.7.6';
-import { deletedPlayer, undoDelete } from '../backup.js?v=0.7.6';
-import { createHoldButton } from '../hold.js?v=0.7.6';
-import { h, topBar } from '../ui.js?v=0.7.6';
+import { AVATARS, MAX_PROFILES, NAME_MAX_LENGTH, checkProfileName } from '../profiles.js?v=0.7.8';
+import { createAvatarPicker } from '../avatar-picker.js?v=0.7.8';
+import { playerIcon } from '../avatars.js?v=0.7.8';
+import { deletedPlayer, undoDelete } from '../backup.js?v=0.7.8';
+import { createHoldButton } from '../hold.js?v=0.7.8';
+import { h, topBar } from '../ui.js?v=0.7.8';
 
 
 export function profilesScreen(ctx) {

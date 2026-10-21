@@ -4,13 +4,13 @@
 // 0.7.2: the sticker pops in with confetti (not with Reduce Motion on), its
 // facts can be read aloud (🔊 Read to me), and the summary shows % right.
 
-import { stickerPicture } from '../art.js?v=0.7.6';
-import { soundLength } from '../audio.js?v=0.7.6';
-import { DIFFICULTY_LABELS, LEVELS, THEMES, isThemeId } from '../settings.js?v=0.7.6';
-import { stickerSet } from '../storyline.js?v=0.7.6';
-import { readAloudButton, stickerReading } from '../read-aloud.js?v=0.7.6';
-import { formatDuration } from '../timer.js?v=0.7.6';
-import { fitToWindow, h } from '../ui.js?v=0.7.6';
+import { stickerPicture } from '../art.js?v=0.7.8';
+import { soundLength } from '../audio.js?v=0.7.8';
+import { DIFFICULTY_LABELS, LEVELS, THEMES, isThemeId } from '../settings.js?v=0.7.8';
+import { stickerSet } from '../storyline.js?v=0.7.8';
+import { readAloudButton, stickerReading } from '../read-aloud.js?v=0.7.8';
+import { formatDuration } from '../timer.js?v=0.7.8';
+import { fitToWindow, h } from '../ui.js?v=0.7.8';
 
 const SLIDE_MS = 3500;
 const CONFETTI_PIECES = 36;
