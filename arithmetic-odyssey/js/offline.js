@@ -17,8 +17,8 @@
 //
 // container is navigator.serviceWorker (replaced in tests).
 
-import { LEVELS, collectionKey } from './settings.js?v=0.7.7';
-import { nextSticker, pictureUrl, stickerSet } from './storyline.js?v=0.7.7';
+import { LEVELS, collectionKey } from './settings.js?v=0.7.8';
+import { nextSticker, pictureUrl, stickerSet } from './storyline.js?v=0.7.8';
 
 export const OFFLINE_TEXT = Object.freeze({
   checking: 'Checking offline play…',

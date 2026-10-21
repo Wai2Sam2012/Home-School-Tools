@@ -4,7 +4,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
-import { answerFrom, columnLayout } from '../js/column-pad.js';
+import { answerFrom, columnLayout, divisionLayout } from '../js/column-pad.js';
 
 test('2-digit × 1-digit: carries over the tens, then one answer row', () => {
   const l = columnLayout(47, 6);
@@ -55,4 +55,42 @@ test('the answer written in the bottom row: read left to right; empty or a gap i
   assert.deepEqual(answerFrom(['', '', '0']), { ok: true, value: '0' });
   assert.deepEqual(answerFrom(['', '', '']), { ok: false, reason: 'empty' });
   assert.deepEqual(answerFrom(['1', '', '5']), { ok: false, reason: 'gap' });
+});
+
+// ---------------------------------------------------------------- long division (0.7.8)
+
+test('long division 156 ÷ 12: answer boxes over the number, then a product and what is left for each step', () => {
+  const l = divisionLayout(156, 12);
+  assert.deepEqual([l.width, l.divisor, l.dividend, l.steps], [3, [1, 2], [1, 5, 6], 2]);
+  assert.deepEqual(l.rows, [
+    { kind: 'answer', from: 0, to: 2 },
+    { kind: 'product', from: 0, to: 1 }, // 12 under the 15
+    { kind: 'difference', from: 0, to: 2 }, // 3, with the 6 brought down
+    { kind: 'product', from: 0, to: 2 }, // 36
+    { kind: 'difference', from: 0, to: 2 }, // 0 left
+  ]);
+});
+
+test('long division 72 ÷ 3 and 96 ÷ 32: one step per answer digit', () => {
+  assert.deepEqual(divisionLayout(72, 3).rows.map((r) => [r.kind, r.from, r.to]), [['answer', 0, 1], ['product', 0, 0], ['difference', 0, 1], ['product', 0, 1], ['difference', 0, 1]]);
+  assert.equal(divisionLayout(96, 32).steps, 1);
+  assert.deepEqual(divisionLayout(96, 32).rows.at(-1), { kind: 'difference', from: 0, to: 1 });
+});
+
+test('every game division fits: the answer boxes cover the answer, and every box is inside the columns', () => {
+  for (let b = 1; b <= 99; b++) {
+    for (let q = 2; q <= 99; q++) {
+      const a = b * q;
+      if (a > 999) break;
+      const l = divisionLayout(a, b);
+      const answer = l.rows[0];
+      assert.ok(answer.to - answer.from + 1 >= String(q).length, `${a} ÷ ${b}`);
+      assert.equal(l.rows.length, 1 + 2 * String(q).length);
+      for (const r of l.rows) assert.ok(r.from >= 0 && r.to < l.width && r.from <= r.to, `${a} ÷ ${b}: ${JSON.stringify(r)}`);
+    }
+  }
+});
+
+test('long division refuses anything that is not a whole-number division the game asks', () => {
+  for (const [a, b] of [[7, 2], [0, 5], [5, 0], [1000, 10], [100, 100], [12.5, 5], ['72', 3]]) assert.throws(() => divisionLayout(a, b), /No long division layout/, `${a} ÷ ${b}`);
 });

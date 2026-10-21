@@ -132,13 +132,14 @@ export function hasTip(problem) {
  *             answer up to 12 (how many 7s make 56: rows of 7 to count)
  *   'column'  × with a 2-digit number: the column method with empty boxes
  *             to write in (js/column-pad.js, 0.7.6)
- *   'split'   ÷ with a bigger answer: 72 = 60 + 12, share each part
+ *   'longdivision' ÷ with a 2-digit divisor or answer: long division with
+ *             empty boxes to write in (js/column-pad.js, 0.7.8)
  */
 export function tipKind(problem) {
   if (problem.op === '+') return 'blocks';
   if (problem.op === '−') return 'takeaway';
   if (problem.op === '×') return Math.max(problem.a, problem.b) >= 10 ? 'column' : 'groups';
-  return problem.answer <= 12 ? 'groups' : 'split';
+  return problem.b >= 10 || problem.answer >= 10 ? 'longdivision' : 'groups';
 }
 
 /** The tip's title, saying how to use the picture. */
@@ -153,16 +154,9 @@ export function tipTitle(problem) {
     }
     return 'Column method: tap a box, then a number to write in it';
   }
+  if (kind === 'longdivision') return 'Long division: tap a box, then a number to write in it';
   // Groups over 30 are drawn standing up, side by side (see groupsSvg()).
-  if (kind === 'groups') return `How many ${problem.b}s make ${problem.a}? Count the ${problem.b > 30 ? 'groups' : 'rows'}`;
-  const { first, rest } = divisionSplit(problem.a, problem.b);
-  return rest ? `${problem.a} = ${first} + ${rest}: share each part, then add` : `${problem.a} ÷ ${problem.b}: think tens first`;
-}
-
-/** For ÷: the biggest tens-of-the-divisor part, and the rest (456 ÷ 38 -> 380 and 76). */
-export function divisionSplit(a, b) {
-  const first = Math.floor(a / (10 * b)) * 10 * b;
-  return { first, rest: a - first };
+  return `How many ${problem.b}s make ${problem.a}? Count the ${problem.b > 30 ? 'groups' : 'rows'}`;
 }
 
 /** The tip picture as SVG text (see tipKind()). */
@@ -177,7 +171,7 @@ export function tipSvg(problem, { unit = 20 } = {}) {
     return groupsSvg(problem.answer, problem.b, { unit, label: `rows of ${problem.b} counting blocks that make ${problem.a}` });
   }
   if (kind === 'column') throw new Error('The column method is built by js/column-pad.js, not drawn here.');
-  if (kind === 'split') return splitSvg(problem.a, problem.b);
+  if (kind === 'longdivision') throw new Error('Long division is built by js/column-pad.js, not drawn here.');
   if (kind === 'takeaway') return takeAwaySvg(problem.a, problem.b, { unit });
   return addSubSvg(problem, { unit });
 }
@@ -289,35 +283,6 @@ function takeAwaySvg(a, b, { unit }) {
   const height = rows * (unit + gap) - gap + margin * 2;
   const label = `${a} blocks, with ${b} taken away (crossed out)`;
   return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="${-margin} ${-margin} ${width} ${height}" class="tip-picture tip-takeaway" role="img" aria-label="${label}">${parts.join('')}</svg>`;
-}
-
-/** A number split into tens and ones ([40, 7]; [30]; [8]). */
-function tensAndOnes(n) {
-  return [Math.floor(n / 10) * 10, n % 10].filter((v) => v > 0);
-}
-
-const TIP_FONT = 'font-family="Arial, Helvetica, sans-serif" font-weight="700" fill="currentColor"';
-
-/** a ÷ b as two easier parts: 72 ÷ 3 -> 60 ÷ 3 = ? and 12 ÷ 3 = ?, then add. */
-function splitSvg(a, b) {
-  const { first, rest } = divisionSplit(a, b);
-  const boxes = [`${first} ÷ ${b} = ?`, `${rest} ÷ ${b} = ?`].filter((_, i) => (i === 0 ? first : rest) > 0);
-  const boxW = 330;
-  const plusW = 70;
-  const margin = 4; // room for the boxes' outlines
-  const parts = [`<text x="${margin + (boxes.length * boxW + (boxes.length - 1) * plusW) / 2}" y="40" text-anchor="middle" font-size="34" ${TIP_FONT}>${a} = ${first}${rest ? ` + ${rest}` : ''}</text>`];
-  let x = margin;
-  boxes.forEach((text, i) => {
-    parts.push(`<rect x="${x}" y="64" width="${boxW}" height="110" rx="16" class="tip-cell tip-cell-${i % 2}" stroke-width="3"/>`);
-    parts.push(`<text x="${x + boxW / 2}" y="131" text-anchor="middle" font-size="36" ${TIP_FONT}>${text}</text>`);
-    x += boxW;
-    if (i < boxes.length - 1) {
-      parts.push(`<text x="${x + plusW / 2}" y="133" text-anchor="middle" font-size="44" ${TIP_FONT}>+</text>`);
-      x += plusW;
-    }
-  });
-  const label = `${a} divided by ${b}: ${a} is ${first} plus ${rest}; ${first} divided by ${b}, plus ${rest} divided by ${b}`;
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${x + margin} 184" class="tip-picture tip-split" role="img" aria-label="${label}">${parts.join('')}</svg>`;
 }
 
 /**

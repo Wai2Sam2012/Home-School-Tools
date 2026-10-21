@@ -1,29 +1,29 @@
 // Starts the game: keeps the players and story files, and switches between
 // screens. Each screen is a function in js/screens/ that builds its page.
 
-import { APP_VERSION } from './version.js?v=0.7.7';
-import { addDebugAction, addDebugInfo, isDebugOn, refreshDebugPanel, showDebugPanel } from './debug.js?v=0.7.7';
-import { measureAll } from './storage-report.js?v=0.7.7';
-import { audioSuspended, loadRecording, pickDifferent, playRecording, playSound, soundLength, unlockAudio } from './audio.js?v=0.7.7';
-import { AVATARS, createProfileStore } from './profiles.js?v=0.7.7';
-import { askToKeepData, createStorage, deviceStorage } from './storage.js?v=0.7.7';
-import { SPEECH_RATES, chooseVoice, createSpeaker, loadVoices } from './speech.js?v=0.7.7';
-import { COLOR_THEMES, DIFFICULTY_LABELS, THEMES, collectionKey } from './settings.js?v=0.7.7';
-import { collectNext, loadStoryline, pictureUrl, stickerSet } from './storyline.js?v=0.7.7';
-import { h } from './ui.js?v=0.7.7';
-import { startScreen } from './screens/start.js?v=0.7.7';
-import { newPlayerScreen, playerPictureScreen, profilesScreen } from './screens/profiles.js?v=0.7.7';
-import { PICTURES_SAVED_EVENT, createOffline, picturesToSave } from './offline.js?v=0.7.7';
-import { homeScreen } from './screens/home.js?v=0.7.7';
-import { setupScreen } from './screens/setup.js?v=0.7.7';
-import { adventureScreen } from './screens/adventure.js?v=0.7.7';
-import { trailEndScreen } from './screens/trail-end.js?v=0.7.7';
-import { albumScreen } from './screens/album.js?v=0.7.7';
-import { statsScreen } from './screens/stats.js?v=0.7.7';
-import { learnScreen } from './screens/learn.js?v=0.7.7';
-import { settingsScreen } from './screens/settings.js?v=0.7.7';
-import { voiceLabScreen } from './screens/voice-lab.js?v=0.7.7';
-import { colorsScreen } from './screens/colors.js?v=0.7.7';
+import { APP_VERSION } from './version.js?v=0.7.8';
+import { addDebugAction, addDebugInfo, isDebugOn, refreshDebugPanel, showDebugPanel } from './debug.js?v=0.7.8';
+import { measureAll } from './storage-report.js?v=0.7.8';
+import { audioSuspended, loadRecording, pickDifferent, playRecording, playSound, soundLength, unlockAudio } from './audio.js?v=0.7.8';
+import { AVATARS, createProfileStore } from './profiles.js?v=0.7.8';
+import { askToKeepData, createStorage, deviceStorage } from './storage.js?v=0.7.8';
+import { SPEECH_RATES, chooseVoice, createSpeaker, loadVoices } from './speech.js?v=0.7.8';
+import { COLOR_THEMES, DIFFICULTY_LABELS, THEMES, collectionKey } from './settings.js?v=0.7.8';
+import { collectNext, loadStoryline, pictureUrl, stickerSet } from './storyline.js?v=0.7.8';
+import { h } from './ui.js?v=0.7.8';
+import { startScreen } from './screens/start.js?v=0.7.8';
+import { newPlayerScreen, playerPictureScreen, profilesScreen } from './screens/profiles.js?v=0.7.8';
+import { PICTURES_SAVED_EVENT, createOffline, picturesToSave } from './offline.js?v=0.7.8';
+import { homeScreen } from './screens/home.js?v=0.7.8';
+import { setupScreen } from './screens/setup.js?v=0.7.8';
+import { adventureScreen } from './screens/adventure.js?v=0.7.8';
+import { trailEndScreen } from './screens/trail-end.js?v=0.7.8';
+import { albumScreen } from './screens/album.js?v=0.7.8';
+import { statsScreen } from './screens/stats.js?v=0.7.8';
+import { learnScreen } from './screens/learn.js?v=0.7.8';
+import { settingsScreen } from './screens/settings.js?v=0.7.8';
+import { voiceLabScreen } from './screens/voice-lab.js?v=0.7.8';
+import { colorsScreen } from './screens/colors.js?v=0.7.8';
 
 const SCREENS = {
   start: { build: startScreen },

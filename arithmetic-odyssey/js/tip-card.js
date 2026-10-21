@@ -1,12 +1,15 @@
 // The Help card (🙏): the question drawn as a picture to count or work out,
 // opened with the Help button next to a question. 7 + 5 as the 7 block, +,
-// the 5 block, = and ?; 3 × 4 as 3 groups of 4; 47 × 38 in columns with
-// boxes to write in (js/column-pad.js); 56 ÷ 7 as rows of 7 to count; 72 ÷ 3
-// as 60 ÷ 3 and 12 ÷ 3 (js/blocks.js).
+// the 5 block, = and ?; 3 × 4 as 3 groups of 4; 56 ÷ 7 as rows of 7 to count
+// (js/blocks.js); 47 × 38 in columns and 156 ÷ 12 as long division, with
+// boxes to write in (note pads, js/column-pad.js).
 
-import { hasTip, tipKind, tipSvg, tipTitle } from './blocks.js?v=0.7.7';
-import { createColumnPad } from './column-pad.js?v=0.7.7';
-import { h } from './ui.js?v=0.7.7';
+import { hasTip, tipKind, tipSvg, tipTitle } from './blocks.js?v=0.7.8';
+import { createColumnPad, createDivisionPad } from './column-pad.js?v=0.7.8';
+
+/** The Help kinds that are note pads to write in. */
+const PADS = { column: createColumnPad, longdivision: createDivisionPad };
+import { h } from './ui.js?v=0.7.8';
 
 /**
  * Returns { el, show(problem), hide(), shown(), press(key) }. onClose runs
@@ -26,7 +29,7 @@ export function createTipCard({ onClose = () => {}, onToggle = () => {}, onAnswe
       const result = pad?.answer();
       if (!result) return;
       if (!result.ok) {
-        padMessage.textContent = result.reason === 'gap' ? 'Fill in the empty box between the digits first.' : 'Write the answer in the bottom row first.';
+        padMessage.textContent = result.reason === 'gap' ? 'Fill in the empty box between the digits first.' : 'Write your answer in the answer boxes (thick outline) first.';
         return;
       }
       padMessage.textContent = '';
@@ -49,17 +52,18 @@ export function createTipCard({ onClose = () => {}, onToggle = () => {}, onAnswe
   function show(problem) {
     if (!hasTip(problem)) return false;
     title.textContent = `🙏 ${tipTitle(problem)}`;
-    if (tipKind(problem) === 'column') {
+    const kind = tipKind(problem);
+    if (PADS[kind]) {
       if (padFor !== problem.key) {
-        pad = createColumnPad(problem.a, problem.b);
+        pad = PADS[kind](problem.a, problem.b);
         padFor = problem.key;
       }
       picture.replaceChildren(pad.el);
     } else {
       picture.innerHTML = tipSvg(problem); // numbers only (hasTip checks they are whole numbers)
     }
-    el.classList.toggle('tip-column', tipKind(problem) === 'column');
-    padActions.hidden = !(onAnswer && tipKind(problem) === 'column');
+    el.classList.toggle('tip-column', Boolean(PADS[kind]));
+    padActions.hidden = !(onAnswer && PADS[kind]);
     padMessage.textContent = '';
     el.hidden = false;
     onToggle(true);

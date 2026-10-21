@@ -2549,6 +2549,24 @@ h1:focus {
   background: var(--accent-soft);
 }
 
+/* The answer boxes have a thicker outline, so they are easy to find (0.7.8). */
+.pad-answer {
+  border-width: 4px;
+  border-color: var(--muted);
+}
+
+/* Long division: the divisor and its bracket, and the line over the number being divided (0.7.8). */
+.pad-divisor {
+  padding-right: 4px;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.pad-bracket {
+  align-self: stretch;
+  border-top: 4px solid var(--text);
+}
+
 .pad-carry {
   width: 72%;
   height: 100%;
@@ -2570,7 +2588,7 @@ h1:focus {
 @media (orientation: landscape) and (min-width: 900px) {
   .tip-card.tip-column {
     display: grid;
-    grid-template-columns: 1fr minmax(180px, 260px);
+    grid-template-columns: 1fr minmax(180px, 300px);
     grid-template-rows: auto 1fr;
     column-gap: 16px;
   }
@@ -2602,6 +2620,7 @@ h1:focus {
   min-height: 52px;
   padding: 6px 22px;
   font-size: 22px;
+  white-space: nowrap;
 }
 
 .pad-message {

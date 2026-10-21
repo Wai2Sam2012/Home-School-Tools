@@ -8,17 +8,17 @@
 // Submit. It pauses while Repeat is reading and while the game is in the
 // background. The keypad works the whole time; nothing waits on speech.
 
-import { answerProblem, jumpTo, milestoneSteps, storyText, unlockSticker, useTip, withNextProblem } from '../adventure.js?v=0.7.7';
-import { hasTip } from '../blocks.js?v=0.7.7';
-import { createTipButton, createTipCard, showTipButtons } from '../tip-card.js?v=0.7.7';
-import { stickerPicture } from '../art.js?v=0.7.7';
-import { playerIcon } from '../avatars.js?v=0.7.7';
-import { createDetourRoad, loopProgress } from '../detour-road.js?v=0.7.7';
-import { createKeypad } from '../keypad.js?v=0.7.7';
-import { THEMES, collectionKey } from '../settings.js?v=0.7.7';
-import { createThinkingTimer } from '../timer.js?v=0.7.7';
-import { nextSticker, stickerSet } from '../storyline.js?v=0.7.7';
-import { h, topBar } from '../ui.js?v=0.7.7';
+import { answerProblem, jumpTo, milestoneSteps, storyText, unlockSticker, useTip, withNextProblem } from '../adventure.js?v=0.7.8';
+import { hasTip } from '../blocks.js?v=0.7.8';
+import { createTipButton, createTipCard, showTipButtons } from '../tip-card.js?v=0.7.8';
+import { stickerPicture } from '../art.js?v=0.7.8';
+import { playerIcon } from '../avatars.js?v=0.7.8';
+import { createDetourRoad, loopProgress } from '../detour-road.js?v=0.7.8';
+import { createKeypad } from '../keypad.js?v=0.7.8';
+import { THEMES, collectionKey } from '../settings.js?v=0.7.8';
+import { createThinkingTimer } from '../timer.js?v=0.7.8';
+import { nextSticker, stickerSet } from '../storyline.js?v=0.7.8';
+import { h, topBar } from '../ui.js?v=0.7.8';
 
 const PRAISE = ['Correct!', 'Great job!', 'You got it!', 'Awesome!', 'Nice work!'];
 // A right answer moves on by itself; after a wrong one the game waits for

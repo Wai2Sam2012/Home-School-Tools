@@ -8,11 +8,11 @@ export function stickerSection(sticker) {
   return sticker.period ?? sticker.region ?? sticker.section ?? '';
 }
 
-import { placeholderArt, stickerPicture } from '../art.js?v=0.7.7';
-import { readAloudButton, stickerReading } from '../read-aloud.js?v=0.7.7';
-import { DIFFICULTY_LABELS, LEVELS, THEMES, collectionKey } from '../settings.js?v=0.7.7';
-import { nextSticker, stickerSet } from '../storyline.js?v=0.7.7';
-import { choiceRow, flash, h, topBar } from '../ui.js?v=0.7.7';
+import { placeholderArt, stickerPicture } from '../art.js?v=0.7.8';
+import { readAloudButton, stickerReading } from '../read-aloud.js?v=0.7.8';
+import { DIFFICULTY_LABELS, LEVELS, THEMES, collectionKey } from '../settings.js?v=0.7.8';
+import { nextSticker, stickerSet } from '../storyline.js?v=0.7.8';
+import { choiceRow, flash, h, topBar } from '../ui.js?v=0.7.8';
 
 /** Long one-word names get a smaller size so they fit on one line ("Thecodontosaurus"). */
 function nameSize(name) {

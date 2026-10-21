@@ -1,13 +1,43 @@
-// Help for multiplication with a 2-digit number (0.7.6): the column method,
-// with empty boxes to write in, like a note pad. The player taps a box, then
-// a number key; the digit goes in the box instead of the answer. After each
-// digit the next box to the left is chosen, as column sums are written.
-// Tapping the chosen box again lets the keys answer the question as usual.
-// The carry boxes are smaller, with a "carry" label (0.7.7), and the answer
-// written in the bottom row can be submitted from Help (answerFrom()).
+// Note pads for Help: the working of a problem laid out on paper, with empty
+// boxes to write in. The player taps a box, then a number key; the digit goes
+// in the box instead of the answer, and the next box is chosen (to the left,
+// as column sums are written; to the right in a division's answer). Tapping
+// the chosen box again lets the keys answer the question as usual, and
+// "Submit this answer" sends what is written in the answer boxes.
+//
+// Two layouts, each first worked out as plain data (so it can be tested) and
+// then built from page elements (never text turned into HTML):
+//
+//   × with a 2-digit number: the column method (0.7.6)
+//
+//    carry  [ ]          carries (above the top number's tens)
+//          4  7
+//      ×   3  8
+//      --------
+//       [ ][ ][ ]        47 × 8
+//     [ ][ ][ ][ ]       47 × 30 (the ones box is for its 0)
+//    + --------
+//     [ ][ ][ ][ ]       the answer
+//
+//   ÷ with a 2-digit divisor or answer: long division (0.7.8)
+//
+//          [ ][ ][ ]     the answer, over the number being divided
+//     12 ) 1  5  6
+//      − [ ][ ]          12 × 1
+//        ------
+//        [ ][ ][ ]       what is left, with the next digit brought down
+//      − [ ][ ][ ]       12 × 3
+//        --------
+//        [ ][ ][ ]       what is left at the end (0 when it divides exactly)
+
+import { h } from './ui.js?v=0.7.8';
+
+const digitsOf = (n) => String(n).split('').map(Number);
+const BOX = 'var(--pad-box)';
+const LINE = '6px';
 
 /**
- * The answer written in the bottom row, read left to right (0.7.7). Returns
+ * The answer written in the answer boxes, read left to right (0.7.7). Returns
  * { ok: true, value } or { ok: false, reason }: 'empty' when nothing is
  * written, 'gap' when an empty box sits between digits.
  */
@@ -19,29 +49,15 @@ export function answerFrom(values) {
   if (used.includes('')) return { ok: false, reason: 'gap' };
   return { ok: true, value: String(Number(used.join(''))) };
 }
-//
-//        [ ]          carries (above the top number's tens)
-//       4  7
-//   ×   3  8
-//   --------
-//    [ ][ ][ ]        47 × 8
-//  [ ][ ][ ][ ]       47 × 30 (the ones box is for its 0)
-//   --------
-//  [ ][ ][ ][ ]       the answer
-//
-// columnLayout() is the plan as plain data, so it can be tested; the picture
-// is built from it with page elements (not text turned into HTML).
 
-import { h } from './ui.js?v=0.7.7';
-
-const digitsOf = (n) => String(n).split('').map(Number);
+// ---------------------------------------------------------------- multiplication
 
 /**
  * The column layout for a × b: the bigger number on top. Returns
  * { width, top, bottom, rows } where width is the number of columns (enough
  * for the answer), top and bottom are the numbers' digits, and rows lists the
- * boxes to write in, top to bottom: { kind, from } boxes in columns from..width-1
- * (kind 'carry', 'partial' or 'answer').
+ * boxes to write in, top to bottom: { kind, from, to } boxes in columns
+ * from..to (kind 'carry', 'partial' or 'answer').
  */
 export function columnLayout(a, b) {
   if (![a, b].every((n) => Number.isInteger(n) && n > 0 && n <= 99)) throw new Error(`No column layout for ${a} × ${b}.`);
@@ -60,88 +76,156 @@ export function columnLayout(a, b) {
   return { width, top: topDigits, bottom: bottomDigits, rows };
 }
 
+/** The pad plan for a × b: grid rows, fixed marks and boxes (see buildPad()). */
+function multiplicationPlan(a, b) {
+  const layout = columnLayout(a, b);
+  const col = (c) => c + 2; // grid column of layout column c (column 1 holds the signs)
+  const heights = [];
+  const marks = [];
+  const boxes = [];
+  const line = (height) => heights.push(height);
+  const rowsOf = (kind) => layout.rows.filter((r) => r.kind === kind);
+  const addBoxes = (r, at) => {
+    for (let c = r.from; c <= r.to; c++) boxes.push({ line: at, column: col(c), kind: r.kind, flow: 'left' });
+  };
+  const carry = rowsOf('carry')[0];
+  if (carry) {
+    line(`calc(${BOX} * 0.7)`);
+    marks.push({ line: heights.length, column: 1, cls: 'pad-note', text: 'carry' });
+    addBoxes(carry, heights.length);
+  }
+  line(BOX);
+  layout.top.forEach((d, i) => marks.push({ line: heights.length, column: col(layout.width - layout.top.length + i), cls: 'pad-digit', text: String(d) }));
+  line(BOX);
+  layout.bottom.forEach((d, i) => marks.push({ line: heights.length, column: col(layout.width - layout.bottom.length + i), cls: 'pad-digit', text: String(d) }));
+  marks.push({ line: heights.length, column: 1, cls: 'pad-sign', text: '×' });
+  line(LINE);
+  marks.push({ line: heights.length, column: 1, span: layout.width + 1, cls: 'pad-line' });
+  const working = layout.rows.filter((r) => r.kind !== 'carry');
+  working.forEach((r, i) => {
+    if (r.kind === 'answer' && working.length > 1) {
+      line(LINE);
+      marks.push({ line: heights.length, column: 1, span: layout.width + 1, cls: 'pad-line' });
+    }
+    line(BOX);
+    addBoxes(r, heights.length);
+    // The + goes beside the last row of working, just above the answer's line.
+    if (working.length > 1 && i === working.length - 2) marks.push({ line: heights.length, column: 1, cls: 'pad-sign', text: '+' });
+  });
+  return { columns: layout.width + 1, heights, marks, boxes, label: `${a} times ${b} in columns, with boxes to write in` };
+}
+
+// ---------------------------------------------------------------- division
+
 /**
- * The note pad for a × b. Returns { el, press(key), selected(), clear() }.
+ * The long division layout for a ÷ b (0.7.8). Returns { width, divisor,
+ * dividend, steps, rows }: width is the number of the dividend's digits
+ * (columns), steps the number of answer digits (one step each), and rows the
+ * boxes to write in, top to bottom: { kind, from, to } in columns from..to,
+ * kind 'answer' (over the dividend), then for each step 'product' (the
+ * divisor times the answer digit) and 'difference' (what is left, with the
+ * next digit brought down; the last one is what is left at the end).
+ */
+export function divisionLayout(a, b) {
+  if (!Number.isInteger(a) || !Number.isInteger(b) || a <= 0 || b <= 0 || a > 999 || b > 99 || a % b !== 0) throw new Error(`No long division layout for ${a} ÷ ${b}.`);
+  const dividend = digitsOf(a);
+  const width = dividend.length;
+  const steps = String(a / b).length;
+  const rows = [{ kind: 'answer', from: 0, to: width - 1 }];
+  for (let k = 0; k < steps; k++) {
+    // The answer digit of this step sits over this column.
+    const at = width - steps + k;
+    rows.push({ kind: 'product', from: 0, to: at });
+    rows.push({ kind: 'difference', from: 0, to: Math.min(at + 1, width - 1) });
+  }
+  return { width, divisor: digitsOf(b), dividend, steps, rows };
+}
+
+/** The pad plan for a ÷ b (see buildPad()). */
+function divisionPlan(a, b) {
+  const layout = divisionLayout(a, b);
+  const col = (c) => c + 2; // column 1 holds the divisor and the − signs
+  const heights = [];
+  const marks = [];
+  const boxes = [];
+  const line = (height) => heights.push(height);
+  const addBoxes = (r, at, flow) => {
+    for (let c = r.from; c <= r.to; c++) boxes.push({ line: at, column: col(c), kind: r.kind, flow });
+  };
+  // The answer is written left to right, one digit for each step.
+  line(BOX);
+  addBoxes(layout.rows[0], heights.length, 'right');
+  line(BOX);
+  marks.push({ line: heights.length, column: 1, cls: 'pad-divisor', text: `${layout.divisor.join('')})` });
+  // One unbroken line over the number being divided.
+  marks.push({ line: heights.length, column: col(0), span: layout.width, cls: 'pad-bracket' });
+  layout.dividend.forEach((d, i) => marks.push({ line: heights.length, column: col(i), cls: 'pad-digit pad-dividend', text: String(d) }));
+  for (let k = 0; k < layout.steps; k++) {
+    const product = layout.rows[1 + 2 * k];
+    const difference = layout.rows[2 + 2 * k];
+    line(BOX);
+    addBoxes(product, heights.length, 'left');
+    marks.push({ line: heights.length, column: 1, cls: 'pad-sign', text: '−' });
+    line(LINE);
+    marks.push({ line: heights.length, column: col(0), span: product.to + 1, cls: 'pad-line' });
+    line(BOX);
+    addBoxes(difference, heights.length, 'left');
+  }
+  // The first column is as wide as the divisor and its bracket ("12)").
+  return { columns: layout.width + 1, firstColumn: `minmax(${BOX}, auto)`, heights, marks, boxes, label: `${a} divided by ${b} by long division, with boxes to write in` };
+}
+
+// ---------------------------------------------------------------- the pad
+
+const KIND_NAMES = { carry: 'Carry', partial: 'Working', product: 'Working', difference: 'Working', answer: 'Answer' };
+
+/**
+ * Builds a pad from its plan: { columns, heights (one per grid row), marks
+ * (fixed digits, signs and lines), boxes ({ line, column, kind, flow }),
+ * label }. Returns { el, press(key), selected(), answer(), clear() }.
  * press(key) takes a keypad key ('0'-'9' or 'back') and returns true when it
  * went into a box (a box is chosen), false when the keypad should answer the
  * question as usual.
  */
-export function createColumnPad(a, b) {
-  const layout = columnLayout(a, b);
-  const cells = []; // every box, by row then column
+function buildPad({ columns, firstColumn = BOX, heights, marks, boxes, label }) {
+  const cells = [];
   let chosen = null;
-
   const choose = (cell) => {
     if (chosen) chosen.el.setAttribute('aria-pressed', 'false');
     chosen = cell;
     if (chosen) chosen.el.setAttribute('aria-pressed', 'true');
   };
-  const box = (row, column) => {
-    const cell = { row, column, value: '', el: null };
+  const place = (lineNo, column, span = 1) => `grid-row: ${lineNo}; grid-column: ${column} / span ${span}`;
+  const parts = marks.map((m) => h('span', { class: m.cls, style: place(m.line, m.column, m.span) }, m.text ?? ''));
+  for (const b of boxes) {
+    const cell = { ...b, value: '', el: null };
     cell.el = h('button', {
       type: 'button',
-      class: `pad-box pad-${layout.rows[row].kind}`,
+      class: `pad-box pad-${b.kind}`,
       'aria-pressed': 'false',
-      'aria-label': `${layout.rows[row].kind === 'carry' ? 'Carry' : layout.rows[row].kind === 'answer' ? 'Answer' : 'Working'} box, empty`,
-      style: `grid-row: ${rowLine(row)}; grid-column: ${column + 2}`,
+      'aria-label': `${KIND_NAMES[b.kind]} box, empty`,
+      style: place(b.line, b.column),
       onclick: () => choose(chosen === cell ? null : cell),
     });
     cells.push(cell);
-    return cell.el;
-  };
-  // Grid lines: carries first, then the two numbers and the line under them,
-  // then the working rows (with a line before the answer).
-  const hasCarry = layout.rows[0].kind === 'carry';
-  const numbersAt = hasCarry ? 2 : 1;
-  const rowLine = (row) => {
-    const kind = layout.rows[row].kind;
-    if (kind === 'carry') return 1;
-    const partials = layout.rows.filter((r) => r.kind !== 'carry');
-    const index = partials.indexOf(layout.rows[row]);
-    // Numbers (2 lines), a line, the partial rows, a line before the answer if there are partials.
-    const afterLine = numbersAt + 3 + index;
-    return kind === 'answer' && layout.bottom.length > 1 ? afterLine + 1 : afterLine;
-  };
-
-  const parts = [];
-  // Row heights: boxes, a shorter carry row, and thin rows for the lines.
-  const lines = [numbersAt + 2];
-  if (layout.bottom.length > 1) lines.push(rowLine(layout.rows.length - 1) - 1);
-  const lastLine = rowLine(layout.rows.length - 1);
-  const heights = Array.from({ length: lastLine }, (_, i) => {
-    const line = i + 1;
-    if (lines.includes(line)) return '6px';
-    if (hasCarry && line === 1) return 'calc(var(--pad-box) * 0.7)';
-    return 'var(--pad-box)';
-  });
-  layout.rows.forEach((r, row) => {
-    for (let column = r.from; column <= r.to; column++) parts.push(box(row, column));
-  });
-  const digit = (d, line, column) => h('span', { class: 'pad-digit', style: `grid-row: ${line}; grid-column: ${column + 2}` }, String(d));
-  layout.top.forEach((d, i) => parts.push(digit(d, numbersAt, layout.width - layout.top.length + i)));
-  layout.bottom.forEach((d, i) => parts.push(digit(d, numbersAt + 1, layout.width - layout.bottom.length + i)));
-  parts.push(h('span', { class: 'pad-sign', style: `grid-row: ${numbersAt + 1}; grid-column: 1` }, '×'));
-  // Says what the small boxes at the top are for.
-  if (hasCarry) parts.push(h('span', { class: 'pad-note', style: 'grid-row: 1; grid-column: 1' }, 'carry'));
-  parts.push(h('span', { class: 'pad-line', style: `grid-row: ${numbersAt + 2}; grid-column: 1 / ${layout.width + 2}` }));
-  if (layout.bottom.length > 1) {
-    const answerLine = rowLine(layout.rows.length - 1) - 1;
-    parts.push(h('span', { class: 'pad-sign', style: `grid-row: ${answerLine - 1}; grid-column: 1` }, '+'));
-    parts.push(h('span', { class: 'pad-line', style: `grid-row: ${answerLine}; grid-column: 1 / ${layout.width + 2}` }));
+    parts.push(cell.el);
   }
-  const el = h('div', { class: 'column-pad', role: 'group', 'aria-label': `${a} times ${b} in columns, with boxes to write in`, style: `grid-template-columns: repeat(${layout.width + 1}, var(--pad-box)); grid-template-rows: ${heights.join(' ')}` }, parts);
+  const el = h('div', {
+    class: 'column-pad',
+    role: 'group',
+    'aria-label': label,
+    style: `grid-template-columns: ${firstColumn} repeat(${columns - 1}, ${BOX}); grid-template-rows: ${heights.join(' ')}`,
+  }, parts);
 
   const show = (cell) => {
     cell.el.textContent = cell.value;
-    cell.el.setAttribute('aria-label', `${cell.el.getAttribute('aria-label').split(',')[0]}, ${cell.value || 'empty'}`);
+    cell.el.setAttribute('aria-label', `${KIND_NAMES[cell.kind]} box, ${cell.value || 'empty'}`);
   };
-
-  const answerRow = layout.rows.length - 1;
   return {
     el,
     selected: () => chosen,
-    /** The answer written in the bottom row (see answerFrom()). */
-    answer: () => answerFrom(cells.filter((c) => c.row === answerRow).sort((x, y) => x.column - y.column).map((c) => c.value)),
+    /** The answer written in the answer boxes (see answerFrom()). */
+    answer: () => answerFrom(cells.filter((c) => c.kind === 'answer').sort((x, y) => x.column - y.column).map((c) => c.value)),
     press(key) {
       if (!chosen) return false;
       if (key === 'back') {
@@ -152,9 +236,10 @@ export function createColumnPad(a, b) {
       if (!/^[0-9]$/.test(key)) return false;
       chosen.value = key;
       show(chosen);
-      // The box to the left in the same row, as column sums are written.
-      const left = cells.find((c) => c.row === chosen.row && c.column === chosen.column - 1);
-      if (left) choose(left);
+      // The next box in the same row: to the left, or to the right in a division's answer.
+      const step = chosen.flow === 'right' ? 1 : -1;
+      const next = cells.find((c) => c.line === chosen.line && c.column === chosen.column + step);
+      if (next) choose(next);
       return true;
     },
     clear() {
@@ -165,4 +250,14 @@ export function createColumnPad(a, b) {
       choose(null);
     },
   };
+}
+
+/** The note pad for a × b (the column method). */
+export function createColumnPad(a, b) {
+  return buildPad(multiplicationPlan(a, b));
+}
+
+/** The note pad for a ÷ b (long division, 0.7.8). */
+export function createDivisionPad(a, b) {
+  return buildPad(divisionPlan(a, b));
 }

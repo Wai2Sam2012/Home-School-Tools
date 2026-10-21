@@ -6,9 +6,9 @@
 // shows the drawing with "Waiting to connect to the internet to get the
 // pictures", and tries again when the internet comes back or it is saved.
 
-import { h } from './ui.js?v=0.7.7';
-import { pictureUrl } from './storyline.js?v=0.7.7';
-import { PICTURES_SAVED_EVENT } from './offline.js?v=0.7.7';
+import { h } from './ui.js?v=0.7.8';
+import { pictureUrl } from './storyline.js?v=0.7.8';
+import { PICTURES_SAVED_EVENT } from './offline.js?v=0.7.8';
 
 export const WAITING_TEXT = 'Waiting to connect to the internet to get the pictures';
 export const WAITING_SHORT = 'Waiting for internet';
