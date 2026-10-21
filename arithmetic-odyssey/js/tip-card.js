@@ -4,9 +4,9 @@
 // boxes to write in (js/column-pad.js); 56 ÷ 7 as rows of 7 to count; 72 ÷ 3
 // as 60 ÷ 3 and 12 ÷ 3 (js/blocks.js).
 
-import { hasTip, tipKind, tipSvg, tipTitle } from './blocks.js?v=0.7.6';
-import { createColumnPad } from './column-pad.js?v=0.7.6';
-import { h } from './ui.js?v=0.7.6';
+import { hasTip, tipKind, tipSvg, tipTitle } from './blocks.js?v=0.7.7';
+import { createColumnPad } from './column-pad.js?v=0.7.7';
+import { h } from './ui.js?v=0.7.7';
 
 /**
  * Returns { el, show(problem), hide(), shown(), press(key) }. onClose runs
@@ -15,14 +15,32 @@ import { h } from './ui.js?v=0.7.6';
  * note pad: true if it went into a box (the screen's keypad then leaves the
  * answer alone).
  */
-export function createTipCard({ onClose = () => {}, onToggle = () => {} } = {}) {
+export function createTipCard({ onClose = () => {}, onToggle = () => {}, onAnswer = null } = {}) {
   const picture = h('div', { class: 'tip-picture-box' });
+  // The column note pad: submit the answer written in its bottom row (0.7.7).
+  const padMessage = h('p', { class: 'pad-message', role: 'status' });
+  const submitPad = h('button', {
+    type: 'button',
+    class: 'big-button primary pad-submit',
+    onclick: () => {
+      const result = pad?.answer();
+      if (!result) return;
+      if (!result.ok) {
+        padMessage.textContent = result.reason === 'gap' ? 'Fill in the empty box between the digits first.' : 'Write the answer in the bottom row first.';
+        return;
+      }
+      padMessage.textContent = '';
+      onAnswer?.(result.value);
+    },
+  }, h('span', { 'aria-hidden': 'true' }, '✓ '), 'Submit this answer');
+  const padActions = h('div', { class: 'pad-actions', hidden: true }, submitPad, padMessage);
   const close = h('button', { type: 'button', class: 'round-button tip-close', 'aria-label': 'Close Help', onclick: () => { hide(); onClose(); } }, '✕');
   const title = h('p', { class: 'tip-title' });
   // The ✕ sits in the title row, so it never covers the picture (0.7.2).
   const el = h('div', { class: 'tip-card', role: 'dialog', 'aria-label': 'Help', hidden: true },
     h('div', { class: 'tip-header' }, title, close),
-    picture);
+    picture,
+    padActions);
 
   // The note pad keeps what was written while Help is closed and opened
   // again for the same question; a new question starts a clean one.
@@ -41,6 +59,8 @@ export function createTipCard({ onClose = () => {}, onToggle = () => {} } = {}) 
       picture.innerHTML = tipSvg(problem); // numbers only (hasTip checks they are whole numbers)
     }
     el.classList.toggle('tip-column', tipKind(problem) === 'column');
+    padActions.hidden = !(onAnswer && tipKind(problem) === 'column');
+    padMessage.textContent = '';
     el.hidden = false;
     onToggle(true);
     return true;

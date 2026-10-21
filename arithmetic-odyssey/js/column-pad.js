@@ -3,6 +3,22 @@
 // a number key; the digit goes in the box instead of the answer. After each
 // digit the next box to the left is chosen, as column sums are written.
 // Tapping the chosen box again lets the keys answer the question as usual.
+// The carry boxes are smaller, with a "carry" label (0.7.7), and the answer
+// written in the bottom row can be submitted from Help (answerFrom()).
+
+/**
+ * The answer written in the bottom row, read left to right (0.7.7). Returns
+ * { ok: true, value } or { ok: false, reason }: 'empty' when nothing is
+ * written, 'gap' when an empty box sits between digits.
+ */
+export function answerFrom(values) {
+  const first = values.findIndex((v) => v !== '');
+  if (first === -1) return { ok: false, reason: 'empty' };
+  const last = values.length - 1 - [...values].reverse().findIndex((v) => v !== '');
+  const used = values.slice(first, last + 1);
+  if (used.includes('')) return { ok: false, reason: 'gap' };
+  return { ok: true, value: String(Number(used.join(''))) };
+}
 //
 //        [ ]          carries (above the top number's tens)
 //       4  7
@@ -16,7 +32,7 @@
 // columnLayout() is the plan as plain data, so it can be tested; the picture
 // is built from it with page elements (not text turned into HTML).
 
-import { h } from './ui.js?v=0.7.6';
+import { h } from './ui.js?v=0.7.7';
 
 const digitsOf = (n) => String(n).split('').map(Number);
 
@@ -105,6 +121,8 @@ export function createColumnPad(a, b) {
   layout.top.forEach((d, i) => parts.push(digit(d, numbersAt, layout.width - layout.top.length + i)));
   layout.bottom.forEach((d, i) => parts.push(digit(d, numbersAt + 1, layout.width - layout.bottom.length + i)));
   parts.push(h('span', { class: 'pad-sign', style: `grid-row: ${numbersAt + 1}; grid-column: 1` }, '×'));
+  // Says what the small boxes at the top are for.
+  if (hasCarry) parts.push(h('span', { class: 'pad-note', style: 'grid-row: 1; grid-column: 1' }, 'carry'));
   parts.push(h('span', { class: 'pad-line', style: `grid-row: ${numbersAt + 2}; grid-column: 1 / ${layout.width + 2}` }));
   if (layout.bottom.length > 1) {
     const answerLine = rowLine(layout.rows.length - 1) - 1;
@@ -118,9 +136,12 @@ export function createColumnPad(a, b) {
     cell.el.setAttribute('aria-label', `${cell.el.getAttribute('aria-label').split(',')[0]}, ${cell.value || 'empty'}`);
   };
 
+  const answerRow = layout.rows.length - 1;
   return {
     el,
     selected: () => chosen,
+    /** The answer written in the bottom row (see answerFrom()). */
+    answer: () => answerFrom(cells.filter((c) => c.row === answerRow).sort((x, y) => x.column - y.column).map((c) => c.value)),
     press(key) {
       if (!chosen) return false;
       if (key === 'back') {

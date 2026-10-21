@@ -2550,7 +2550,65 @@ h1:focus {
 }
 
 .pad-carry {
+  width: 72%;
+  height: 100%;
+  justify-self: center;
+  border-style: dotted;
   font-size: 0.7em;
+}
+
+/* "carry", next to the carry boxes (0.7.7). */
+.pad-note {
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 600;
+  text-align: center;
+}
+
+/* Sideways, the card is wide and the note pad narrow: the Submit button
+   goes beside the pad, so the screen still fits (0.7.7). */
+@media (orientation: landscape) and (min-width: 900px) {
+  .tip-card.tip-column {
+    display: grid;
+    grid-template-columns: 1fr minmax(180px, 260px);
+    grid-template-rows: auto 1fr;
+    column-gap: 16px;
+  }
+
+  .tip-card.tip-column .tip-header {
+    grid-column: 1 / -1;
+  }
+
+  .tip-card.tip-column .pad-actions {
+    flex-direction: column;
+    justify-content: center;
+  }
+
+  .tip-card.tip-column .pad-message {
+    text-align: center;
+  }
+}
+
+/* Submit the answer written in the bottom row (0.7.7). */
+.pad-actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 4px 16px;
+}
+
+.pad-submit {
+  min-height: 52px;
+  padding: 6px 22px;
+  font-size: 22px;
+}
+
+.pad-message {
+  margin: 0;
+  color: var(--error);
+  font-size: 17px;
+  font-weight: 600;
 }
 
 /* The note pad is not scaled like the pictures: its boxes keep their size. */

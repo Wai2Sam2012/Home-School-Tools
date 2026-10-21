@@ -8,17 +8,17 @@
 // Submit. It pauses while Repeat is reading and while the game is in the
 // background. The keypad works the whole time; nothing waits on speech.
 
-import { answerProblem, jumpTo, milestoneSteps, storyText, unlockSticker, useTip, withNextProblem } from '../adventure.js?v=0.7.6';
-import { hasTip } from '../blocks.js?v=0.7.6';
-import { createTipButton, createTipCard, showTipButtons } from '../tip-card.js?v=0.7.6';
-import { stickerPicture } from '../art.js?v=0.7.6';
-import { playerIcon } from '../avatars.js?v=0.7.6';
-import { createDetourRoad, loopProgress } from '../detour-road.js?v=0.7.6';
-import { createKeypad } from '../keypad.js?v=0.7.6';
-import { THEMES, collectionKey } from '../settings.js?v=0.7.6';
-import { createThinkingTimer } from '../timer.js?v=0.7.6';
-import { nextSticker, stickerSet } from '../storyline.js?v=0.7.6';
-import { h, topBar } from '../ui.js?v=0.7.6';
+import { answerProblem, jumpTo, milestoneSteps, storyText, unlockSticker, useTip, withNextProblem } from '../adventure.js?v=0.7.7';
+import { hasTip } from '../blocks.js?v=0.7.7';
+import { createTipButton, createTipCard, showTipButtons } from '../tip-card.js?v=0.7.7';
+import { stickerPicture } from '../art.js?v=0.7.7';
+import { playerIcon } from '../avatars.js?v=0.7.7';
+import { createDetourRoad, loopProgress } from '../detour-road.js?v=0.7.7';
+import { createKeypad } from '../keypad.js?v=0.7.7';
+import { THEMES, collectionKey } from '../settings.js?v=0.7.7';
+import { createThinkingTimer } from '../timer.js?v=0.7.7';
+import { nextSticker, stickerSet } from '../storyline.js?v=0.7.7';
+import { h, topBar } from '../ui.js?v=0.7.7';
 
 const PRAISE = ['Correct!', 'Great job!', 'You got it!', 'Awesome!', 'Nice work!'];
 // A right answer moves on by itself; after a wrong one the game waits for
@@ -90,6 +90,8 @@ export function adventureScreen(ctx) {
   // While the tip is open it takes the place of the trail map and the story, so it can be bigger.
   // The size is fitted again straight away, so the screen never shows a frame that is too tall.
   const tipCard = createTipCard({
+    // "Submit this answer" on the column note pad answers like the keypad's ✓.
+    onAnswer: (value) => submit(value),
     onToggle: (open) => {
       page?.classList.toggle('tip-open', open);
       fitNow();

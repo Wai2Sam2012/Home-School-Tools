@@ -3,8 +3,8 @@
 // Settings). Each player keeps their own; the start screens use the last
 // player's.
 
-import { COLOR_THEMES, COLOR_THEME_LABELS } from '../settings.js?v=0.7.6';
-import { choiceRow, h, topBar } from '../ui.js?v=0.7.6';
+import { COLOR_THEMES, COLOR_THEME_LABELS } from '../settings.js?v=0.7.7';
+import { choiceRow, h, topBar } from '../ui.js?v=0.7.7';
 
 export function colorsScreen(ctx) {
   const player = ctx.profiles.active();

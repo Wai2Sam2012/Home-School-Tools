@@ -4,7 +4,7 @@ import { test } from 'node:test';
 import assert from 'node:assert/strict';
 import { readFileSync } from 'node:fs';
 
-import { columnLayout } from '../js/column-pad.js';
+import { answerFrom, columnLayout } from '../js/column-pad.js';
 
 test('2-digit × 1-digit: carries over the tens, then one answer row', () => {
   const l = columnLayout(47, 6);
@@ -45,4 +45,14 @@ test('anything else is refused', () => {
 test('the pad is built from page elements, never text turned into HTML', () => {
   const code = readFileSync(new URL('../js/column-pad.js', import.meta.url), 'utf8');
   assert.doesNotMatch(code, /innerHTML|insertAdjacentHTML/);
+});
+
+test('the answer written in the bottom row: read left to right; empty or a gap is refused (0.7.7)', () => {
+  assert.deepEqual(answerFrom(['1', '1', '5']), { ok: true, value: '115' });
+  assert.deepEqual(answerFrom(['', '9', '6']), { ok: true, value: '96' }, 'leading empty boxes are fine');
+  assert.deepEqual(answerFrom(['', '4', '']), { ok: true, value: '4' }, 'so are trailing ones');
+  assert.deepEqual(answerFrom(['0', '0', '7']), { ok: true, value: '7' }, 'leading zeros are dropped');
+  assert.deepEqual(answerFrom(['', '', '0']), { ok: true, value: '0' });
+  assert.deepEqual(answerFrom(['', '', '']), { ok: false, reason: 'empty' });
+  assert.deepEqual(answerFrom(['1', '', '5']), { ok: false, reason: 'gap' });
 });
