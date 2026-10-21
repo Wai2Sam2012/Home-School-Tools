@@ -1,15 +1,19 @@
 // The Help card (🙏): the question drawn as a picture to count or work out,
 // opened with the Help button next to a question. 7 + 5 as the 7 block, +,
-// the 5 block, = and ?; 4 × 23 as 4 rows of 23; 47 × 38 split into tens and
-// ones; 56 ÷ 7 as rows of 7 to count; 72 ÷ 3 as 60 ÷ 3 and 12 ÷ 3 (js/blocks.js).
+// the 5 block, = and ?; 3 × 4 as 3 groups of 4; 47 × 38 in columns with
+// boxes to write in (js/column-pad.js); 56 ÷ 7 as rows of 7 to count; 72 ÷ 3
+// as 60 ÷ 3 and 12 ÷ 3 (js/blocks.js).
 
-import { hasTip, tipSvg, tipTitle } from './blocks.js?v=0.7.5';
-import { h } from './ui.js?v=0.7.5';
+import { hasTip, tipKind, tipSvg, tipTitle } from './blocks.js?v=0.7.6';
+import { createColumnPad } from './column-pad.js?v=0.7.6';
+import { h } from './ui.js?v=0.7.6';
 
 /**
- * Returns { el, show(problem), hide(), shown() }. onClose runs when the
- * player closes it; onToggle(open) whenever it opens or closes (the screen
- * makes room for it).
+ * Returns { el, show(problem), hide(), shown(), press(key) }. onClose runs
+ * when the player closes it; onToggle(open) whenever it opens or closes (the
+ * screen makes room for it). press(key) gives a keypad key to the column
+ * note pad: true if it went into a box (the screen's keypad then leaves the
+ * answer alone).
  */
 export function createTipCard({ onClose = () => {}, onToggle = () => {} } = {}) {
   const picture = h('div', { class: 'tip-picture-box' });
@@ -20,10 +24,23 @@ export function createTipCard({ onClose = () => {}, onToggle = () => {} } = {}) 
     h('div', { class: 'tip-header' }, title, close),
     picture);
 
+  // The note pad keeps what was written while Help is closed and opened
+  // again for the same question; a new question starts a clean one.
+  let pad = null;
+  let padFor = '';
   function show(problem) {
     if (!hasTip(problem)) return false;
     title.textContent = `🙏 ${tipTitle(problem)}`;
-    picture.innerHTML = tipSvg(problem); // numbers only (hasTip checks they are whole numbers)
+    if (tipKind(problem) === 'column') {
+      if (padFor !== problem.key) {
+        pad = createColumnPad(problem.a, problem.b);
+        padFor = problem.key;
+      }
+      picture.replaceChildren(pad.el);
+    } else {
+      picture.innerHTML = tipSvg(problem); // numbers only (hasTip checks they are whole numbers)
+    }
+    el.classList.toggle('tip-column', tipKind(problem) === 'column');
     el.hidden = false;
     onToggle(true);
     return true;
@@ -34,7 +51,13 @@ export function createTipCard({ onClose = () => {}, onToggle = () => {} } = {}) 
     picture.replaceChildren();
     if (wasOpen) onToggle(false);
   }
-  return { el, show, hide, shown: () => !el.hidden };
+  return {
+    el,
+    show,
+    hide,
+    shown: () => !el.hidden,
+    press: (key) => !el.hidden && pad !== null && picture.contains(pad.el) && pad.press(key),
+  };
 }
 
 /**

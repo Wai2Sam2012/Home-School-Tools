@@ -9,8 +9,8 @@
 //   The round ends when every problem is learned, or after a few tries each
 //     (so it never goes on and on); unlearned problems stay on the list.
 
-import { checkAnswer, restoreProblem } from './math.js?v=0.7.5';
-import { PRACTICE_SIZE, SLOW_MS } from './scores.js?v=0.7.5';
+import { checkAnswer, restoreProblem } from './math.js?v=0.7.6';
+import { PRACTICE_SIZE, SLOW_MS } from './scores.js?v=0.7.6';
 
 export const LEARN_NEEDS = 3;
 export const LEARN_MAX_PROBLEMS = PRACTICE_SIZE;

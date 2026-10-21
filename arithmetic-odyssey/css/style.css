@@ -2508,6 +2508,56 @@ h1:focus {
   fill: var(--tip-cell-alt);
 }
 
+/* Help for × with a 2-digit number: the column method, with empty boxes
+   to write in (js/column-pad.js, 0.7.6). */
+.column-pad {
+  --pad-box: clamp(44px, 5.4vh, 58px);
+  display: grid;
+  gap: 6px;
+  align-items: center;
+  justify-content: center;
+  margin: 2px auto;
+  font-size: calc(var(--pad-box) * 0.62);
+  font-weight: 800;
+  line-height: 1;
+}
+
+.pad-digit,
+.pad-sign {
+  text-align: center;
+}
+
+.pad-line {
+  height: 4px;
+  border-radius: 2px;
+  background: var(--text);
+}
+
+.pad-box {
+  width: 100%;
+  height: 100%;
+  padding: 0;
+  border: 3px dashed var(--line);
+  border-radius: 10px;
+  background: var(--surface);
+  color: var(--typed);
+  font: inherit;
+}
+
+.pad-box[aria-pressed="true"] {
+  border: 3px solid var(--accent);
+  background: var(--accent-soft);
+}
+
+.pad-carry {
+  font-size: 0.7em;
+}
+
+/* The note pad is not scaled like the pictures: its boxes keep their size. */
+.tip-column .tip-picture-box {
+  overflow-x: auto;
+}
+
 /* Open in place of the map, the window grows with its picture: as wide as
    the screen allows, up to about a third of the screen's height. */
 .adventure-screen.tip-open .tip-picture-box > svg,
