@@ -8,17 +8,17 @@
 // Submit. It pauses while Repeat is reading and while the game is in the
 // background. The keypad works the whole time; nothing waits on speech.
 
-import { answerProblem, jumpTo, milestoneSteps, storyText, unlockSticker, useTip, withNextProblem } from '../adventure.js?v=0.7.5';
-import { hasTip } from '../blocks.js?v=0.7.5';
-import { createTipButton, createTipCard, showTipButtons } from '../tip-card.js?v=0.7.5';
-import { stickerPicture } from '../art.js?v=0.7.5';
-import { playerIcon } from '../avatars.js?v=0.7.5';
-import { createDetourRoad, loopProgress } from '../detour-road.js?v=0.7.5';
-import { createKeypad } from '../keypad.js?v=0.7.5';
-import { THEMES, collectionKey } from '../settings.js?v=0.7.5';
-import { createThinkingTimer } from '../timer.js?v=0.7.5';
-import { nextSticker, stickerSet } from '../storyline.js?v=0.7.5';
-import { h, topBar } from '../ui.js?v=0.7.5';
+import { answerProblem, jumpTo, milestoneSteps, storyText, unlockSticker, useTip, withNextProblem } from '../adventure.js?v=0.7.6';
+import { hasTip } from '../blocks.js?v=0.7.6';
+import { createTipButton, createTipCard, showTipButtons } from '../tip-card.js?v=0.7.6';
+import { stickerPicture } from '../art.js?v=0.7.6';
+import { playerIcon } from '../avatars.js?v=0.7.6';
+import { createDetourRoad, loopProgress } from '../detour-road.js?v=0.7.6';
+import { createKeypad } from '../keypad.js?v=0.7.6';
+import { THEMES, collectionKey } from '../settings.js?v=0.7.6';
+import { createThinkingTimer } from '../timer.js?v=0.7.6';
+import { nextSticker, stickerSet } from '../storyline.js?v=0.7.6';
+import { h, topBar } from '../ui.js?v=0.7.6';
 
 const PRAISE = ['Correct!', 'Great job!', 'You got it!', 'Awesome!', 'Nice work!'];
 // A right answer moves on by itself; after a wrong one the game waits for
@@ -367,6 +367,8 @@ export function adventureScreen(ctx) {
     },
     onFull: bumpQuestion,
   });
+  // With Help's column note pad open and a box chosen, the number keys write in the box (0.7.6).
+  keypad.setKeyTaker((key) => tipCard.press(key));
   // Covers the keys (not the answer box) after a wrong answer, so the screen doesn't change size.
   const gotIt = h('button', { type: 'button', class: 'big-button primary got-it', onclick: acknowledge }, 'Got it ›');
   const gotItCover = h('div', { class: 'got-it-cover', hidden: true }, gotIt);

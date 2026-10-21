@@ -105,27 +105,23 @@ test('every problem has Help: + and − up to 99, and every × and ÷', () => {
   }
 });
 
-test('× with a number up to 10: groups to count (4 rows of 23, numbered)', () => {
-  const p = problem('×', 23, 4);
+test('× of two 1-digit numbers: groups to count (3 rows of 4, numbered)', () => {
+  const p = problem('×', 4, 3);
   assert.equal(tipKind(p), 'groups');
-  assert.equal(tipTitle(p), '4 groups of 23: count them all');
+  assert.equal(tipTitle(p), '3 groups of 4: count them all');
   assert.equal(tipTitle(problem('×', 1, 8)), '1 group of 8: count them all');
-  const t = texts(tipSvg(p));
-  // Each row is 10, 10 and 3 (no numbers on the blocks since 0.7.4), with the row's number.
-  assert.deepEqual(t, ['1', '2', '3', '4'], 'each row numbered');
-  assert.equal((tipSvg(p).match(/width="20" height="20" /g) ?? []).length, 92, '92 squares in all (4 × 23)');
-  assert.equal(tipKind(problem('×', 7, 8)), 'groups');
+  assert.deepEqual(texts(tipSvg(p)), ['1', '2', '3'], 'each row numbered (no numbers on the blocks since 0.7.4)');
+  assert.equal((tipSvg(p).match(/width="20" height="20" /g) ?? []).length, 12, '12 squares in all (3 × 4)');
   assert.equal((tipSvg(problem('×', 7, 8)).match(/width="20" height="20" /g) ?? []).length, 56);
 });
 
-test('× of two 2-digit numbers: a box split into tens and ones', () => {
-  const p = problem('×', 47, 38);
-  assert.equal(tipKind(p), 'area');
-  assert.match(tipTitle(p), /tens and ones/);
-  const t = texts(tipSvg(p));
-  for (const box of ['40 × 30 = ?', '40 × 8 = ?', '7 × 30 = ?', '7 × 8 = ?']) assert.ok(t.includes(box), box);
-  assert.deepEqual(texts(tipSvg(problem('×', 40, 30))).filter((x) => x.includes('×')), ['40 × 30 = ?'], 'no empty boxes for 0 ones');
-  assert.equal((tipSvg(p).match(/class="tip-cell/g) ?? []).length, 4);
+test('× with a 2-digit number: the column method note pad (0.7.6)', () => {
+  for (const [a, b] of [[23, 4], [4, 23], [47, 38], [10, 10], [99, 99], [12, 1]]) {
+    assert.equal(tipKind(problem('×', a, b)), 'column', `${a} × ${b}`);
+    assert.match(tipTitle(problem('×', a, b)), /Column method: tap a box/);
+    assert.throws(() => tipSvg(problem('×', a, b)), /column-pad/, 'built by js/column-pad.js');
+  }
+  assert.equal(tipKind(problem('×', 9, 9)), 'groups', 'Beginner keeps the groups');
 });
 
 test('÷ with an answer up to 12: how many groups make it (rows to count)', () => {
@@ -175,7 +171,7 @@ test('bigger numbers use tens and the rest, standing up: 47 + 35', () => {
 
 test('Help pictures never put a number on a block (0.7.4)', () => {
   const badge = /<circle[^>]*fill="#ffffff" opacity="0.92"/;
-  for (const [op, a, b] of [['+', 7, 5], ['+', 47, 35], ['×', 3, 4], ['×', 4, 23], ['×', 2, 45], ['÷', 56, 7], ['÷', 360, 40]]) {
+  for (const [op, a, b] of [['+', 7, 5], ['+', 47, 35], ['×', 3, 4], ['×', 9, 8], ['÷', 56, 7], ['÷', 360, 40]]) {
     const svg = tipSvg(problem(op, a, b));
     assert.doesNotMatch(svg, badge, `${a} ${op} ${b}`);
   }

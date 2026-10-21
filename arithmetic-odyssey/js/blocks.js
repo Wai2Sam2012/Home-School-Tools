@@ -128,15 +128,16 @@ export function hasTip(problem) {
  *   'takeaway' −: the first number as squares in rows of ten, with the
  *             second number taken away (greyed and crossed out) from the
  *             end, so the squares left are the answer (0.7.2)
- *   'groups'  × with a number up to 10 (4 groups of 23), and ÷ with an
+ *   'groups'  × of two 1-digit numbers (3 groups of 4), and ÷ with an
  *             answer up to 12 (how many 7s make 56: rows of 7 to count)
- *   'area'    × of two 2-digit numbers: a box split into tens and ones
+ *   'column'  × with a 2-digit number: the column method with empty boxes
+ *             to write in (js/column-pad.js, 0.7.6)
  *   'split'   ÷ with a bigger answer: 72 = 60 + 12, share each part
  */
 export function tipKind(problem) {
   if (problem.op === '+') return 'blocks';
   if (problem.op === '−') return 'takeaway';
-  if (problem.op === '×') return Math.min(problem.a, problem.b) <= 10 ? 'groups' : 'area';
+  if (problem.op === '×') return Math.max(problem.a, problem.b) >= 10 ? 'column' : 'groups';
   return problem.answer <= 12 ? 'groups' : 'split';
 }
 
@@ -150,7 +151,7 @@ export function tipTitle(problem) {
       const [few, each] = problem.a <= problem.b ? [problem.a, problem.b] : [problem.b, problem.a];
       return `${few} ${few === 1 ? 'group' : 'groups'} of ${each}: count them all`;
     }
-    return 'Split into tens and ones: work out each box, then add them';
+    return 'Column method: tap a box, then a number to write in it';
   }
   // Groups over 30 are drawn standing up, side by side (see groupsSvg()).
   if (kind === 'groups') return `How many ${problem.b}s make ${problem.a}? Count the ${problem.b > 30 ? 'groups' : 'rows'}`;
@@ -175,7 +176,7 @@ export function tipSvg(problem, { unit = 20 } = {}) {
     }
     return groupsSvg(problem.answer, problem.b, { unit, label: `rows of ${problem.b} counting blocks that make ${problem.a}` });
   }
-  if (kind === 'area') return areaSvg(problem.a, problem.b);
+  if (kind === 'column') throw new Error('The column method is built by js/column-pad.js, not drawn here.');
   if (kind === 'split') return splitSvg(problem.a, problem.b);
   if (kind === 'takeaway') return takeAwaySvg(problem.a, problem.b, { unit });
   return addSubSvg(problem, { unit });
@@ -296,38 +297,6 @@ function tensAndOnes(n) {
 }
 
 const TIP_FONT = 'font-family="Arial, Helvetica, sans-serif" font-weight="700" fill="currentColor"';
-
-/** a × b as a box split into tens and ones: a's parts down the side, b's along the top. */
-function areaSvg(a, b) {
-  const rows = tensAndOnes(a);
-  const cols = tensAndOnes(b);
-  const side = 90; // room for the labels on the left
-  const top = 50;
-  // Sizes follow the numbers a little, so the bigger parts look bigger, but every box fits its words.
-  const colW = cols.map((v) => (v >= 10 ? 330 : 230));
-  const rowH = rows.map((v) => (v >= 10 ? 130 : 100));
-  const parts = [];
-  let x = side;
-  cols.forEach((v, c) => {
-    parts.push(`<text x="${x + colW[c] / 2}" y="${top - 14}" text-anchor="middle" font-size="34" ${TIP_FONT}>${v}</text>`);
-    x += colW[c];
-  });
-  let y = top;
-  rows.forEach((rv, r) => {
-    parts.push(`<text x="${side - 14}" y="${y + rowH[r] / 2 + 12}" text-anchor="end" font-size="34" ${TIP_FONT}>${rv}</text>`);
-    let cx = side;
-    cols.forEach((cv, c) => {
-      parts.push(`<rect x="${cx}" y="${y}" width="${colW[c]}" height="${rowH[r]}" class="tip-cell tip-cell-${(r + c) % 2}" stroke-width="3"/>`);
-      parts.push(`<text x="${cx + colW[c] / 2}" y="${y + rowH[r] / 2 + 12}" text-anchor="middle" font-size="34" ${TIP_FONT}>${rv} × ${cv} = ?</text>`);
-      cx += colW[c];
-    });
-    y += rowH[r];
-  });
-  const width = side + colW.reduce((n, w) => n + w, 0) + 10;
-  const height = y + 10;
-  const label = `${a} times ${b} split into tens and ones: ${rows.map((rv) => cols.map((cv) => `${rv} times ${cv}`).join(', ')).join(', ')}`;
-  return `<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 ${width} ${height}" class="tip-picture tip-area" role="img" aria-label="${label}">${parts.join('')}</svg>`;
-}
 
 /** a ÷ b as two easier parts: 72 ÷ 3 -> 60 ÷ 3 = ? and 12 ÷ 3 = ?, then add. */
 function splitSvg(a, b) {

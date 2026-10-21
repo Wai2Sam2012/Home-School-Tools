@@ -1,8 +1,8 @@
 // The on-screen number keypad. Answers are only ever typed here (or on a PC
 // keyboard), never in a text box, so the iPad's keyboard never opens.
 
-import { MAX_ANSWER_DIGITS } from './math.js?v=0.7.5';
-import { h } from './ui.js?v=0.7.5';
+import { MAX_ANSWER_DIGITS } from './math.js?v=0.7.6';
+import { h } from './ui.js?v=0.7.6';
 
 export const BACK = 'back';
 export const SUBMIT = 'submit';
@@ -63,6 +63,9 @@ export function createKeypad({ maxDigits = MAX_ANSWER_DIGITS, onSubmit = () => {
   let value = '';
   let enabled = true;
   let ignoreUntil = 0;
+  // Something else can take the digit keys first (Help's column note pad):
+  // it returns true when it used the key.
+  let takeKey = () => false;
 
   const display = h('output', { class: 'answer-display empty', 'aria-live': 'polite', 'aria-label': 'Your answer' }, '?');
 
@@ -82,6 +85,7 @@ export function createKeypad({ maxDigits = MAX_ANSWER_DIGITS, onSubmit = () => {
 
   function press(key) {
     if (!enabled || performance.now() < ignoreUntil) return;
+    if (key !== SUBMIT && takeKey(key)) return;
     const result = pressKey(value, key, maxDigits);
     if (result.action === 'submit') {
       onSubmit(value);
@@ -139,6 +143,10 @@ export function createKeypad({ maxDigits = MAX_ANSWER_DIGITS, onSubmit = () => {
     setEnabled(on) {
       enabled = on;
       for (const button of buttons) button.disabled = !on;
+    },
+    /** Lets fn(key) take the digit and Back keys first; it returns true when it used one (0.7.6). */
+    setKeyTaker(fn) {
+      takeKey = fn ?? (() => false);
     },
     /** Ignores key presses for a moment, e.g. the second tap of a double tap on "Got it". */
     ignoreTaps(ms) {

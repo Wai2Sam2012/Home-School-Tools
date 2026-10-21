@@ -3,7 +3,7 @@
 // It works with Voice off too, since the child asked for it; tapping it
 // again stops. No button when the device has no voice.
 
-import { h } from './ui.js?v=0.7.5';
+import { h } from './ui.js?v=0.7.6';
 
 /** What is read for a sticker: its name (as it is said) and its facts. */
 export function stickerReading(sticker) {
