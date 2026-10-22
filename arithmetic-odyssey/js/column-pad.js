@@ -30,7 +30,7 @@
 //        --------
 //        [ ][ ][ ]       what is left at the end (0 when it divides exactly)
 
-import { h } from './ui.js?v=0.7.8';
+import { h } from './ui.js?v=0.7.9';
 
 const digitsOf = (n) => String(n).split('').map(Number);
 const BOX = 'var(--pad-box)';

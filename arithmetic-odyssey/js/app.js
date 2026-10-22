@@ -1,29 +1,30 @@
 // Starts the game: keeps the players and story files, and switches between
 // screens. Each screen is a function in js/screens/ that builds its page.
 
-import { APP_VERSION } from './version.js?v=0.7.8';
-import { addDebugAction, addDebugInfo, isDebugOn, refreshDebugPanel, showDebugPanel } from './debug.js?v=0.7.8';
-import { measureAll } from './storage-report.js?v=0.7.8';
-import { audioSuspended, loadRecording, pickDifferent, playRecording, playSound, soundLength, unlockAudio } from './audio.js?v=0.7.8';
-import { AVATARS, createProfileStore } from './profiles.js?v=0.7.8';
-import { askToKeepData, createStorage, deviceStorage } from './storage.js?v=0.7.8';
-import { SPEECH_RATES, chooseVoice, createSpeaker, loadVoices } from './speech.js?v=0.7.8';
-import { COLOR_THEMES, DIFFICULTY_LABELS, THEMES, collectionKey } from './settings.js?v=0.7.8';
-import { collectNext, loadStoryline, pictureUrl, stickerSet } from './storyline.js?v=0.7.8';
-import { h } from './ui.js?v=0.7.8';
-import { startScreen } from './screens/start.js?v=0.7.8';
-import { newPlayerScreen, playerPictureScreen, profilesScreen } from './screens/profiles.js?v=0.7.8';
-import { PICTURES_SAVED_EVENT, createOffline, picturesToSave } from './offline.js?v=0.7.8';
-import { homeScreen } from './screens/home.js?v=0.7.8';
-import { setupScreen } from './screens/setup.js?v=0.7.8';
-import { adventureScreen } from './screens/adventure.js?v=0.7.8';
-import { trailEndScreen } from './screens/trail-end.js?v=0.7.8';
-import { albumScreen } from './screens/album.js?v=0.7.8';
-import { statsScreen } from './screens/stats.js?v=0.7.8';
-import { learnScreen } from './screens/learn.js?v=0.7.8';
-import { settingsScreen } from './screens/settings.js?v=0.7.8';
-import { voiceLabScreen } from './screens/voice-lab.js?v=0.7.8';
-import { colorsScreen } from './screens/colors.js?v=0.7.8';
+import { APP_VERSION } from './version.js?v=0.7.9';
+import { addDebugAction, addDebugInfo, isDebugOn, refreshDebugPanel, showDebugPanel } from './debug.js?v=0.7.9';
+import { measureAll } from './storage-report.js?v=0.7.9';
+import { createWakeLock } from './wake-lock.js?v=0.7.9';
+import { audioSuspended, loadRecording, pickDifferent, playRecording, playSound, soundLength, unlockAudio } from './audio.js?v=0.7.9';
+import { AVATARS, createProfileStore } from './profiles.js?v=0.7.9';
+import { askToKeepData, createStorage, deviceStorage } from './storage.js?v=0.7.9';
+import { SPEECH_RATES, chooseVoice, createSpeaker, loadVoices } from './speech.js?v=0.7.9';
+import { COLOR_THEMES, DIFFICULTY_LABELS, THEMES, collectionKey } from './settings.js?v=0.7.9';
+import { collectNext, loadStoryline, pictureUrl, stickerSet } from './storyline.js?v=0.7.9';
+import { h } from './ui.js?v=0.7.9';
+import { startScreen } from './screens/start.js?v=0.7.9';
+import { newPlayerScreen, playerPictureScreen, profilesScreen } from './screens/profiles.js?v=0.7.9';
+import { PICTURES_SAVED_EVENT, createOffline, picturesToSave } from './offline.js?v=0.7.9';
+import { homeScreen } from './screens/home.js?v=0.7.9';
+import { setupScreen } from './screens/setup.js?v=0.7.9';
+import { adventureScreen } from './screens/adventure.js?v=0.7.9';
+import { trailEndScreen } from './screens/trail-end.js?v=0.7.9';
+import { albumScreen } from './screens/album.js?v=0.7.9';
+import { statsScreen } from './screens/stats.js?v=0.7.9';
+import { learnScreen } from './screens/learn.js?v=0.7.9';
+import { settingsScreen } from './screens/settings.js?v=0.7.9';
+import { voiceLabScreen } from './screens/voice-lab.js?v=0.7.9';
+import { colorsScreen } from './screens/colors.js?v=0.7.9';
 
 const SCREENS = {
   start: { build: startScreen },
@@ -320,6 +321,7 @@ function addDebugTools() {
 
   // Offline play, storage and memory (measured in the background; "Measure" updates them).
   addDebugInfo('Offline play', () => `${ctx.offline.message() || 'starting'} [${ctx.offline.state().status}]`);
+  addDebugInfo('Screen kept on', () => ({ on: 'yes (while the game is being used)', off: 'no (idle, or not allowed right now)', 'not supported': 'not supported here (needs iPadOS 16.4, or 18.4 for the Home Screen app)' })[ctx.wakeLock?.state() ?? 'off']);
   let measured = {};
   const STORAGE_ROWS = ['Saved game data', 'Saved data by player', "Other tools' saved data here", 'Offline copy', 'Sticker pictures saved', 'Browser storage used',
     'Kept when the iPad is short of space', 'Memory (JavaScript)', 'Page right now', 'Measured at'];
@@ -365,25 +367,58 @@ document.addEventListener('touchmove', (event) => {
 // No double-tap zoom either: Safari can still zoom on two quick taps (for
 // example on Submit). Cancelling the second tap stops the zoom but also its
 // click, so press the button here instead; fast typing ("11") still works.
-// A swipe (to scroll the album) never presses anything.
+// A swipe (to scroll the album) never presses anything. The text box (a
+// player's name) is left alone, so its caret and selection still work.
+// 0.7.9: two taps up to DOUBLE_TAP_MS apart count (iPadOS zooms on slower
+// double taps than the 350 ms used before).
 let tapStart = null;
 let lastTapAt = 0;
 document.addEventListener('touchstart', (event) => {
   const touch = event.touches[0];
   tapStart = event.touches.length === 1 && touch ? { x: touch.clientX, y: touch.clientY } : null;
 }, { passive: true });
+const DOUBLE_TAP_MS = 600;
 document.addEventListener('touchend', (event) => {
   const touch = event.changedTouches[0];
   if (!touch || event.touches.length) return;
+  if (event.target.closest?.('input, textarea')) {
+    lastTapAt = 0;
+    return;
+  }
   const moved = !tapStart || Math.hypot(touch.clientX - tapStart.x, touch.clientY - tapStart.y) > 10;
   const now = Date.now();
-  if (!moved && now - lastTapAt < 350) {
+  if (!moved && now - lastTapAt < DOUBLE_TAP_MS) {
     event.preventDefault();
     const button = event.target.closest?.('button');
     if (button && !button.disabled) button.click();
   }
   lastTapAt = moved ? 0 : now;
 }, { passive: false });
+
+// If Safari zooms in anyway, put it back to normal size (0.7.9): setting the
+// viewport's limits again makes the iPad snap back to scale 1. Not while
+// fingers are down (the two-finger Grown-ups hold).
+const viewport = document.querySelector('meta[name="viewport"]');
+let fingersDown = 0;
+document.addEventListener('touchstart', (event) => { fingersDown = event.touches.length; }, { passive: true });
+document.addEventListener('touchend', (event) => {
+  fingersDown = event.touches.length;
+  if (fingersDown === 0) unzoom();
+}, { passive: true });
+function unzoom() {
+  if (!viewport || !globalThis.visualViewport || globalThis.visualViewport.scale <= 1.01) return;
+  // A different text with the same limit, then the original: each change makes Safari apply it.
+  const content = viewport.getAttribute('content');
+  viewport.setAttribute('content', content.replace(/maximum-scale=[^,]*/, 'maximum-scale=1.0'));
+  setTimeout(() => viewport.setAttribute('content', content), 300);
+}
+globalThis.visualViewport?.addEventListener('resize', () => {
+  if (fingersDown === 0) unzoom();
+});
+
+// Keep the screen on while the game is being used (js/wake-lock.js, 0.7.9).
+ctx.wakeLock = createWakeLock();
+for (const type of ['pointerdown', 'keydown']) document.addEventListener(type, () => ctx.wakeLock.use(), { passive: true });
 
 // "Tap to continue": back from the background, the iPad may have suspended
 // sound. A tap is needed to start it again.

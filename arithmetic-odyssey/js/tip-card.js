@@ -4,12 +4,12 @@
 // (js/blocks.js); 47 × 38 in columns and 156 ÷ 12 as long division, with
 // boxes to write in (note pads, js/column-pad.js).
 
-import { hasTip, tipKind, tipSvg, tipTitle } from './blocks.js?v=0.7.8';
-import { createColumnPad, createDivisionPad } from './column-pad.js?v=0.7.8';
+import { hasTip, tipKind, tipSvg, tipTitle } from './blocks.js?v=0.7.9';
+import { createColumnPad, createDivisionPad } from './column-pad.js?v=0.7.9';
 
 /** The Help kinds that are note pads to write in. */
 const PADS = { column: createColumnPad, longdivision: createDivisionPad };
-import { h } from './ui.js?v=0.7.8';
+import { h } from './ui.js?v=0.7.9';
 
 /**
  * Returns { el, show(problem), hide(), shown(), press(key) }. onClose runs
